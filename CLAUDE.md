@@ -5,6 +5,14 @@ for fast navigation; conventions in `wiki/CLAUDE.md`). **Round-close discipline:
 commit that changes canon docs, sim, or programs also updates the touched wiki pages +
 `wiki/state.md` and appends one `wiki/log.md` line. Canon always wins over wiki content.
 
+**Whitepaper discipline (standing):** the published whitepaper
+(https://outfox.gitbook.io/whitepaper/, source `whitepaper/`) tracks the project. Any
+round that changes what the whitepaper states — built-vs-designed status, roadmap
+phases, economics, chain facts, results — also updates the affected `whitepaper/`
+pages and runs `scripts/publish-whitepaper.sh`. Everything under `whitepaper/` is
+public on publish: redaction rules apply, honesty markers ([designed] vs verified)
+stay accurate, and the gambling-vocabulary blacklist holds.
+
 Docs are the source of truth: `PLAN.md` (roadmap), `docs/ECONOMY.md` (priority #1 —
 economy rules win all conflicts), `docs/GDD.md`, `docs/DESIGN-SYSTEM-WEB.md` (active UI
 spec; `docs/DESIGN-SYSTEM.md` is the archived Telegram-track v1), `docs/THEME-OUTFOX.md`
