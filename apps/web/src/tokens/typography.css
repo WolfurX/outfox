@@ -1,0 +1,32 @@
+/* OUTFOX — type. One webfont only: JetBrains Mono (variable).
+   Mono carries the terminal voice: numbers, labels, headings, buttons, chips.
+   System sans carries prose. Mono is inherently tabular — numbers always align. */
+
+:root {
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, "SF Mono",
+    Menlo, Consolas, monospace;
+  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Scale (mobile-first, dense but >=11px) */
+  --fs-xs: 11px;    /* chips, provenance labels, tab labels */
+  --fs-sm: 12px;    /* meta, secondary rows, table headers */
+  --fs-md: 14px;    /* body, row primary text */
+  --fs-lg: 16px;    /* row amounts, sheet titles */
+  --fs-xl: 20px;    /* screen titles */
+  --fs-2xl: 24px;   /* section numerals */
+  --fs-3xl: 30px;   /* balance numerals */
+  --fs-4xl: 38px;   /* the Ledger hero numeral */
+
+  --lh-tight: 1.15;
+  --lh-snug: 1.35;
+  --lh-body: 1.5;
+
+  --fw-reg: 400;
+  --fw-med: 500;
+  --fw-semi: 600;
+  --fw-bold: 700;
+
+  /* Uppercase label tracking — the system's signature */
+  --track-caps: 0.08em;
+  --track-caps-wide: 0.14em;
+}

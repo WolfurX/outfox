@@ -1,0 +1,36 @@
+/* OUTFOX — element defaults. */
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-ui);
+  font-size: var(--fs-md);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a { color: var(--c-accent-text); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 2px; }
+
+:focus-visible {
+  outline: 2px solid var(--c-focus-ring);
+  outline-offset: 2px;
+}
+
+::selection { background: var(--c-accent-soft); }
+
+code, pre, kbd { font-family: var(--font-mono); }
+
+/* Component keyframes — flat, no bounce */
+@keyframes ofx-print {
+  from { opacity: 0; transform: translateY(2px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ofx-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}

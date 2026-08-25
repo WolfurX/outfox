@@ -1,0 +1,15 @@
+{
+  "name": "outfox-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/shared",
+    "apps/server",
+    "apps/web"
+  ],
+  "scripts": {
+    "dev:server": "npm run dev -w apps/server",
+    "dev:web": "npm run dev -w apps/web",
+    "test": "npm run test -w apps/server",
+    "build": "npm run build -w apps/web"
+  }
+}

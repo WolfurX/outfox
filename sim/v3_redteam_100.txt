@@ -1,0 +1,122 @@
+
+=== Scenario: demurrage_flight === [red-team: G3/G4 diagnostic]
+  final medians: N=886  M=936,277¢  e=159.7¢/$VIG  Gini=0.653  cashout=16,604,604¢  sybil=0.00%
+  crit   pass%        median   detail
+  OK G1     100%       0.9824   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -1437.7143   mean net Credit emission, t≥180 ≤ 0
+  DG G3      10%       0.0824   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)  [diagnostic under attack]
+  OK G4     100%       0.0109   median mature CPI inflation in [−5%, +10%] (annualised)  [diagnostic under attack]
+  OK G5     100%       0.9764   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.2116   median mature $VIG velocity in [0.02, 30]×/month
+  OK G7     100%       0.6422   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=2.69)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.1513   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0000   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6493   ledgers conserve ($VIG resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+
+=== Scenario: bank_run === [red-team: G3/G4 diagnostic]
+  final medians: N=886  M=941,198¢  e=49.7¢/$VIG  Gini=0.587  cashout=5,712,472¢  sybil=0.02%
+  crit   pass%        median   detail
+  OK G1     100%       0.9690   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -3235.2942   mean net Credit emission, t≥180 ≤ 0
+  DG G3       0%       0.1714   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)  [diagnostic under attack]
+  DG G4       4%      -0.0688   median mature CPI inflation in [−5%, +10%] (annualised)  [diagnostic under attack]
+  OK G5     100%       0.9752   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.2320   median mature $VIG velocity in [0.02, 30]×/month
+  OK G7     100%       0.5631   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=2.93)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  XX G9       0%       1.2250   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0002   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6496   ledgers conserve ($VIG resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE FAIL (see XX/~ rows)
+
+=== Scenario: smart_sybil === [red-team: G3/G4 diagnostic]
+  final medians: N=886  M=975,532¢  e=99.6¢/$VIG  Gini=0.690  cashout=7,738,661¢  sybil=5.32%
+  crit   pass%        median   detail
+  OK G1     100%       0.9817   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -1215.6762   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0189   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)  [diagnostic under attack]
+  OK G4     100%       0.0015   median mature CPI inflation in [−5%, +10%] (annualised)  [diagnostic under attack]
+  OK G5     100%       0.9930   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.1935   median mature $VIG velocity in [0.02, 30]×/month
+  OK G7     100%       0.6845   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=2.24)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0747   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  XX G11     20%       0.0532   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6297   ledgers conserve ($VIG resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE FAIL (see XX/~ rows)
+
+=== Scenario: floor_split === [red-team: G3/G4 diagnostic]
+  final medians: N=886  M=978,380¢  e=61.0¢/$VIG  Gini=0.603  cashout=6,698,118¢  sybil=0.01%
+  crit   pass%        median   detail
+  OK G1     100%       0.9838   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -1334.7261   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0168   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)  [diagnostic under attack]
+  OK G4     100%      -0.0101   median mature CPI inflation in [−5%, +10%] (annualised)  [diagnostic under attack]
+  OK G5     100%       0.9940   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.1946   median mature $VIG velocity in [0.02, 30]×/month
+  OK G7     100%       0.5947   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=2.73)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0773   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0001   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6476   ledgers conserve ($VIG resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+
+=== Scenario: pump_dump === [red-team: G3/G4 diagnostic]
+  final medians: N=886  M=1,074,431¢  e=19.5¢/$VIG  Gini=0.470  cashout=4,201,267¢  sybil=0.04%
+  crit   pass%        median   detail
+  XX G1       9%       1.0033   cumulative faucet:sink (2nd half) ≤ 1.0
+  XX G2       0%    3006.0941   mean net Credit emission, t≥180 ≤ 0
+  DG G3       0%       0.6944   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)  [diagnostic under attack]
+  OK G4     100%       0.0014   median mature CPI inflation in [−5%, +10%] (annualised)  [diagnostic under attack]
+  OK G5     100%       0.9669   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.2772   median mature $VIG velocity in [0.02, 30]×/month
+  OK G7     100%       0.5235   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=2.66)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  XX G9       0%       1.4481   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0004   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6918   ledgers conserve ($VIG resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE FAIL (see XX/~ rows)
+
+=== Scenario: confidence_crisis === [red-team: G3/G4 diagnostic]
+  final medians: N=886  M=961,422¢  e=60.3¢/$VIG  Gini=0.606  cashout=6,008,070¢  sybil=0.02%
+  crit   pass%        median   detail
+  OK G1     100%       0.9850   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -1563.7237   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0290   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)  [diagnostic under attack]
+  OK G4     100%       0.0545   median mature CPI inflation in [−5%, +10%] (annualised)  [diagnostic under attack]
+  OK G5     100%       0.9953   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.2100   median mature $VIG velocity in [0.02, 30]×/month
+  OK G7     100%       0.5922   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=2.86)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0687   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0002   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6604   ledgers conserve ($VIG resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+
+=== Scenario: whale_market === [red-team: G3/G4 diagnostic]
+  final medians: N=886  M=959,156¢  e=24.6¢/$VIG  Gini=0.694  cashout=3,109,865¢  sybil=0.03%
+  crit   pass%        median   detail
+  OK G1     100%       0.9766   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -1722.8683   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0211   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)  [diagnostic under attack]
+  OK G4     100%      -0.0129   median mature CPI inflation in [−5%, +10%] (annualised)  [diagnostic under attack]
+  OK G5     100%       1.0050   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.2941   median mature $VIG velocity in [0.02, 30]×/month
+  XX G7       0%       0.6942   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=1.16)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0314   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0003   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.7876   ledgers conserve ($VIG resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE FAIL (see XX/~ rows)
+
+########  OVERALL: NOT ALL PASS  (runs=100, horizon=720)  ########
+wrote results_v3_redteam.json

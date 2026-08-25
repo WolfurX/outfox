@@ -1,0 +1,27 @@
+take=0.0    bank_run=PASS  pump_dump=PASS  confidence_crisis=PASS  demurrage_flight=PASS  floor_split=PASS  smart_sybil=known-G11  whale_market=PASS
+          baseline treasury median: 191,286,037 c
+take=0.25   bank_run=PASS  pump_dump=PASS  confidence_crisis=PASS  demurrage_flight=PASS  floor_split=PASS  smart_sybil=known-G11  whale_market=PASS
+          baseline treasury median: 189,920,287 c
+take=0.5    bank_run=PASS  pump_dump=PASS  confidence_crisis=PASS  demurrage_flight=PASS  floor_split=PASS  smart_sybil=known-G11  whale_market=PASS
+          baseline treasury median: 188,554,537 c
+take=0.75   bank_run=PASS  pump_dump=PASS  confidence_crisis=PASS  demurrage_flight=PASS  floor_split=PASS  smart_sybil=known-G11  whale_market=PASS
+          baseline treasury median: 187,188,787 c
+take=0.9    bank_run=PASS  pump_dump=PASS  confidence_crisis=PASS  demurrage_flight=PASS  floor_split=PASS  smart_sybil=known-G11  whale_market=PASS
+          baseline treasury median: 186,369,337 c
+
+==================================================================================
+Equivalence check (round-6 review follow-up): take=0.9 vs take=0.0, 6 scenarios x
+3 seeds (baseline, gresham, bank_run, pump_dump, confidence_crisis, whale_market),
+ALL final-row metrics compared bit-for-bit except 'treasury' (credit_resid noise
+tolerance 1e-5 c). Result: IDENTICAL on all 18 pairs; treasury deltas ~4.4-5.2M c
+(= 0.9 x cumulative F3, which is ~5.5M c ~ 2.9% of the ~191M c baseline treasury).
+Mechanism: the S13.B ops bind on their per-tick / rolling-window caps before the
+treasury balance ever binds, so the diversion never alters dynamics. Every take in
+[0, 0.9] replays the v5 record exactly: treasury(t) is pointwise decreasing in the
+take, so if it never binds at 0.9 it never binds at any interior rate. The 100-seed
+scorecards at take=0.9 were byte-identical to v5_redteam_100.txt / the v5 standard
+record (as this implies) and are therefore not kept as separate artifacts — the v5
+scorecards ARE the record for every take in the interval.
+Reproduce: run the sim twice per (scenario, seed) with DEFAULT_PARAMS op_take_f3
+overridden to 0.0 / 0.9 and diff the final metrics rows (no CLI flag; override the
+param in a driver script).

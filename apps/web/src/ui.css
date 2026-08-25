@@ -1,0 +1,31 @@
+/* App-level styles that are not design-system components.
+   Everything visual lives in tokens/ + components.css; this file is deliberately thin. */
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* Numeric input — a terminal field, matching the button geometry. */
+.ofx-input {
+  width: 84px; height: 36px; padding: 0 var(--space-2);
+  background: var(--c-bg); color: var(--c-text);
+  border: var(--bw-1) solid var(--c-border-strong); border-radius: var(--radius-2);
+  font-family: var(--font-mono); font-size: var(--fs-sm); font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.ofx-input::placeholder {
+  color: var(--c-text-3); text-transform: uppercase;
+  letter-spacing: var(--track-caps); font-size: var(--fs-xs);
+}
+.ofx-input:focus-visible { border-color: var(--c-accent); }
+
+/* Full-width variant used inside sheets (email / code entry). */
+.ofx-input--wide { width: 100%; height: var(--tap-min); text-align: left; font-size: var(--fs-md); }
+
+.ofx-sheet__text { font-size: var(--fs-sm); color: var(--c-text-2); margin: 0 0 var(--space-4); }
+.ofx-sheet__field { display: grid; gap: var(--space-2); margin-bottom: var(--space-4); }
+.ofx-sheet__label {
+  font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: var(--fw-med);
+  text-transform: uppercase; letter-spacing: var(--track-caps); color: var(--c-text-2);
+}

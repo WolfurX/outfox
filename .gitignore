@@ -1,0 +1,33 @@
+# dependencies
+node_modules/
+
+# builds
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# env & secrets
+.env
+.env.*
+!.env.example
+
+# logs
+*.log
+npm-debug.log*
+
+# editor / OS
+.DS_Store
+.idea/
+.vscode/
+node_modules/
+apps/server/outfox.sqlite*
+apps/web/dist/
+*.log
+
+# art dump zone (curated assets get wired into apps/web and committed there)
+art/raw/
+
+# founders-only material (never committed)
+private/

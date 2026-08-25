@@ -1,0 +1,314 @@
+/* OUTFOX — component classes. Semantic tokens only; no raw hex.
+   The page is the surface: sections are ruled, not carded. Elevation exists only
+   on sheets. Glow restricted to CTA / active tab / result reveal.
+   Ported verbatim from the "Outfox Design System" project in Claude Design. */
+
+@keyframes ofx-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ofx-rise { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* ---------- Dotted leader (ledger/receipt language) ---------- */
+.ofx-leader {
+  flex: 1; min-width: 24px; height: 1px; align-self: center; margin: 0 var(--space-3);
+  border-bottom: var(--bw-1) dotted var(--c-border-strong);
+}
+
+/* ---------- Button — a terminal key, not a web pill. ---------- */
+.ofx-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  font-family: var(--font-mono); font-weight: var(--fw-semi);
+  text-transform: uppercase; letter-spacing: var(--track-caps);
+  border-radius: 0; border: var(--bw-1) solid transparent;
+  background: transparent; color: var(--c-text);
+  cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
+  white-space: nowrap; text-decoration: none;
+  transition: background var(--dur-1) var(--ease-out), border-color var(--dur-1) var(--ease-out),
+    color var(--dur-1) var(--ease-out), transform var(--dur-1) var(--ease-out);
+}
+.ofx-btn:hover { text-decoration: none; }
+.ofx-btn:active:not(:disabled) { transform: translateY(1px); }
+.ofx-btn:disabled { opacity: 0.45; cursor: default; }
+.ofx-btn--sm { height: 36px; padding: 0 var(--space-3); font-size: var(--fs-xs); }
+.ofx-btn--md { height: var(--tap-min); padding: 0 var(--space-4); font-size: var(--fs-sm); }
+.ofx-btn--lg { height: 52px; padding: 0 var(--space-5); font-size: var(--fs-md); }
+.ofx-btn--icononly { padding: 0; }
+.ofx-btn--icononly.ofx-btn--sm { width: 36px; }
+.ofx-btn--icononly.ofx-btn--md { width: var(--tap-min); }
+.ofx-btn--icononly.ofx-btn--lg { width: 52px; }
+.ofx-btn--full { display: flex; width: 100%; }
+
+.ofx-btn--primary { background: var(--c-accent); color: var(--c-on-accent); box-shadow: var(--glow-cta); }
+.ofx-btn--primary:hover:not(:disabled) { background: color-mix(in oklab, var(--c-accent) 90%, white); }
+.ofx-btn--primary:active:not(:disabled) { background: color-mix(in oklab, var(--c-accent) 88%, black); }
+
+.ofx-btn--secondary { background: var(--c-raised); border-color: var(--c-border-strong); color: var(--c-text); }
+.ofx-btn--secondary:hover:not(:disabled) { background: color-mix(in srgb, var(--c-raised) 70%, var(--c-text)); border-color: var(--c-text-3); }
+.ofx-btn--secondary:active:not(:disabled) { background: color-mix(in srgb, var(--c-raised) 65%, var(--c-bg)); }
+
+/* Ghost — bracketed text action: [ LABEL ]. Brackets are presentational (CSS). */
+.ofx-btn--ghost { color: var(--c-accent-text); }
+.ofx-btn--ghost::before { content: "["; color: var(--c-text-3); font-weight: var(--fw-reg); }
+.ofx-btn--ghost::after { content: "]"; color: var(--c-text-3); font-weight: var(--fw-reg); }
+.ofx-btn--ghost:hover:not(:disabled) { background: var(--c-accent-soft); }
+.ofx-btn--ghost:hover:not(:disabled)::before, .ofx-btn--ghost:hover:not(:disabled)::after { color: var(--c-accent-text); }
+.ofx-btn--ghost.ofx-btn--icononly::before, .ofx-btn--ghost.ofx-btn--icononly::after { content: none; }
+
+.ofx-btn--danger { border-color: color-mix(in oklab, var(--c-danger) 45%, transparent); color: var(--c-danger); }
+.ofx-btn--danger:hover:not(:disabled) { background: var(--c-danger-soft); }
+
+/* ---------- Chip — legend-key status, not a pill.
+   Unsettled: hatched swatch + dashed underline + label — never color alone. ---------- */
+.ofx-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 0; border: 0; border-radius: 0; background: none;
+  font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: var(--fw-semi);
+  line-height: 1.4; text-transform: uppercase; letter-spacing: var(--track-caps);
+  color: var(--c-text-2); white-space: nowrap;
+}
+.ofx-chip__mark {
+  width: 7px; height: 7px; flex-shrink: 0;
+  border: var(--bw-1) solid currentColor; background: transparent;
+}
+.ofx-chip--accent { color: var(--c-accent-text); }
+.ofx-chip--up { color: var(--c-up); }
+.ofx-chip--down { color: var(--c-down); }
+.ofx-chip--warn { color: var(--c-warn); }
+.ofx-chip--unsettled { color: var(--c-unsettled); }
+.ofx-chip--accent .ofx-chip__mark,
+.ofx-chip--up .ofx-chip__mark,
+.ofx-chip--down .ofx-chip__mark,
+.ofx-chip--warn .ofx-chip__mark { background: currentColor; }
+.ofx-chip--dashed { text-decoration: underline dashed; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.ofx-chip--hatch .ofx-chip__mark {
+  background: repeating-linear-gradient(-45deg, currentColor 0 1px, transparent 1px 3px);
+}
+
+/* ---------- Amount ---------- */
+.ofx-amount {
+  font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+  white-space: nowrap; line-height: var(--lh-tight);
+}
+.ofx-amount--sm { font-size: var(--fs-sm); font-weight: var(--fw-med); }
+.ofx-amount--md { font-size: var(--fs-lg); font-weight: var(--fw-semi); }
+.ofx-amount--lg { font-size: var(--fs-2xl); font-weight: var(--fw-semi); }
+.ofx-amount--xl { font-size: var(--fs-3xl); font-weight: var(--fw-bold); }
+.ofx-amount--hero { font-size: var(--fs-4xl); font-weight: var(--fw-bold); }
+.ofx-amount--up { color: var(--c-up); }
+.ofx-amount--down { color: var(--c-down); }
+.ofx-amount--unsettled { color: var(--c-unsettled); }
+.ofx-amount--muted { color: var(--c-text-2); }
+.ofx-amount__unit { font-size: 0.6em; font-weight: var(--fw-med); letter-spacing: var(--track-caps); color: var(--c-text-2); margin-left: 0.4em; }
+
+/* ---------- Meter ---------- */
+.ofx-meter { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+.ofx-meter__head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-2); }
+.ofx-meter__label {
+  display: inline-flex; align-items: center; gap: var(--space-1);
+  font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: var(--fw-med);
+  text-transform: uppercase; letter-spacing: var(--track-caps); color: var(--c-text-2);
+}
+.ofx-meter__value { font-family: var(--font-mono); font-size: var(--fs-sm); font-weight: var(--fw-semi); font-variant-numeric: tabular-nums; color: var(--c-text); }
+.ofx-meter__track { display: flex; gap: 3px; height: 8px; }
+.ofx-meter__seg { flex: 1; background: var(--c-border); border-radius: 1px; }
+.ofx-meter--accent .ofx-meter__seg--on { background: var(--c-accent); }
+.ofx-meter--warn .ofx-meter__seg--on { background: var(--c-warn); }
+.ofx-meter--unsettled .ofx-meter__seg--on { background: var(--c-unsettled); }
+.ofx-meter--neutral .ofx-meter__seg--on { background: var(--c-text-2); }
+
+/* ---------- Ruled sections (was: cards) ---------- */
+.ofx-rowgroup__title {
+  display: flex; align-items: center; gap: var(--space-3);
+  font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: var(--fw-med);
+  text-transform: uppercase; letter-spacing: var(--track-caps-wide); color: var(--c-text-2);
+  margin: 0 0 var(--space-1) 0;
+}
+.ofx-rowgroup__title::after { content: ""; flex: 1; height: 1px; background: var(--c-border); }
+.ofx-rowgroup { border-bottom: var(--bw-1) solid var(--c-border); }
+.ofx-rowgroup--capless { border-top: var(--bw-1) solid var(--c-border); }
+.ofx-rowgroup > * + * { border-top: var(--bw-1) solid var(--c-border); }
+
+.ofx-row {
+  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: var(--space-3);
+  width: 100%; min-height: 52px; padding: var(--space-3) var(--space-1);
+  background: transparent; border: 0; margin: 0; text-align: left;
+  color: var(--c-text); font-family: var(--font-ui); font-size: var(--fs-md); line-height: var(--lh-snug);
+}
+.ofx-row--lead { grid-template-columns: auto 1fr auto; }
+.ofx-row--press { cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background var(--dur-1) var(--ease-out); }
+.ofx-row--press:hover { background: var(--c-raised); }
+.ofx-row--press:active { background: color-mix(in srgb, var(--c-raised) 65%, var(--c-bg)); }
+.ofx-row:disabled { opacity: 0.45; cursor: default; }
+.ofx-row__lead { display: flex; align-items: center; justify-content: center; color: var(--c-text-3); width: 20px; }
+.ofx-row__title { font-weight: var(--fw-med); }
+.ofx-row__sub { font-size: var(--fs-sm); color: var(--c-text-2); margin-top: 2px; }
+.ofx-row__trail { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; text-align: right; }
+.ofx-row__chevron { color: var(--c-text-3); }
+
+/* ---------- ActionRow ---------- */
+.ofx-action { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-3) var(--space-1); }
+.ofx-action__main { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.ofx-action__body { min-width: 0; }
+.ofx-action__title { font-weight: var(--fw-med); font-size: var(--fs-md); }
+.ofx-action__desc { font-size: var(--fs-sm); color: var(--c-text-2); margin-top: 2px; }
+.ofx-action__meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3);
+  margin-top: var(--space-2);
+  font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: var(--fw-med);
+  text-transform: uppercase; letter-spacing: var(--track-caps); color: var(--c-text-2);
+  font-variant-numeric: tabular-nums;
+}
+.ofx-action__meta > span { display: inline-flex; align-items: center; gap: 4px; }
+
+/* The result PRINTS on the acted-on row. Constant duration, no suspense build. */
+.ofx-result {
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-1); border: var(--bw-1) solid;
+  font-family: var(--font-mono); font-size: var(--fs-sm); font-weight: var(--fw-semi);
+  letter-spacing: var(--track-caps); text-transform: uppercase; font-variant-numeric: tabular-nums;
+  animation: ofx-print var(--dur-reveal) var(--ease-print) both;
+}
+.ofx-result--clean { color: var(--c-up); border-color: color-mix(in oklab, var(--c-up) 35%, transparent); background: var(--c-up-soft); box-shadow: var(--glow-reveal); }
+.ofx-result--nicked { color: var(--c-down); border-color: color-mix(in oklab, var(--c-down) 35%, transparent); background: var(--c-danger-soft); box-shadow: var(--glow-reveal); }
+.ofx-result__note { margin-left: auto; color: var(--c-text-2); font-weight: var(--fw-med); text-transform: none; letter-spacing: 0; font-family: var(--font-ui); }
+
+/* ---------- TabBar / NavRail ---------- */
+.ofx-tabbar { display: flex; background: var(--c-panel); border-top: var(--bw-1) solid var(--c-border); }
+.ofx-tabbar--fixed { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; padding-bottom: env(safe-area-inset-bottom); }
+.ofx-tab {
+  position: relative; flex: 1; min-height: 56px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  background: none; border: 0; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  color: var(--c-text-2);
+  font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: var(--fw-med);
+  text-transform: uppercase; letter-spacing: var(--track-caps);
+  transition: color var(--dur-1) var(--ease-out);
+}
+.ofx-tab::before {
+  content: ""; position: absolute; top: -1px; left: 25%; right: 25%; height: 2px;
+  background: transparent; transition: background var(--dur-2) var(--ease-out);
+}
+.ofx-tab--active { color: var(--c-accent-text); }
+.ofx-tab--active::before { background: var(--c-accent); box-shadow: var(--glow-tab); }
+
+.ofx-navrail {
+  width: var(--w-rail); flex: 0 0 var(--w-rail);
+  display: flex; flex-direction: column; gap: var(--space-1);
+  padding: var(--space-3) var(--space-2);
+  background: var(--c-panel); border-right: var(--bw-1) solid var(--c-border);
+}
+.ofx-navrail .ofx-tab { flex: 0 0 auto; border-radius: 0; }
+.ofx-navrail .ofx-tab::before { top: 25%; bottom: 25%; left: -8px; right: auto; width: 2px; height: auto; }
+.ofx-navrail .ofx-tab--active { background: var(--c-accent-soft); }
+
+/* ---------- Sheet — the only raised surface ---------- */
+.ofx-scrim { position: fixed; inset: 0; background: var(--c-scrim); z-index: 50; animation: ofx-fade var(--dur-2) var(--ease-out) both; }
+.ofx-sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; margin: 0 auto;
+  max-width: var(--w-phone-max); max-height: 85dvh;
+  display: flex; flex-direction: column;
+  background: var(--c-panel); border: var(--bw-1) solid var(--c-border); border-bottom: 0;
+  border-radius: var(--radius-3) var(--radius-3) 0 0;
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 51; animation: ofx-rise var(--dur-2) var(--ease-out) both;
+}
+.ofx-sheet__handle { flex: 0 0 auto; width: 36px; height: 4px; border-radius: var(--radius-full); background: var(--c-border-strong); margin: var(--space-2) auto 0; }
+.ofx-sheet__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-4); }
+.ofx-sheet__title { font-family: var(--font-mono); font-size: var(--fs-lg); font-weight: var(--fw-semi); text-transform: uppercase; letter-spacing: var(--track-caps); }
+.ofx-sheet__body { padding: 0 var(--space-4) var(--space-4); overflow: auto; }
+.ofx-sheet__foot { display: flex; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-top: var(--bw-1) solid var(--c-border); }
+.ofx-sheet__foot > .ofx-btn { flex: 1; }
+
+/* ---------- Banner — flat strip between rules, never a card ---------- */
+.ofx-banner {
+  display: flex; gap: var(--space-3); align-items: flex-start;
+  padding: var(--space-3);
+  border-top: var(--bw-1) solid var(--c-border); border-bottom: var(--bw-1) solid var(--c-border);
+  border-left: 0; border-right: 0; border-radius: 0;
+  background: transparent; color: var(--c-text);
+}
+.ofx-banner__icon { color: var(--c-text-2); margin-top: 1px; }
+.ofx-banner__title { font-family: var(--font-mono); font-size: var(--fs-sm); font-weight: var(--fw-semi); text-transform: uppercase; letter-spacing: var(--track-caps); }
+.ofx-banner__body { font-size: var(--fs-sm); color: var(--c-text-2); margin-top: 2px; }
+.ofx-banner__action { margin-left: auto; align-self: center; }
+.ofx-banner--warn, .ofx-banner--halted { border-color: color-mix(in oklab, var(--c-warn) 40%, transparent); background: var(--c-warn-soft); }
+.ofx-banner--warn .ofx-banner__icon, .ofx-banner--halted .ofx-banner__icon,
+.ofx-banner--warn .ofx-banner__title, .ofx-banner--halted .ofx-banner__title { color: var(--c-warn); }
+.ofx-banner--danger { border-color: color-mix(in oklab, var(--c-danger) 40%, transparent); background: var(--c-danger-soft); }
+.ofx-banner--danger .ofx-banner__icon, .ofx-banner--danger .ofx-banner__title { color: var(--c-danger); }
+.ofx-banner--unsettled { border-color: var(--c-unsettled-border); background: var(--c-unsettled-soft); }
+.ofx-banner--unsettled .ofx-banner__icon, .ofx-banner--unsettled .ofx-banner__title { color: var(--c-unsettled); }
+
+/* ---------- EmptyState ---------- */
+.ofx-empty { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-7) var(--space-5); text-align: center; }
+.ofx-empty__icon { display: flex; color: var(--c-text-3); }
+/* Illustrations — sanctioned slots only (DESIGN-SYSTEM-WEB §6): onboarding, EmptyState.
+   The art is dark-world; the hairline frames it as a card in both themes. */
+.ofx-art { display: block; width: 100%; object-fit: cover; border-radius: var(--radius-2); border: var(--bw-1) solid var(--c-border); background: var(--c-raised); }
+.ofx-ftue__art { aspect-ratio: 4 / 5; max-height: 44vh; }
+.ofx-empty__art { display: block; width: min(180px, 55%); aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-2); border: var(--bw-1) solid var(--c-border); opacity: 0.92; }
+.ofx-thumb { display: block; width: 40px; height: 40px; object-fit: cover; border-radius: var(--radius-1); border: var(--bw-1) solid var(--c-border); }
+.ofx-row__lead:has(> .ofx-thumb) { width: auto; }
+.ofx-empty__title { font-family: var(--font-mono); font-size: var(--fs-sm); font-weight: var(--fw-semi); text-transform: uppercase; letter-spacing: var(--track-caps); color: var(--c-text-2); }
+.ofx-empty__hint { font-size: var(--fs-sm); color: var(--c-text-2); max-width: 30em; margin: 0; }
+.ofx-empty > .ofx-btn { margin-top: var(--space-2); }
+
+/* ---------- Skeleton ---------- */
+.ofx-skel { background: var(--c-raised); border-radius: var(--radius-1); animation: ofx-pulse var(--dur-pulse) var(--ease-in-out) infinite; }
+@media (prefers-reduced-motion: reduce) { .ofx-skel { animation: none; } }
+
+/* ---------- SplitBar — a Call's chance quoted like depth ----------
+   The two labels must NEVER wrap: a wrapped row puts "25%" next to "CLEAN" on a 75%
+   Call, which misreads the probability of a money action. nowrap + a floor width. */
+.ofx-split { display: flex; flex-direction: column; gap: 4px; min-width: 132px; }
+.ofx-split__labels {
+  display: flex; justify-content: space-between; gap: var(--space-2);
+  flex-wrap: nowrap; white-space: nowrap;
+  font-family: var(--font-mono); font-size: 10px; font-weight: var(--fw-med);
+  text-transform: uppercase; letter-spacing: var(--track-caps); color: var(--c-text-2);
+  font-variant-numeric: tabular-nums;
+}
+.ofx-split__labels > span { display: inline-flex; gap: 4px; }
+.ofx-split__labels b { font-weight: var(--fw-semi); color: var(--c-text); }
+.ofx-split__track { display: flex; height: 4px; gap: 2px; }
+.ofx-split__l { background: var(--c-up); }
+.ofx-split__r { background: var(--c-down); opacity: 0.5; }
+
+/* ---------- Session stat line ---------- */
+.ofx-statline {
+  display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4);
+  font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: var(--fw-med);
+  letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--c-text-3);
+  font-variant-numeric: tabular-nums;
+}
+.ofx-statline b { font-weight: var(--fw-semi); color: var(--c-text); margin-left: 4px; }
+
+/* ---------- Ticker strip — the tape itself ---------- */
+.ofx-ticker {
+  display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  padding: 5px var(--space-4);
+  border-bottom: var(--bw-1) solid var(--c-border);
+  background: var(--c-bg);
+  font-family: var(--font-mono); font-size: 10px; font-weight: var(--fw-med);
+  letter-spacing: var(--track-caps); text-transform: uppercase;
+  color: var(--c-text-2); font-variant-numeric: tabular-nums;
+}
+.ofx-ticker--halted { color: var(--c-warn); background: var(--c-warn-soft); }
+.ofx-ticker b { font-weight: var(--fw-semi); color: var(--c-text); }
+.ofx-ticker--halted b { color: var(--c-warn); }
+
+/* ---------- App shell ---------- */
+.ofx-app { min-height: 100dvh; display: flex; flex-direction: column; }
+.ofx-app__header {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--bw-1) solid var(--c-border); background: var(--c-bg);
+}
+.ofx-app__brand { font-family: var(--font-mono); font-size: var(--fs-sm); font-weight: var(--fw-bold); text-transform: uppercase; letter-spacing: var(--track-caps-wide); }
+.ofx-app__main { flex: 1; width: 100%; max-width: var(--maxw-content); margin: 0 auto; padding: var(--space-4) var(--space-4) 88px; }
+.ofx-app__sections { display: flex; flex-direction: column; gap: var(--space-6); }
+@media (min-width: 768px) {
+  .ofx-app { flex-direction: row; }
+  .ofx-app__col { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .ofx-app__main { padding-bottom: var(--space-7); }
+  .ofx-tabbar--fixed { display: none; }
+}

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Outfox</title>
+    <meta name="theme-color" content="#0B0E14" />
+    <!-- the fox mark (derived assets — regenerate via scripts/icons.mjs, never hand-edit) -->
+    <link rel="icon" href="/icons/app-icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-180.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <script>
+      // No-FOUC theme resolution (DESIGN-SYSTEM-WEB §4.6): runs before any stylesheet.
+      (function () {
+        var pref = 'system';
+        try { pref = localStorage.getItem('outfox.theme') || 'system'; } catch (e) {}
+        var dark = pref === 'dark' || (pref === 'system' &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches);
+        var t = dark ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', dark ? '#0B0E14' : '#F4F6FA');
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

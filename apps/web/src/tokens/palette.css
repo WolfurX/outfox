@@ -1,0 +1,47 @@
+/* OUTFOX — raw palette. The ONLY file where hex values live.
+   Components never reference these; they use the semantic tokens in colors.css.
+   Source: Claude Design "Outfox Design System". */
+
+:root {
+  /* Ink — the Floor at night (blue-black ramp) */
+  --ink-950: #0B0E14;
+  --ink-900: #11151F;
+  --ink-850: #161B26;
+  --ink-800: #1C2230;
+  --ink-700: #232A3A;
+  --ink-600: #333D52;
+  --ink-500: #55607A;
+  --ink-400: #8A93A8;
+  --ink-300: #ABB4C6;
+  --ink-100: #E6EAF2;
+
+  /* Paper — daylight session (flat, no glow) */
+  --paper-100: #FFFFFF;
+  --paper-200: #F4F6FA;
+  --paper-300: #E9EDF4;
+  --paper-400: #D5DBE7;
+  --paper-500: #BFC8D8;
+  --paper-ink: #171C26;
+
+  /* Fox orange — the brand accent */
+  --fox-300: #FFB077;
+  --fox-400: #FF8A3D;
+  --fox-500: #F1731C;
+  /* #B95608 (as designed) measured 4.41:1 as text on the light background — just under
+     AA. Darkened one step to 4.70:1. fox-600 is text/focus-ring only in light theme
+     (fills use fox-500), so nothing else shifts. Verified: scripts/aa-check.mjs */
+  --fox-600: #B25307;
+  --fox-950: #1A0D02;
+
+  /* Status */
+  --red-400: #FF5C5C;
+  --red-600: #C13A3A;
+  --green-400: #3DD68C;
+  --green-600: #1D7A4F;
+  --amber-400: #FFC24B;
+  --amber-700: #8A6100;
+
+  /* Haze — Unsettled Scrip (quarantined chance winnings) */
+  --haze-400: #9DA8F5;
+  --haze-600: #4C58C4;
+}

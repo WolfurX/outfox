@@ -1,0 +1,27 @@
+Round-6b probe: operator take on CASH-OUT fees (op_take_wdfee) — the boundary-fee
+revenue channel (withdrawal fee + seasoning surcharge, charged in $VIG at the exit
+valve; diverted share booked to VIG_exited, conservation-exact).
+Gate probe: 8 seeds/scenario; red-team survival criteria strict + 3 standard scenarios
+full-strict. Equivalence: take=1.0 vs 0.0, all final-row metrics bit-compared except
+vig_exited (absorbs the take) / vig_burned (treasury-shared path) / credit-treasury.
+Reproduce: override DEFAULT_PARAMS['op_take_wdfee'] in a driver script (no CLI flag).
+Re-prove condition: if VIG_treasury ever becomes the binding term of F4 issuance or a
+S13.B sell op at a future calibration, this interval must be re-proven.
+== gate probe ==
+take=0.0   bank_run=PASS  pump_dump=PASS  confidence_crisis=PASS  demurrage_flight=PASS  floor_split=PASS  smart_sybil=known-G11  whale_market=PASS  baseline=PASS  gresham=PASS  funnel=PASS
+take=0.5   bank_run=PASS  pump_dump=PASS  confidence_crisis=PASS  demurrage_flight=PASS  floor_split=PASS  smart_sybil=known-G11  whale_market=PASS  baseline=PASS  gresham=PASS  funnel=PASS
+take=1.0   bank_run=PASS  pump_dump=PASS  confidence_crisis=PASS  demurrage_flight=PASS  floor_split=PASS  smart_sybil=known-G11  whale_market=PASS  baseline=PASS  gresham=PASS  funnel=PASS
+
+== equivalence check take=1.0 vs 0.0 (all metrics except vig-treasury-side) ==
+      baseline seed 0: IDENTICAL outside allowed
+      baseline seed 1: IDENTICAL outside allowed
+      baseline seed 2: IDENTICAL outside allowed
+  whale_market seed 0: IDENTICAL outside allowed
+  whale_market seed 1: IDENTICAL outside allowed
+  whale_market seed 2: IDENTICAL outside allowed
+      bank_run seed 0: IDENTICAL outside allowed
+      bank_run seed 1: IDENTICAL outside allowed
+      bank_run seed 2: IDENTICAL outside allowed
+
+VERDICT: dynamics unchanged
+

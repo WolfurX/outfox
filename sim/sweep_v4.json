@@ -1,0 +1,422 @@
+{
+  "oat": {
+    "delta": {
+      "values": [
+        0.002,
+        0.0035,
+        0.0045,
+        0.006,
+        0.008
+      ],
+      "passes": [
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "interval": [
+        0.0035,
+        0.008
+      ],
+      "calibrated": 0.0045,
+      "cal_in": true
+    },
+    "delta_kp": {
+      "values": [
+        0.0,
+        0.015,
+        0.03,
+        0.05,
+        0.08
+      ],
+      "passes": [
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "interval": [
+        0.0,
+        0.05
+      ],
+      "calibrated": 0.03,
+      "cal_in": true
+    },
+    "bound_spend_frac": {
+      "values": [
+        0.4,
+        0.5,
+        0.53,
+        0.6,
+        0.7
+      ],
+      "passes": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "interval": [
+        0.4,
+        0.7
+      ],
+      "calibrated": 0.56,
+      "cal_in": false
+    },
+    "f2_cap": {
+      "values": [
+        80,
+        100,
+        112,
+        135,
+        165
+      ],
+      "passes": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "interval": [
+        80,
+        165
+      ],
+      "calibrated": 112.0,
+      "cal_in": true
+    },
+    "phi_market": {
+      "values": [
+        0.02,
+        0.035,
+        0.05,
+        0.07,
+        0.1
+      ],
+      "passes": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "interval": [
+        0.02,
+        0.1
+      ],
+      "calibrated": 0.035,
+      "cal_in": true
+    },
+    "w_cap": {
+      "values": [
+        40,
+        58,
+        80,
+        120,
+        200
+      ],
+      "passes": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "interval": [
+        40,
+        200
+      ],
+      "calibrated": 58.0,
+      "cal_in": true
+    },
+    "bot_pass_rate": {
+      "values": [
+        0.005,
+        0.01,
+        0.02,
+        0.05,
+        0.1
+      ],
+      "passes": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "interval": [
+        0.005,
+        0.1
+      ],
+      "calibrated": 0.01,
+      "cal_in": true
+    },
+    "demurrage_prog_rate": {
+      "values": [
+        0.006,
+        0.012,
+        0.018,
+        0.03,
+        0.045
+      ],
+      "passes": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "interval": [
+        0.006,
+        0.045
+      ],
+      "calibrated": 0.018,
+      "cal_in": true
+    },
+    "vig_idle_decay_mult": {
+      "values": [
+        0.0,
+        0.5,
+        1.0,
+        1.5,
+        2.5
+      ],
+      "passes": [
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "interval": [
+        0.5,
+        2.5
+      ],
+      "calibrated": 1.0,
+      "cal_in": true
+    },
+    "seasoning_days": {
+      "values": [
+        15,
+        30,
+        60,
+        90,
+        120
+      ],
+      "passes": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "interval": [
+        15,
+        120
+      ],
+      "calibrated": 60,
+      "cal_in": true
+    },
+    "unbond_days": {
+      "values": [
+        2,
+        4,
+        7,
+        14,
+        28
+      ],
+      "passes": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "interval": [
+        2,
+        28
+      ],
+      "calibrated": 7,
+      "cal_in": true
+    },
+    "stake_prob": {
+      "values": [
+        0.15,
+        0.25,
+        0.35,
+        0.5,
+        0.7
+      ],
+      "passes": [
+        true,
+        true,
+        true,
+        false,
+        false
+      ],
+      "interval": [
+        0.15,
+        0.35
+      ],
+      "calibrated": 0.35,
+      "cal_in": true
+    },
+    "vig_status_burn": {
+      "values": [
+        0.0,
+        0.3,
+        0.65,
+        0.85,
+        1.0
+      ],
+      "passes": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "interval": [
+        0.0,
+        1.0
+      ],
+      "calibrated": 0.65,
+      "cal_in": true
+    },
+    "commons_prob": {
+      "values": [
+        0.0,
+        0.02,
+        0.05,
+        0.1,
+        0.2
+      ],
+      "passes": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "interval": [
+        0.0,
+        0.2
+      ],
+      "calibrated": 0.05,
+      "cal_in": true
+    },
+    "ex_flow_cap": {
+      "values": [
+        0.005,
+        0.01,
+        0.02,
+        0.05,
+        1.0
+      ],
+      "passes": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "interval": [
+        0.005,
+        1.0
+      ],
+      "calibrated": 0.02,
+      "cal_in": true
+    },
+    "vol_fee_k": {
+      "values": [
+        0.0,
+        4.0,
+        8.0,
+        16.0,
+        32.0
+      ],
+      "passes": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "interval": [
+        0.0,
+        32.0
+      ],
+      "calibrated": 8.0,
+      "cal_in": true
+    },
+    "twap_jitter": {
+      "values": [
+        0.0,
+        0.15,
+        0.3,
+        0.5,
+        0.7
+      ],
+      "passes": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "interval": [
+        0.0,
+        0.7
+      ],
+      "calibrated": 0.3,
+      "cal_in": true
+    }
+  },
+  "grid": {
+    "x_param": "delta",
+    "x": [
+      0.003,
+      0.0045,
+      0.006,
+      0.008
+    ],
+    "y_param": "f2_cap",
+    "y": [
+      90,
+      112,
+      140,
+      170
+    ],
+    "grid": [
+      [
+        false,
+        false,
+        false,
+        false
+      ],
+      [
+        true,
+        true,
+        true,
+        true
+      ],
+      [
+        true,
+        true,
+        true,
+        true
+      ],
+      [
+        true,
+        true,
+        true,
+        true
+      ]
+    ]
+  },
+  "runs": 3,
+  "ticks": 720
+}

@@ -1,0 +1,157 @@
+
+==================  OAT SENSITIVITY SWEEP  (runs=3, ticks=720)  ==================
+For each lever: which values keep the FULL G1-G12 gate passing across the 5-scenario stress subset (baseline, plateau, bot_attack, gresham, funnel).
+
+  delta  (calibrated=0.0045)
+     delta=0.002    FAIL:G1(bas/pla/fun),G2(bas/bot/gre/fun)
+     delta=0.0035   PASS
+    *delta=0.0045   PASS
+     delta=0.006    PASS
+     delta=0.008    PASS
+    -> safe interval: [0.0035, 0.008]  calibrated INSIDE the interval
+
+  delta_kp  (calibrated=0.03)
+     delta_kp=0.0      PASS
+     delta_kp=0.015    PASS
+    *delta_kp=0.03     PASS
+     delta_kp=0.05     PASS
+     delta_kp=0.08     FAIL:G3(bas/bot/gre)
+    -> safe interval: [0.0, 0.05]  calibrated INSIDE the interval
+
+  bound_spend_frac  (calibrated=0.56)
+     bound_spend_frac=0.4      PASS
+     bound_spend_frac=0.5      PASS
+     bound_spend_frac=0.53     PASS
+     bound_spend_frac=0.6      PASS
+     bound_spend_frac=0.7      PASS
+    -> safe interval: [0.4, 0.7]  calibrated OUTSIDE the interval
+
+  f2_cap  (calibrated=112.0)
+     f2_cap=80       PASS
+     f2_cap=100      PASS
+    *f2_cap=112      PASS
+     f2_cap=135      PASS
+     f2_cap=165      PASS
+    -> safe interval: [80, 165]  calibrated INSIDE the interval
+
+  phi_market  (calibrated=0.035)
+     phi_market=0.02     PASS
+    *phi_market=0.035    PASS
+     phi_market=0.05     PASS
+     phi_market=0.07     PASS
+     phi_market=0.1      PASS
+    -> safe interval: [0.02, 0.1]  calibrated INSIDE the interval
+
+  w_cap  (calibrated=58.0)
+     w_cap=40       PASS
+    *w_cap=58       PASS
+     w_cap=80       PASS
+     w_cap=120      PASS
+     w_cap=200      PASS
+    -> safe interval: [40, 200]  calibrated INSIDE the interval
+
+  bot_pass_rate  (calibrated=0.01)
+     bot_pass_rate=0.005    PASS
+    *bot_pass_rate=0.01     PASS
+     bot_pass_rate=0.02     PASS
+     bot_pass_rate=0.05     PASS
+     bot_pass_rate=0.1      PASS
+    -> safe interval: [0.005, 0.1]  calibrated INSIDE the interval
+
+  demurrage_prog_rate  (calibrated=0.018)
+     demurrage_prog_rate=0.006    PASS
+     demurrage_prog_rate=0.012    PASS
+    *demurrage_prog_rate=0.018    PASS
+     demurrage_prog_rate=0.03     PASS
+     demurrage_prog_rate=0.045    PASS
+    -> safe interval: [0.006, 0.045]  calibrated INSIDE the interval
+
+  vig_idle_decay_mult  (calibrated=1.0)
+     vig_idle_decay_mult=0.0      FAIL:G2(bas),G6(bas/gre)
+     vig_idle_decay_mult=0.5      PASS
+    *vig_idle_decay_mult=1.0      PASS
+     vig_idle_decay_mult=1.5      PASS
+     vig_idle_decay_mult=2.5      PASS
+    -> safe interval: [0.5, 2.5]  calibrated INSIDE the interval
+
+  seasoning_days  (calibrated=60)
+     seasoning_days=15       PASS
+     seasoning_days=30       PASS
+    *seasoning_days=60       PASS
+     seasoning_days=90       PASS
+     seasoning_days=120      PASS
+    -> safe interval: [15, 120]  calibrated INSIDE the interval
+
+  unbond_days  (calibrated=7)
+     unbond_days=2        PASS
+     unbond_days=4        PASS
+    *unbond_days=7        PASS
+     unbond_days=14       PASS
+     unbond_days=28       PASS
+    -> safe interval: [2, 28]  calibrated INSIDE the interval
+
+  stake_prob  (calibrated=0.35)
+     stake_prob=0.15     PASS
+     stake_prob=0.25     PASS
+    *stake_prob=0.35     PASS
+     stake_prob=0.5      FAIL:G7(bot)
+     stake_prob=0.7      FAIL:G7(bot/fun)
+    -> safe interval: [0.15, 0.35]  calibrated INSIDE the interval
+
+  vig_status_burn  (calibrated=0.65)
+     vig_status_burn=0.0      PASS
+     vig_status_burn=0.3      PASS
+    *vig_status_burn=0.65     PASS
+     vig_status_burn=0.85     PASS
+     vig_status_burn=1.0      PASS
+    -> safe interval: [0.0, 1.0]  calibrated INSIDE the interval
+
+  commons_prob  (calibrated=0.05)
+     commons_prob=0.0      PASS
+     commons_prob=0.02     PASS
+    *commons_prob=0.05     PASS
+     commons_prob=0.1      PASS
+     commons_prob=0.2      PASS
+    -> safe interval: [0.0, 0.2]  calibrated INSIDE the interval
+
+  ex_flow_cap  (calibrated=0.02)
+     ex_flow_cap=0.005    PASS
+     ex_flow_cap=0.01     PASS
+    *ex_flow_cap=0.02     PASS
+     ex_flow_cap=0.05     PASS
+     ex_flow_cap=1.0      PASS
+    -> safe interval: [0.005, 1.0]  calibrated INSIDE the interval
+
+  vol_fee_k  (calibrated=8.0)
+     vol_fee_k=0.0      PASS
+     vol_fee_k=4.0      PASS
+    *vol_fee_k=8.0      PASS
+     vol_fee_k=16.0     PASS
+     vol_fee_k=32.0     PASS
+    -> safe interval: [0.0, 32.0]  calibrated INSIDE the interval
+
+  twap_jitter  (calibrated=0.3)
+     twap_jitter=0.0      PASS
+     twap_jitter=0.15     PASS
+    *twap_jitter=0.3      PASS
+     twap_jitter=0.5      PASS
+     twap_jitter=0.7      PASS
+    -> safe interval: [0.0, 0.7]  calibrated INSIDE the interval
+
+
+==================  2-D SAFE-REGION MAP: delta × f2_cap  ==================
+(core faucet/sink balance; ✓ = full gate passes all scenarios, runs=3)
+
+         delta \ f2_cap:      90     112     140     170
+            0.003      ·     ·     ·     ·  
+           0.0045      ✓     ✓     ✓     ✓  
+            0.006      ✓     ✓     ✓     ✓  
+            0.008      ✓     ✓     ✓     ✓  
+
+    ✓ = all G1-G12 pass in all scenarios · · = at least one fails
+
+==================  SUMMARY  ==================
+  Robust levers (calibrated value sits inside a multi-point safe interval): delta, delta_kp, f2_cap, phi_market, w_cap, bot_pass_rate, demurrage_prog_rate, vig_idle_decay_mult, seasoning_days, unbond_days, stake_prob, vig_status_burn, commons_prob, ex_flow_cap, vol_fee_k, twap_jitter
+  Knife-edge levers (single passing point — tighten tolerance): none
+
+  wrote sweep_v4.json

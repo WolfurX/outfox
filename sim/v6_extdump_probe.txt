@@ -1,0 +1,47 @@
+Assessment probes (2026-07-11, pre-round-7): sustained external sell pressure.
+Question: if ALPHA is speculated too hard externally (sustained crash imported
+through the deposit valve), does the game become unplayable?
+
+Gate taxonomy used here (defined once; G2 is Scrip-side monetary discipline):
+  GAME-SIDE (playability-load-bearing): G1, G2, G5, G8, G10, G12
+  PRICE-BAND / token-market:            G6, G7, G9, G11
+  UNDER-ATTACK DIAGNOSTICS (per the two-tier gate): G3, G4
+
+PROBE A — permanent SELF-FUNDED dump: the bank_run adversary's 30-day window made
+permanent (every tick from t=90 to horizon end, 20% of holders selling 90% of
+their own regenerating liquid), 8 seeds. NOTE (review-corrected): this does NOT
+saturate the flow cap — instrumentation showed the sell-side cap binding on only
+~14.5% of dump ticks, front-loaded (0% in the final ~9 months), because the
+adversaries can only sell what they hold.
+  game-side:  G1 100%/0.984  G2 100%/-2410  G5 100%/1.0  G8 100%/1.0
+              G10 100%/0     G12 100%/0.715
+  price-band: G6 100%/0.282  G7 100%/0.339  G9 0% (e ends 12.8c, -87%)
+              G11 100%/0.0005
+  diagnostics: G3 25%, G4 0% (med 12%/yr CPI) — elevated, as expected
+  final: e=12.8 (e0=100), N=892
+
+PROBE B — permanent CAP-PINNED dump (the honest worst case): deposit-fed sellers
+recycle the ENTIRE external float (VIG_exited + VIG_dormant re-entering through
+the valve, conservation-exact) into sell pressure that pins the S13.B flow cap
+whenever float exists, permanently from t=90. 8 seeds.
+  game-side:  G1 100%/0.977  G2 100%/-3830  G5 100%/0.98  G8 100%/1.0
+              G10 100%/0     G12 100%/0.766 (vig_resid 7e-9)
+  price-band: G6 100%/1.55   G7 100%/0.181  G9 0% (e ends 3.0c, -97%)
+              G11 100%/0.0006
+  diagnostics: G3 50%, G4 0% (med 13.4%/yr CPI)
+  final: e=3.0 (e0=100), N=892
+
+Reading: even with the token annihilated (-97%) under unbounded sustained external
+selling at the maximum throttled rate, EVERY load-bearing game-side gate stays
+green — the role-separation firewall (Scrip gameplay, ALPHA convenience-only)
+decouples playability from price. Matches the engine's design note: no economy
+holds price against a permanent exodus, and this one does not need to.
+
+NOT covered by these probes (round-7 scope, AUDIT-2 s9): endogenous churn from
+price collapse (morale — churn is exogenous in-model, N stays ~892 by
+construction), external price discovery displacing the internal exchange as
+reference, mania/bubble import paths (G9 upper arm + price<3x strict there).
+
+Reproduce: scratchpad subclasses overriding _exchange_step (permanent dump window;
+probe B additionally tops adversary liquid up to cap-rate from VIG_exited +
+VIG_dormant each tick). No engine changes; conservation identity verified intact.

@@ -1,0 +1,29 @@
+/* OUTFOX — motion. Flat and fast; the reveal must never be the reward.
+   HARD RULE (DESIGN-SYSTEM-WEB §8.2): chance reveals <=320ms, CONSTANT duration,
+   no suspense build, no near-miss theatre, no escalating celebration.
+   Everything collapses to 0 under prefers-reduced-motion. */
+
+:root {
+  --dur-1: 90ms;         /* micro: press, hover */
+  --dur-2: 160ms;        /* standard: sheet, tab switch */
+  --dur-reveal: 280ms;   /* result print — constant, never longer */
+  --dur-pulse: 1200ms;
+
+  --ease-out: cubic-bezier(0.2, 0.7, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.45, 0, 0.25, 1);
+  /* the "print" — flat, no overshoot, no bounce */
+  --ease-print: cubic-bezier(0.3, 0, 0.7, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-1: 0ms;
+    --dur-2: 0ms;
+    --dur-reveal: 0ms;
+    --dur-pulse: 0ms;
+    /* glow rides on the motion budget — kill it too */
+    --glow-cta: none;
+    --glow-tab: none;
+    --glow-reveal: none;
+  }
+}

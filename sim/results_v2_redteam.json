@@ -1,0 +1,377 @@
+{
+  "demurrage_flight": {
+    "gate": {
+      "G1": {
+        "pass_rate": 1.0,
+        "median": 0.992603644787874,
+        "detail": "cumulative faucet:sink (2nd half) \u2264 1.0"
+      },
+      "G2": {
+        "pass_rate": 1.0,
+        "median": -1336.2505482638926,
+        "detail": "mean net Credit emission, t\u2265180 \u2264 0"
+      },
+      "G3": {
+        "pass_rate": 0.1,
+        "median": 0.08149673874379376,
+        "detail": "p95 |30-day smoothed M/Q growth| \u2264 5%/mo (mature window)"
+      },
+      "G4": {
+        "pass_rate": 0.98,
+        "median": 0.05596427281109795,
+        "detail": "median mature CPI inflation in [\u22125%, +10%] (annualised)"
+      },
+      "G5": {
+        "pass_rate": 1.0,
+        "median": 0.9253532929163852,
+        "detail": "credit velocity end \u2265 0.5\u00d7 mid (no collapse)"
+      },
+      "G6": {
+        "pass_rate": 1.0,
+        "median": 0.2514153295289242,
+        "detail": "median mature $VIG velocity in [0.02, 30]\u00d7/month"
+      },
+      "G7": {
+        "pass_rate": 1.0,
+        "median": 0.6400887119300689,
+        "detail": "median wealth Gini \u2264 0.70 AND Pareto \u03b1 \u2265 2 (\u03b1=3.27)"
+      },
+      "G8": {
+        "pass_rate": 1.0,
+        "median": 0.9087348837012829,
+        "detail": "CAPTURE share of cumulative sink volume \u2265 50% (sinks accrue value)"
+      },
+      "G9": {
+        "pass_rate": 1.0,
+        "median": 1.5336227227888437,
+        "detail": "no hoard/dump split: e\u2208[0.2,5]\u00d7e0 and price <3\u00d7"
+      },
+      "G10": {
+        "pass_rate": 1.0,
+        "median": 0.0,
+        "detail": "unexplained Bound (chance-origin) outflow = 0 (ledger-verified)"
+      },
+      "G11": {
+        "pass_rate": 1.0,
+        "median": 2.173412469658208e-05,
+        "detail": "sybil share of realized cash-out value < 5%"
+      },
+      "G12": {
+        "pass_rate": 1.0,
+        "median": 0.6294779936256333,
+        "detail": "ledgers conserve ($VIG resid=0.00, \u00a2 resid=0.00) AND exit-Gini < 0.85"
+      }
+    },
+    "finals": {
+      "N": 891.5,
+      "M": 1077342.5774289193,
+      "e": 153.42850556796898,
+      "gini": 0.6527311286701083,
+      "faucet_sink": 1.0186884376750265,
+      "sybil_share": 2.173412469658208e-05,
+      "vig_burned": 378376.36339640716,
+      "treasury": 174737453.7693293,
+      "cashout_total": 21984319.989407808
+    }
+  },
+  "bank_run": {
+    "gate": {
+      "G1": {
+        "pass_rate": 1.0,
+        "median": 0.9431153882334558,
+        "detail": "cumulative faucet:sink (2nd half) \u2264 1.0"
+      },
+      "G2": {
+        "pass_rate": 1.0,
+        "median": -10524.67850961523,
+        "detail": "mean net Credit emission, t\u2265180 \u2264 0"
+      },
+      "G3": {
+        "pass_rate": 0.0,
+        "median": 0.1215109440880966,
+        "detail": "p95 |30-day smoothed M/Q growth| \u2264 5%/mo (mature window)"
+      },
+      "G4": {
+        "pass_rate": 0.08,
+        "median": -0.06849681563585996,
+        "detail": "median mature CPI inflation in [\u22125%, +10%] (annualised)"
+      },
+      "G5": {
+        "pass_rate": 1.0,
+        "median": 0.9785028547333245,
+        "detail": "credit velocity end \u2265 0.5\u00d7 mid (no collapse)"
+      },
+      "G6": {
+        "pass_rate": 1.0,
+        "median": 0.2203766709339621,
+        "detail": "median mature $VIG velocity in [0.02, 30]\u00d7/month"
+      },
+      "G7": {
+        "pass_rate": 1.0,
+        "median": 0.5672955321508864,
+        "detail": "median wealth Gini \u2264 0.70 AND Pareto \u03b1 \u2265 2 (\u03b1=3.37)"
+      },
+      "G8": {
+        "pass_rate": 1.0,
+        "median": 0.8972416656357776,
+        "detail": "CAPTURE share of cumulative sink volume \u2265 50% (sinks accrue value)"
+      },
+      "G9": {
+        "pass_rate": 1.0,
+        "median": 1.4606340538587745,
+        "detail": "no hoard/dump split: e\u2208[0.2,5]\u00d7e0 and price <3\u00d7"
+      },
+      "G10": {
+        "pass_rate": 1.0,
+        "median": 0.0,
+        "detail": "unexplained Bound (chance-origin) outflow = 0 (ledger-verified)"
+      },
+      "G11": {
+        "pass_rate": 1.0,
+        "median": 0.00020442457612789374,
+        "detail": "sybil share of realized cash-out value < 5%"
+      },
+      "G12": {
+        "pass_rate": 1.0,
+        "median": 0.6462037891233563,
+        "detail": "ledgers conserve ($VIG resid=0.00, \u00a2 resid=0.00) AND exit-Gini < 0.85"
+      }
+    },
+    "finals": {
+      "N": 891.5,
+      "M": 1150015.9325620823,
+      "e": 45.75616329739566,
+      "gini": 0.5803779292797994,
+      "faucet_sink": 1.0042353815923204,
+      "sybil_share": 0.00020442457612789374,
+      "vig_burned": 439426.6985719807,
+      "treasury": 177321372.270659,
+      "cashout_total": 9510120.954299035
+    }
+  },
+  "smart_sybil": {
+    "gate": {
+      "G1": {
+        "pass_rate": 1.0,
+        "median": 0.9896497502081689,
+        "detail": "cumulative faucet:sink (2nd half) \u2264 1.0"
+      },
+      "G2": {
+        "pass_rate": 1.0,
+        "median": -2548.083986923167,
+        "detail": "mean net Credit emission, t\u2265180 \u2264 0"
+      },
+      "G3": {
+        "pass_rate": 1.0,
+        "median": 0.025444188755639092,
+        "detail": "p95 |30-day smoothed M/Q growth| \u2264 5%/mo (mature window)"
+      },
+      "G4": {
+        "pass_rate": 1.0,
+        "median": 0.002831697105831199,
+        "detail": "median mature CPI inflation in [\u22125%, +10%] (annualised)"
+      },
+      "G5": {
+        "pass_rate": 1.0,
+        "median": 0.9802393318018905,
+        "detail": "credit velocity end \u2265 0.5\u00d7 mid (no collapse)"
+      },
+      "G6": {
+        "pass_rate": 1.0,
+        "median": 0.18846098442624415,
+        "detail": "median mature $VIG velocity in [0.02, 30]\u00d7/month"
+      },
+      "G7": {
+        "pass_rate": 1.0,
+        "median": 0.6816856078393883,
+        "detail": "median wealth Gini \u2264 0.70 AND Pareto \u03b1 \u2265 2 (\u03b1=3.35)"
+      },
+      "G8": {
+        "pass_rate": 1.0,
+        "median": 0.9012920392867174,
+        "detail": "CAPTURE share of cumulative sink volume \u2265 50% (sinks accrue value)"
+      },
+      "G9": {
+        "pass_rate": 1.0,
+        "median": 1.0970674148357424,
+        "detail": "no hoard/dump split: e\u2208[0.2,5]\u00d7e0 and price <3\u00d7"
+      },
+      "G10": {
+        "pass_rate": 1.0,
+        "median": 0.0,
+        "detail": "unexplained Bound (chance-origin) outflow = 0 (ledger-verified)"
+      },
+      "G11": {
+        "pass_rate": 1.0,
+        "median": 0.03741203654577815,
+        "detail": "sybil share of realized cash-out value < 5%"
+      },
+      "G12": {
+        "pass_rate": 1.0,
+        "median": 0.6200294935989694,
+        "detail": "ledgers conserve ($VIG resid=0.00, \u00a2 resid=0.00) AND exit-Gini < 0.85"
+      }
+    },
+    "finals": {
+      "N": 887.5,
+      "M": 1135820.088950316,
+      "e": 94.1161269885276,
+      "gini": 0.6877626170680277,
+      "faucet_sink": 1.0030351688875503,
+      "sybil_share": 0.03741203654577815,
+      "vig_burned": 294910.52200090326,
+      "treasury": 184339151.07425392,
+      "cashout_total": 10938672.928797282
+    }
+  },
+  "floor_split": {
+    "gate": {
+      "G1": {
+        "pass_rate": 1.0,
+        "median": 0.9831440949936819,
+        "detail": "cumulative faucet:sink (2nd half) \u2264 1.0"
+      },
+      "G2": {
+        "pass_rate": 1.0,
+        "median": -4769.925571467111,
+        "detail": "mean net Credit emission, t\u2265180 \u2264 0"
+      },
+      "G3": {
+        "pass_rate": 1.0,
+        "median": 0.021301821131073484,
+        "detail": "p95 |30-day smoothed M/Q growth| \u2264 5%/mo (mature window)"
+      },
+      "G4": {
+        "pass_rate": 1.0,
+        "median": -0.014927597953224958,
+        "detail": "median mature CPI inflation in [\u22125%, +10%] (annualised)"
+      },
+      "G5": {
+        "pass_rate": 1.0,
+        "median": 0.9885929376236433,
+        "detail": "credit velocity end \u2265 0.5\u00d7 mid (no collapse)"
+      },
+      "G6": {
+        "pass_rate": 1.0,
+        "median": 0.18430574485144968,
+        "detail": "median mature $VIG velocity in [0.02, 30]\u00d7/month"
+      },
+      "G7": {
+        "pass_rate": 1.0,
+        "median": 0.5971311428607041,
+        "detail": "median wealth Gini \u2264 0.70 AND Pareto \u03b1 \u2265 2 (\u03b1=3.26)"
+      },
+      "G8": {
+        "pass_rate": 1.0,
+        "median": 0.8937196059250236,
+        "detail": "CAPTURE share of cumulative sink volume \u2265 50% (sinks accrue value)"
+      },
+      "G9": {
+        "pass_rate": 1.0,
+        "median": 1.108352136705737,
+        "detail": "no hoard/dump split: e\u2208[0.2,5]\u00d7e0 and price <3\u00d7"
+      },
+      "G10": {
+        "pass_rate": 1.0,
+        "median": 0.0,
+        "detail": "unexplained Bound (chance-origin) outflow = 0 (ledger-verified)"
+      },
+      "G11": {
+        "pass_rate": 1.0,
+        "median": 0.00017272638367689646,
+        "detail": "sybil share of realized cash-out value < 5%"
+      },
+      "G12": {
+        "pass_rate": 1.0,
+        "median": 0.6388595934486355,
+        "detail": "ledgers conserve ($VIG resid=0.00, \u00a2 resid=0.00) AND exit-Gini < 0.85"
+      }
+    },
+    "finals": {
+      "N": 891.5,
+      "M": 1165556.4247258676,
+      "e": 61.595166412313,
+      "gini": 0.6060539806972949,
+      "faucet_sink": 1.000308839790085,
+      "sybil_share": 0.00017272638367689646,
+      "vig_burned": 388708.0760565741,
+      "treasury": 175911276.22838846,
+      "cashout_total": 10908603.482357692
+    }
+  },
+  "pump_dump": {
+    "gate": {
+      "G1": {
+        "pass_rate": 1.0,
+        "median": 0.9538719031115555,
+        "detail": "cumulative faucet:sink (2nd half) \u2264 1.0"
+      },
+      "G2": {
+        "pass_rate": 1.0,
+        "median": -13086.398559650552,
+        "detail": "mean net Credit emission, t\u2265180 \u2264 0"
+      },
+      "G3": {
+        "pass_rate": 0.0,
+        "median": 0.8806346073874064,
+        "detail": "p95 |30-day smoothed M/Q growth| \u2264 5%/mo (mature window)"
+      },
+      "G4": {
+        "pass_rate": 0.72,
+        "median": -0.03151161954124021,
+        "detail": "median mature CPI inflation in [\u22125%, +10%] (annualised)"
+      },
+      "G5": {
+        "pass_rate": 1.0,
+        "median": 0.9607277854162106,
+        "detail": "credit velocity end \u2265 0.5\u00d7 mid (no collapse)"
+      },
+      "G6": {
+        "pass_rate": 1.0,
+        "median": 0.2662636498601031,
+        "detail": "median mature $VIG velocity in [0.02, 30]\u00d7/month"
+      },
+      "G7": {
+        "pass_rate": 1.0,
+        "median": 0.5557008635209603,
+        "detail": "median wealth Gini \u2264 0.70 AND Pareto \u03b1 \u2265 2 (\u03b1=3.41)"
+      },
+      "G8": {
+        "pass_rate": 1.0,
+        "median": 0.9004817152221251,
+        "detail": "CAPTURE share of cumulative sink volume \u2265 50% (sinks accrue value)"
+      },
+      "G9": {
+        "pass_rate": 1.0,
+        "median": 1.5431291872647122,
+        "detail": "no hoard/dump split: e\u2208[0.2,5]\u00d7e0 and price <3\u00d7"
+      },
+      "G10": {
+        "pass_rate": 1.0,
+        "median": 0.0,
+        "detail": "unexplained Bound (chance-origin) outflow = 0 (ledger-verified)"
+      },
+      "G11": {
+        "pass_rate": 1.0,
+        "median": 0.00024691534655571425,
+        "detail": "sybil share of realized cash-out value < 5%"
+      },
+      "G12": {
+        "pass_rate": 1.0,
+        "median": 0.6539543824508127,
+        "detail": "ledgers conserve ($VIG resid=0.00, \u00a2 resid=0.00) AND exit-Gini < 0.85"
+      }
+    },
+    "finals": {
+      "N": 891.5,
+      "M": 1438126.682256423,
+      "e": 32.26463599156333,
+      "gini": 0.5322518434276399,
+      "faucet_sink": 0.8379836383012094,
+      "sybil_share": 0.00024691534655571425,
+      "vig_burned": 520722.729777555,
+      "treasury": 178018850.94469738,
+      "cashout_total": 8420134.431503937
+    }
+  }
+}

@@ -1,0 +1,19 @@
+== Phase A: honest mature release volume (baseline, 25 seeds) ==
+  mature wd_released per tick: median 75.2  p95 147.4  ($VIG/day)
+  candidate caps: 1x p95 = 147/day (weekly 1029)   2x = 294/day
+  ring ceiling min(k*w_cap, cap*7)/wk at k=12 : per-id 696  vs cap1x 1029  cap2x 2058
+  ring ceiling min(k*w_cap, cap*7)/wk at k=50 : per-id 2900  vs cap1x 1029  cap2x 2058
+  ring ceiling min(k*w_cap, cap*7)/wk at k=200: per-id 11600  vs cap1x 1029  cap2x 2058
+
+== Phase B: smart_sybil re-judge (100 seeds/cell; G11 bar < 5%) ==
+  mules  cap/day    | G11%   pass%    | bot cashout  total        | escrow_end notes
+  12     off        |  6.07%      0% |       357690      5920168 |        832 | surv   0%  fails G11:100
+  12     147        |  6.07%      0% |       357712      5920413 |        832 | surv   0%  fails G11:100
+  50     off        | 10.71%      0% |       655910      6123530 |        844 | surv   0%  fails G11:100
+  50     147        | 10.71%      0% |       655905      6123654 |        844 | surv   0%  fails G11:100
+  200    off        | 17.33%      0% |      1680339      9682172 |        882 | surv   0%  fails G1:60 G11:100 G2:100
+  200    147        | 17.33%      0% |      1680805      9682139 |        882 | surv   0%  fails G1:60 G11:100 G2:100
+  200    294        | 17.33%      0% |      1680339      9682172 |        882 | surv   0%  fails G1:60 G11:100 G2:100
+
+regression: the (12, off) cell is the v5 engine exactly -- compare G11 median
+to v5_redteam_100.txt smart_sybil (~5.4%).

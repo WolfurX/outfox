@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+sweep_out.txt
+v3_final.txt
+.venv/

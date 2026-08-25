@@ -1,0 +1,22 @@
+/* OUTFOX — token entry point.
+ *
+ * Layered, reference direction strictly downward, no layer skips
+ * (DESIGN-SYSTEM-WEB §4.1):
+ *
+ *   palette      raw hex — the ONLY file with hex values
+ *   colors       semantic tokens (--c-*) — the stable API components use
+ *   typography / spacing / motion — the rest of the semantic layer
+ *   base         element defaults + keyframes
+ *
+ * Source: the "Outfox Design System" project in Claude Design, ported 2026-07-12.
+ * One deviation from the source, recorded in palette.css: fox-600 darkened one step so
+ * accent-as-text clears WCAG AA on the light background (4.41 -> 4.70).
+ * Verified by `node scripts/aa-check.mjs` — every pair, both themes.
+ */
+@import './fonts.css';
+@import './tokens/palette.css';
+@import './tokens/colors.css';
+@import './tokens/typography.css';
+@import './tokens/spacing.css';
+@import './tokens/motion.css';
+@import './tokens/base.css';

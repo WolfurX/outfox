@@ -1,0 +1,63 @@
+Round-5 calibration record — §13.D whale-tail levers (whale_market, seeds from 0)
+==================================================================================
+All runs on the corrected metric (networth/vig_circ include VIG_unbonding).
+G7% = joint per-seed pass rate (Gini <= 0.70 AND Hill alpha >= 2); alpha/gini = medians.
+
+Corrected-metric re-measurement of the v4 engine (levers off), 8 seeds:
+  thresh   rate |  G7%  alpha   gini |     G1        G2     G6     G9 G12%
+   750.0    0.0 |    0   1.02  0.721 |  0.979   -1637.4  0.276   1.04  100
+  (the v4-reported alpha 1.13 / Gini 0.695 were measured with unbonding invisible)
+
+Stage 1 — progressive carry alone (vig_prog_thresh x vig_prog_rate), 8 seeds:
+    250   0.02 |    0   1.21  0.674      500   0.02 |    0   1.26  0.684
+    250   0.03 |    0   1.33  0.658      500   0.03 |    0   1.35  0.673
+    250  0.045 |    0   1.49  0.639      500  0.045 |    0   1.47  0.660
+    750   0.02 |    0   1.17  0.691     1000   0.02 |    0   1.12  0.696
+    750   0.03 |    0   1.23  0.682     1000   0.03 |    0   1.17  0.689
+    750  0.045 |    0   1.31  0.673     1000  0.045 |    0   1.22  0.682
+   1500   0.02 |    0   1.08  0.704     1500   0.03 |    0   1.10  0.699
+   1500  0.045 |    0   1.12  0.695
+  VERDICT: stock-side alone tops out ~alpha 1.5 even at the aggressive corner --
+  the inflow gap must be compressed at the source (F4), per the round-5 diagnosis.
+
+Stage 2 — F4 wealth-indexed issuance alone (gamma x href, carry off), 8 seeds:
+  gamma   href |  G7%  alpha   gini        gamma   href |  G7%  alpha   gini
+    1.0   1000 |    0   1.35  0.708          1.5   1000 |    0   1.52  0.704
+    1.0   2000 |    0   1.21  0.711          2.0   1000 |    0   1.70  0.701
+    1.0   3000 |    0   1.15  0.713          2.0   2000 |    0   1.40  0.706
+  VERDICT: inflow-side alone also insufficient; the pair is required.
+
+Stage 3 — combined refinement, 8 seeds:
+  gamma   href  thresh   rate |  G7%  alpha   gini
+    2.0    500     250  0.045 |  100   3.42  0.658
+    2.0    500     500   0.03 |  100   2.58  0.686
+    2.0    750     250  0.045 |  100   2.80  0.653
+    2.0    750     500   0.03 |  100   2.20  0.684
+    2.0    750     500  0.045 |  100   2.30  0.681
+    2.0   1000     250  0.045 |  100   2.49  0.651
+    2.0   1000     500   0.03 |   50   2.02  0.683
+    2.0   1000     500  0.045 |   88   2.10  0.678
+    2.5    750     250  0.045 |  100   3.21  0.656
+    2.5    750     500   0.03 |  100   2.46  0.686
+    2.5   1000     250  0.045 |  100   2.79  0.653
+    3.0   1000     250  0.045 |  100   3.10  0.655
+  G7 = 100% throughout the tested box gamma in [2,3] x href in [500,1000] x
+  thresh in [250,500] x rate in [0.03,0.045] except the gentlest corner -- a
+  passing region, not a knife-edge.
+
+Stage 4 — default-candidate variance check, 32 seeds:
+  gamma   href  thresh   rate |  G7%  alpha   gini
+    2.0    750     500  0.045 |  100   2.27  0.681   (~1 sigma alpha margin)
+    2.5    750     500   0.03 |  100   2.41  0.686   (~1 sigma alpha margin)
+    2.0    750     250  0.045 |  100   2.81  0.653   <- CHOSEN (~2 sigma both legs)
+
+Zero-point equivalence check (vig_prog_rate=0 + vig_primary_gamma=0 vs committed v4),
+whale_market 8 seeds, full 720-tick horizon:
+  G1 median 0.9792 (v4: 0.9792)   G2 median -1637.4446 (v4: -1637.4446)
+  e 25.0 (v4: 25.0)   M 944,263 (v4: 944,263)   cashout 3,139,652 (v4: 3,139,652)
+  Dynamics identical to all printed digits. Known 1-ulp caveat: the refactored F4
+  treasury-exhaustion pro-rata branch computes the same quantity with one extra
+  rounding vs v4; it did not trigger in these runs.
+
+Full-seed verdicts: v5_redteam_100.txt (whale_market PASS, alpha med 2.80, G7 100%),
+v5_500.txt (standard suite), sweep_v5.txt (OAT incl. the four new levers).

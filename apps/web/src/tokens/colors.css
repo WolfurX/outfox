@@ -1,0 +1,96 @@
+/* OUTFOX — semantic color tokens.
+   Dark ("the Floor at night") is canonical and lives on :root.
+   Light ("daylight session") is a single attribute write: <html data-theme="light">.
+   Every pair is WCAG AA in both themes. Components reference ONLY these. */
+
+:root {
+  color-scheme: dark;
+
+  /* Surfaces — elevation is by border, not shadow */
+  --c-bg: var(--ink-950);
+  --c-surface: var(--ink-900);      /* cards, rows */
+  --c-panel: var(--ink-850);        /* sheets, panels, tab bar */
+  --c-raised: var(--ink-800);       /* hover / pressed surfaces */
+  --c-border: var(--ink-700);       /* hairlines */
+  --c-border-strong: var(--ink-600);
+
+  /* Text */
+  --c-text: var(--ink-100);
+  --c-text-2: var(--ink-400);       /* secondary / hints */
+  --c-text-3: var(--ink-500);       /* disabled only */
+
+  /* Fox orange — accent */
+  --c-accent: var(--fox-400);
+  --c-accent-text: var(--fox-400);
+  --c-on-accent: var(--fox-950);
+  --c-accent-soft: color-mix(in oklab, var(--fox-400) 14%, transparent);
+  --c-accent-border: color-mix(in oklab, var(--fox-400) 45%, transparent);
+
+  /* Status */
+  --c-up: var(--green-400);         /* gains, cleared */
+  --c-down: var(--red-400);         /* losses, Nicked */
+  --c-danger: var(--red-400);
+  --c-danger-soft: color-mix(in oklab, var(--red-400) 12%, transparent);
+  --c-warn: var(--amber-400);
+  --c-warn-soft: color-mix(in oklab, var(--amber-400) 12%, transparent);
+  --c-up-soft: color-mix(in oklab, var(--green-400) 12%, transparent);
+
+  /* Unsettled Scrip — quarantined chance winnings.
+     ALWAYS paired with the hatch pattern + a text label. Never color alone. */
+  --c-unsettled: var(--haze-400);
+  --c-unsettled-soft: color-mix(in oklab, var(--haze-400) 12%, transparent);
+  --c-unsettled-border: color-mix(in oklab, var(--haze-400) 45%, transparent);
+
+  /* Focus ring */
+  --c-focus-ring: var(--fox-300);
+
+  /* Scrim behind sheets */
+  --c-scrim: color-mix(in srgb, var(--ink-950) 72%, transparent);
+
+  /* Glow — dark theme only, on at most three things:
+     primary CTA, active tab indicator, result reveal. Vanishes under reduced motion. */
+  --glow-cta: 0 0 18px 0 color-mix(in oklab, var(--fox-400) 28%, transparent);
+  --glow-tab: 0 0 10px 0 color-mix(in oklab, var(--fox-400) 35%, transparent);
+  --glow-reveal: 0 0 14px 0 color-mix(in oklab, var(--fox-400) 22%, transparent);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --c-bg: var(--paper-200);
+  --c-surface: var(--paper-100);
+  --c-panel: var(--paper-100);
+  --c-raised: var(--paper-300);
+  --c-border: var(--paper-400);
+  --c-border-strong: var(--paper-500);
+
+  --c-text: var(--paper-ink);
+  --c-text-2: color-mix(in srgb, var(--paper-ink) 62%, var(--paper-200));
+  --c-text-3: var(--paper-500);
+
+  --c-accent: var(--fox-500);
+  --c-accent-text: var(--fox-600);
+  --c-on-accent: var(--fox-950);
+  --c-accent-soft: color-mix(in oklab, var(--fox-500) 12%, transparent);
+  --c-accent-border: color-mix(in oklab, var(--fox-500) 45%, transparent);
+
+  --c-up: var(--green-600);
+  --c-down: var(--red-600);
+  --c-danger: var(--red-600);
+  --c-danger-soft: color-mix(in oklab, var(--red-600) 10%, transparent);
+  --c-warn: var(--amber-700);
+  --c-warn-soft: color-mix(in oklab, var(--amber-700) 12%, transparent);
+  --c-up-soft: color-mix(in oklab, var(--green-600) 10%, transparent);
+
+  --c-unsettled: var(--haze-600);
+  --c-unsettled-soft: color-mix(in oklab, var(--haze-600) 10%, transparent);
+  --c-unsettled-border: color-mix(in oklab, var(--haze-600) 45%, transparent);
+
+  --c-focus-ring: var(--fox-600);
+  --c-scrim: color-mix(in srgb, var(--paper-ink) 40%, transparent);
+
+  /* Daylight session is flat — no glow, anywhere */
+  --glow-cta: none;
+  --glow-tab: none;
+  --glow-reveal: none;
+}
