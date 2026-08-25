@@ -27,10 +27,10 @@
 import type { DB } from './db.js';
 import { withTx, EngineError, postTx, treasuryAdd, requireRung, applyCarry } from './engine.js';
 import { postAlpha, applyAlphaCarry } from './settlement.js';
-import { EXCHANGE, type ExchangeView, type ExchangeQuote } from '@outfox/shared';
+import { ALPHA_BASE_UNITS, EXCHANGE, type ExchangeView, type ExchangeQuote } from '@outfox/shared';
 
 const DAY_MS = 86_400_000;
-const WEI_PER_ALPHA = 10n ** 18n;
+const WEI_PER_ALPHA = ALPHA_BASE_UNITS;
 
 const ceilDiv = (a: bigint, b: bigint) => (a + b - 1n) / b;
 
@@ -62,7 +62,7 @@ function writePool(db: DB, p: Pool): void {
 
 /** ¢ per whole ALPHA, as a float — a derived metric (G9 series), never money math. */
 function rateOf(p: Pool): number {
-  return (Number(p.creditCents) * 1e18) / Number(p.alphaWei);
+  return (Number(p.creditCents) * Number(ALPHA_BASE_UNITS)) / Number(p.alphaWei);
 }
 
 // ----- seeding ---------------------------------------------------------------

@@ -1,129 +1,243 @@
 /**
- * The chain edge: Settlement indexer + voucher signer.
+ * The chain edge: Settlement indexer + voucher signer (Solana).
  *
  * The server is the custodian of game state; the chain is the value boundary. This module
  * is the ONLY place that talks to it:
- *   - indexOnce()  — pulls Deposited/Withdrawn logs and folds them into the game ledger.
- *   - signVoucher() — signs an EIP-712 withdrawal voucher with the server's hot key AFTER
- *     the §9 gates have already passed in settlement.ts. The contract enforces only what
- *     the chain must (single-use nonce, expiry, signature, pause, rolling cap).
+ *   - indexOnce()  — pulls Deposited/Withdrawn events from the settlement program's
+ *     transactions and folds them into the game ledger.
+ *   - signVoucher() — ed25519-signs a withdrawal voucher with the server's hot key AFTER
+ *     the §9 gates have already passed in settlement.ts. The program enforces only what
+ *     the chain must (single-use nonce PDA, expiry, signature, pause, rolling cap).
  *
- * Every credited deposit is keyed by (tx_hash, log_index), so re-indexing — after a crash,
- * a restart, or a reorg replay — can never double-credit.
+ * Every credited deposit is keyed by (signature, event index) — stored in the same
+ * (tx_hash, log_index) columns the EVM era used — so re-indexing after a crash or
+ * restart can never double-credit.
+ *
+ * The voucher message layout MUST match `programs/settlement/src/lib.rs::voucher_message`:
+ *   "OUTFOX_SETTLEMENT_V1"(20) ++ program_id(32) ++ chain_id u64le ++ to(32)
+ *   ++ amount u64le ++ nonce u64le ++ deadline i64le      (116 bytes)
  */
 import {
-  createPublicClient, http, parseAbi, parseAbiItem, getAddress,
-  encodeFunctionData, verifyMessage, type Address, type Hex,
-} from 'viem';
-import { privateKeyToAccount } from 'viem/accounts';
+  ComputeBudgetProgram, Connection, Ed25519Program, PublicKey, SystemProgram,
+  SYSVAR_INSTRUCTIONS_PUBKEY, Transaction, TransactionInstruction,
+} from '@solana/web3.js';
+import { createHash } from 'node:crypto';
+import nacl from 'tweetnacl';
+import bs58 from 'bs58';
 import type { DB } from './db.js';
 import { creditDeposit, markWithdrawalConfirmed } from './settlement.js';
 
-export const DEPOSITED = parseAbiItem('event Deposited(address indexed from, uint256 amount)');
-export const WITHDRAWN = parseAbiItem('event Withdrawn(address indexed to, uint256 amount, uint256 indexed nonce)');
+export const VOUCHER_DOMAIN = 'OUTFOX_SETTLEMENT_V1';
+export const TOKEN_PROGRAM = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
+export const ATA_PROGRAM = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
 
 export interface ChainConfig {
   rpcUrl: string;
+  /** Voucher domain separator for the cluster (0 localnet, 1 devnet, 2 mainnet). */
   chainId: number;
-  settlement: Address;
-  /** block the Settlement contract was deployed in — never index below it */
-  startBlock: bigint;
-  /** the game server's hot signing key (NOT the owner key) */
-  signerKey?: Hex;
-  /** logs are pulled in windows; public RPCs cap the span */
-  windowSize?: bigint;
+  /** The settlement program id. */
+  programId: PublicKey;
+  /** The server's hot ed25519 voucher key: 32-byte seed, base58 or hex. NOT the admin. */
+  signerSeed?: Uint8Array;
+  /** Max transactions folded per indexOnce batch. */
+  batchLimit?: number;
 }
 
 export function chainConfigFromEnv(): ChainConfig | null {
-  const { OUTFOX_RPC_URL, OUTFOX_CHAIN_ID, OUTFOX_SETTLEMENT, OUTFOX_START_BLOCK, OUTFOX_SIGNER_KEY } = process.env;
-  if (!OUTFOX_RPC_URL || !OUTFOX_CHAIN_ID || !OUTFOX_SETTLEMENT) return null;
+  const { OUTFOX_RPC_URL, OUTFOX_CHAIN_ID, OUTFOX_PROGRAM_ID, OUTFOX_SIGNER_KEY } = process.env;
+  if (!OUTFOX_RPC_URL || OUTFOX_CHAIN_ID === undefined || !OUTFOX_PROGRAM_ID) return null;
+  let seed: Uint8Array | undefined;
+  if (OUTFOX_SIGNER_KEY) {
+    seed = /^[0-9a-fA-Fx]+$/.test(OUTFOX_SIGNER_KEY) && OUTFOX_SIGNER_KEY.length >= 64
+      ? Uint8Array.from(Buffer.from(OUTFOX_SIGNER_KEY.replace(/^0x/, ''), 'hex'))
+      : bs58.decode(OUTFOX_SIGNER_KEY);
+    if (seed.length === 64) seed = seed.slice(0, 32); // accept full keypair bytes too
+    if (seed.length !== 32) throw new Error('OUTFOX_SIGNER_KEY must be a 32-byte ed25519 seed');
+  }
   return {
     rpcUrl: OUTFOX_RPC_URL,
     chainId: Number(OUTFOX_CHAIN_ID),
-    settlement: getAddress(OUTFOX_SETTLEMENT),
-    startBlock: BigInt(OUTFOX_START_BLOCK ?? '0'),
-    signerKey: OUTFOX_SIGNER_KEY as Hex | undefined,
-    windowSize: 5_000n,
+    programId: new PublicKey(OUTFOX_PROGRAM_ID),
+    signerSeed: seed,
+    batchLimit: 100,
   };
 }
 
-export function publicClientFor(cfg: ChainConfig) {
-  return createPublicClient({ transport: http(cfg.rpcUrl) });
+export function connectionFor(cfg: ChainConfig): Connection {
+  return new Connection(cfg.rpcUrl, 'confirmed');
 }
 
-// ----- EIP-712 voucher -------------------------------------------------------
+// ----- PDAs and addresses ----------------------------------------------------
 
-/** Must match Settlement.sol's EIP712("OutfoxSettlement", "1") + WITHDRAWAL_TYPEHASH. */
-export const VOUCHER_TYPES = {
-  Withdrawal: [
-    { name: 'to', type: 'address' },
-    { name: 'amount', type: 'uint256' },
-    { name: 'nonce', type: 'uint256' },
-    { name: 'deadline', type: 'uint256' },
-  ],
-} as const;
+export function statePda(cfg: ChainConfig): PublicKey {
+  return PublicKey.findProgramAddressSync([Buffer.from('settlement')], cfg.programId)[0];
+}
 
+export function noncePda(cfg: ChainConfig, nonce: bigint): PublicKey {
+  const buf = Buffer.alloc(8);
+  buf.writeBigUInt64LE(nonce);
+  return PublicKey.findProgramAddressSync([Buffer.from('nonce'), buf], cfg.programId)[0];
+}
+
+export function ataFor(owner: PublicKey, mint: PublicKey): PublicKey {
+  return PublicKey.findProgramAddressSync(
+    [owner.toBuffer(), TOKEN_PROGRAM.toBuffer(), mint.toBuffer()],
+    ATA_PROGRAM,
+  )[0];
+}
+
+let mintCache: { state: string; mint: PublicKey } | null = null;
+
+/** The ALPHA mint, read from the on-chain settlement state itself (set at initialize,
+ * so cached for the process lifetime — no separate env var to drift).
+ * State layout: disc(8) admin(32) pending_admin(1+32) signer(32) alpha_mint(32) ... */
+export async function alphaMintFor(cfg: ChainConfig): Promise<PublicKey> {
+  const state = statePda(cfg);
+  if (mintCache && mintCache.state === state.toBase58()) return mintCache.mint;
+  const info = await connectionFor(cfg).getAccountInfo(state);
+  if (!info) throw new Error('settlement state account not found — program not initialized?');
+  const mint = new PublicKey(info.data.subarray(105, 137));
+  mintCache = { state: state.toBase58(), mint };
+  return mint;
+}
+
+/** Live reserve — the escrow token-account balance, the solvency ceiling every
+ * withdrawal request is checked against. Base units (9dp). */
+export async function reserveFor(cfg: ChainConfig): Promise<bigint> {
+  const mint = await alphaMintFor(cfg);
+  const escrow = ataFor(statePda(cfg), mint);
+  const bal = await connectionFor(cfg).getTokenAccountBalance(escrow);
+  return BigInt(bal.value.amount);
+}
+
+// ----- the ed25519 voucher ---------------------------------------------------
+
+export function voucherMessage(
+  cfg: ChainConfig,
+  v: { to: PublicKey; amount: bigint; nonce: bigint; deadline: bigint },
+): Buffer {
+  const msg = Buffer.alloc(116);
+  msg.write(VOUCHER_DOMAIN, 0, 'ascii');
+  cfg.programId.toBuffer().copy(msg, 20);
+  msg.writeBigUInt64LE(BigInt(cfg.chainId), 52);
+  v.to.toBuffer().copy(msg, 60);
+  msg.writeBigUInt64LE(v.amount, 92);
+  msg.writeBigUInt64LE(v.nonce, 100);
+  msg.writeBigInt64LE(v.deadline, 108);
+  return msg;
+}
+
+export function voucherSignerPubkey(cfg: ChainConfig): PublicKey {
+  if (!cfg.signerSeed) throw new Error('OUTFOX_SIGNER_KEY not configured');
+  return new PublicKey(nacl.sign.keyPair.fromSeed(cfg.signerSeed).publicKey);
+}
+
+/** Sign a withdrawal voucher. Returns the base58 ed25519 signature (64 bytes). */
 export async function signVoucher(
   cfg: ChainConfig,
-  v: { to: Address; amount: bigint; nonce: bigint; deadline: bigint },
-): Promise<Hex> {
-  if (!cfg.signerKey) throw new Error('OUTFOX_SIGNER_KEY not configured — cannot sign vouchers');
-  const account = privateKeyToAccount(cfg.signerKey);
-  return account.signTypedData({
-    domain: {
-      name: 'OutfoxSettlement',
-      version: '1',
-      chainId: cfg.chainId,
-      verifyingContract: cfg.settlement,
-    },
-    types: VOUCHER_TYPES,
-    primaryType: 'Withdrawal',
-    message: { to: v.to, amount: v.amount, nonce: v.nonce, deadline: v.deadline },
+  v: { to: PublicKey | string; amount: bigint; nonce: bigint; deadline: bigint },
+): Promise<string> {
+  if (!cfg.signerSeed) throw new Error('OUTFOX_SIGNER_KEY not configured — cannot sign vouchers');
+  const to = typeof v.to === 'string' ? new PublicKey(v.to) : v.to;
+  const msg = voucherMessage(cfg, { ...v, to });
+  const kp = nacl.sign.keyPair.fromSeed(cfg.signerSeed);
+  return bs58.encode(nacl.sign.detached(msg, kp.secretKey));
+}
+
+// ----- client transactions ---------------------------------------------------
+// The web app carries NO chain code: every transaction it asks a wallet to sign is
+// built HERE and shipped down the wire as base64. One builder, one source of truth.
+
+function disc(name: string): Buffer {
+  return createHash('sha256').update(`global:${name}`).digest().subarray(0, 8);
+}
+
+function depositIx(cfg: ChainConfig, mint: PublicKey, depositor: PublicKey, amount: bigint): TransactionInstruction {
+  const state = statePda(cfg);
+  const data = Buffer.alloc(16);
+  disc('deposit').copy(data, 0);
+  data.writeBigUInt64LE(amount, 8);
+  return new TransactionInstruction({
+    programId: cfg.programId,
+    keys: [
+      { pubkey: state, isSigner: false, isWritable: false },
+      { pubkey: depositor, isSigner: true, isWritable: false },
+      { pubkey: ataFor(depositor, mint), isSigner: false, isWritable: true },
+      { pubkey: ataFor(state, mint), isSigner: false, isWritable: true },
+      { pubkey: TOKEN_PROGRAM, isSigner: false, isWritable: false },
+    ],
+    data,
   });
 }
 
-// ----- client transaction calldata -------------------------------------------
-// The web app carries NO ABI code: every transaction it asks a wallet to send is
-// encoded HERE and shipped down the wire. One encoder, one source of truth.
-
-const SETTLEMENT_ABI = parseAbi([
-  'function alpha() view returns (address)',
-  'function deposit(uint256 amount)',
-  'function withdraw(address to, uint256 amount, uint256 nonce, uint256 deadline, bytes signature)',
-]);
-const ERC20_ABI = parseAbi(['function approve(address spender, uint256 value) returns (bool)']);
-
-let alphaAddrCache: { settlement: Address; alpha: Address } | null = null;
-
-/** The ALPHA token address, read from the Settlement contract itself (immutable there,
- * so cached for the process lifetime — no separate env var to drift). */
-export async function alphaAddressFor(cfg: ChainConfig): Promise<Address> {
-  if (alphaAddrCache && alphaAddrCache.settlement === cfg.settlement) return alphaAddrCache.alpha;
-  const alpha = await publicClientFor(cfg).readContract({
-    address: cfg.settlement, abi: SETTLEMENT_ABI, functionName: 'alpha',
-  });
-  alphaAddrCache = { settlement: cfg.settlement, alpha };
-  return alpha;
-}
-
-export function approveCalldata(settlement: Address, amountWei: bigint): Hex {
-  return encodeFunctionData({ abi: ERC20_ABI, functionName: 'approve', args: [settlement, amountWei] });
-}
-
-export function depositCalldata(amountWei: bigint): Hex {
-  return encodeFunctionData({ abi: SETTLEMENT_ABI, functionName: 'deposit', args: [amountWei] });
-}
-
-export function redeemCalldata(
-  v: { to: Address; amount: bigint; nonce: bigint; deadline: bigint; signature: Hex },
-): Hex {
-  return encodeFunctionData({
-    abi: SETTLEMENT_ABI, functionName: 'withdraw',
-    args: [v.to, v.amount, v.nonce, v.deadline, v.signature],
+function withdrawIx(
+  cfg: ChainConfig, mint: PublicKey, payer: PublicKey,
+  v: { to: PublicKey; amount: bigint; nonce: bigint; deadline: bigint },
+  ed25519IxIndex: number,
+): TransactionInstruction {
+  const state = statePda(cfg);
+  const data = Buffer.alloc(33);
+  disc('withdraw').copy(data, 0);
+  data.writeBigUInt64LE(v.amount, 8);
+  data.writeBigUInt64LE(v.nonce, 16);
+  data.writeBigInt64LE(v.deadline, 24);
+  data.writeUInt8(ed25519IxIndex, 32);
+  return new TransactionInstruction({
+    programId: cfg.programId,
+    keys: [
+      { pubkey: state, isSigner: false, isWritable: true },
+      { pubkey: payer, isSigner: true, isWritable: true },
+      { pubkey: v.to, isSigner: false, isWritable: false },
+      { pubkey: noncePda(cfg, v.nonce), isSigner: false, isWritable: true },
+      { pubkey: ataFor(state, mint), isSigner: false, isWritable: true },
+      { pubkey: ataFor(v.to, mint), isSigner: false, isWritable: true },
+      { pubkey: SYSVAR_INSTRUCTIONS_PUBKEY, isSigner: false, isWritable: false },
+      { pubkey: mint, isSigner: false, isWritable: false },
+      { pubkey: TOKEN_PROGRAM, isSigner: false, isWritable: false },
+      { pubkey: ATA_PROGRAM, isSigner: false, isWritable: false },
+      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+    ],
+    data,
   });
 }
 
-// ----- R2 wallet link (SIWE-lite) --------------------------------------------
+async function toBase64Unsigned(cfg: ChainConfig, feePayer: PublicKey, ixs: TransactionInstruction[]): Promise<string> {
+  const { blockhash } = await connectionFor(cfg).getLatestBlockhash('confirmed');
+  const tx = new Transaction({ feePayer, blockhash, lastValidBlockHeight: 0 });
+  tx.add(...ixs);
+  return tx.serialize({ requireAllSignatures: false, verifySignatures: false }).toString('base64');
+}
+
+/** One wallet transaction: deposit `amount` base units into the escrow. (No approve
+ * step — the depositor signs the transfer authority directly; ERC-2612's job is native.) */
+export async function prepareDepositTx(cfg: ChainConfig, depositor: PublicKey | string, amount: bigint): Promise<string> {
+  const from = typeof depositor === 'string' ? new PublicKey(depositor) : depositor;
+  const mint = await alphaMintFor(cfg);
+  return toBase64Unsigned(cfg, from, [depositIx(cfg, mint, from, amount)]);
+}
+
+/** One wallet transaction: [ed25519 verify, withdraw] redeeming a signed voucher.
+ * Anyone may pay for and submit it; tokens go to the voucher's recipient. */
+export async function prepareRedeemTx(
+  cfg: ChainConfig, payer: PublicKey | string,
+  v: { to: PublicKey | string; amount: bigint; nonce: bigint; deadline: bigint; signature: string },
+): Promise<string> {
+  const feePayer = typeof payer === 'string' ? new PublicKey(payer) : payer;
+  const to = typeof v.to === 'string' ? new PublicKey(v.to) : v.to;
+  const mint = await alphaMintFor(cfg);
+  const msg = voucherMessage(cfg, { ...v, to });
+  const ed = Ed25519Program.createInstructionWithPublicKey({
+    publicKey: voucherSignerPubkey(cfg).toBytes(),
+    message: msg,
+    signature: bs58.decode(v.signature),
+  });
+  // ed25519 ix at index 1 (after the compute-budget ix), matching the u8 arg below
+  const cu = ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 });
+  const wd = withdrawIx(cfg, mint, feePayer, { ...v, to }, 1);
+  return toBase64Unsigned(cfg, feePayer, [cu, ed, wd]);
+}
+
+// ----- R2 wallet link (SIWS-lite) --------------------------------------------
 
 /** The message the wallet signs to prove control. Domain-bound and nonce-bound, so a
  * signature harvested elsewhere cannot link a wallet here. */
@@ -137,11 +251,17 @@ export function linkMessage(nonce: string, origin: string): string {
   ].join('\n');
 }
 
+/** Verify a wallet's ed25519 signature over the link message. `signature` is base58
+ * (wallet-standard signMessage output). */
 export async function verifyLinkSignature(
-  address: Address, message: string, signature: Hex,
+  address: string, message: string, signature: string,
 ): Promise<boolean> {
   try {
-    return await verifyMessage({ address, message, signature });
+    return nacl.sign.detached.verify(
+      Buffer.from(message, 'utf8'),
+      bs58.decode(signature),
+      new PublicKey(address).toBytes(),
+    );
   } catch {
     return false;
   }
@@ -149,92 +269,121 @@ export async function verifyLinkSignature(
 
 // ----- the indexer -----------------------------------------------------------
 
-function getCursor(db: DB, cfg: ChainConfig): bigint {
-  const row = db.prepare(`SELECT last_block FROM chain_cursor WHERE id = 1`).get() as
-    { last_block: number } | undefined;
-  return row ? BigInt(row.last_block) : cfg.startBlock - 1n;
+const EVENT_DEPOSITED = createHash('sha256').update('event:Deposited').digest().subarray(0, 8);
+const EVENT_WITHDRAWN = createHash('sha256').update('event:Withdrawn').digest().subarray(0, 8);
+
+function getCursor(db: DB): string | null {
+  const row = db.prepare(`SELECT last_sig FROM chain_cursor_sig WHERE id = 1`).get() as
+    { last_sig: string } | undefined;
+  return row?.last_sig ?? null;
 }
 
-function setCursor(db: DB, block: bigint): void {
+function setCursor(db: DB, sig: string): void {
   db.prepare(
-    `INSERT INTO chain_cursor (id, last_block) VALUES (1, ?)
-     ON CONFLICT (id) DO UPDATE SET last_block = excluded.last_block`
-  ).run(Number(block));
+    `INSERT INTO chain_cursor_sig (id, last_sig) VALUES (1, ?)
+     ON CONFLICT (id) DO UPDATE SET last_sig = excluded.last_sig`
+  ).run(sig);
 }
 
 /** Records the raw event. Returns false if we have already seen it (idempotency). */
 function recordEvent(
-  db: DB, txHash: string, logIndex: number, block: bigint, kind: string, payload: unknown,
+  db: DB, signature: string, eventIndex: number, slot: number, kind: string, payload: unknown,
 ): boolean {
   const existing = db.prepare(
     `SELECT 1 FROM chain_events WHERE tx_hash = ? AND log_index = ?`
-  ).get(txHash, logIndex);
+  ).get(signature, eventIndex);
   if (existing) return false;
   db.prepare(
     `INSERT INTO chain_events (tx_hash, log_index, block, kind, payload, at)
      VALUES (?, ?, ?, ?, ?, ?)`
-  ).run(txHash, logIndex, Number(block), kind, JSON.stringify(payload), Date.now());
+  ).run(signature, eventIndex, slot, kind, JSON.stringify(payload), Date.now());
   return true;
 }
 
-/**
- * Pull one batch of logs and fold them in. Safe to call repeatedly; safe to crash between
- * calls. Confirmations lag the head so a shallow reorg cannot strand a credit.
- */
-export async function indexOnce(
-  db: DB, cfg: ChainConfig, confirmations = 2n,
-): Promise<{ from: bigint; to: bigint; deposits: number; withdrawals: number }> {
-  const client = publicClientFor(cfg);
-  const head = await client.getBlockNumber();
-  const safeHead = head > confirmations ? head - confirmations : 0n;
-  const from = getCursor(db, cfg) + 1n;
-  if (from > safeHead) return { from, to: safeHead, deposits: 0, withdrawals: 0 };
-  const to = safeHead - from > (cfg.windowSize ?? 5_000n)
-    ? from + (cfg.windowSize ?? 5_000n)
-    : safeHead;
-
-  const [deps, wds] = await Promise.all([
-    client.getLogs({ address: cfg.settlement, event: DEPOSITED, fromBlock: from, toBlock: to }),
-    client.getLogs({ address: cfg.settlement, event: WITHDRAWN, fromBlock: from, toBlock: to }),
-  ]);
-
-  // A seasoning lot's clock must start when the deposit LANDED ON CHAIN, not when the
-  // indexer happened to see it: otherwise catching up after downtime (or replaying
-  // history) silently restarts every affected player's 60-day seasoning. The block
-  // timestamp is the only replay-stable answer. (Caught by the M4 harness.)
-  const blockTimes = new Map<bigint, number>();
-  for (const bn of new Set(deps.map((l) => l.blockNumber!))) {
-    blockTimes.set(bn, Number((await client.getBlock({ blockNumber: bn })).timestamp) * 1000);
-  }
-
-  let deposits = 0;
-  for (const log of deps) {
-    const address = getAddress(log.args.from!).toLowerCase();
-    const amount = log.args.amount!;
-    const fresh = recordEvent(db, log.transactionHash!, log.logIndex!, log.blockNumber!,
-      'Deposited', { address, amount: amount.toString() });
-    if (!fresh) continue;
-    creditDeposit(db, address, amount, log.transactionHash!, log.logIndex!,
-      blockTimes.get(log.blockNumber!));
-    deposits++;
-  }
-
-  let withdrawals = 0;
-  for (const log of wds) {
-    const nonce = log.args.nonce!;
-    const fresh = recordEvent(db, log.transactionHash!, log.logIndex!, log.blockNumber!,
-      'Withdrawn', { to: log.args.to, amount: log.args.amount!.toString(), nonce: nonce.toString() });
-    if (!fresh) continue;
-    markWithdrawalConfirmed(db, nonce.toString(), log.transactionHash!);
-    withdrawals++;
-  }
-
-  setCursor(db, to);
-  return { from, to, deposits, withdrawals };
+interface ParsedEvent {
+  kind: 'Deposited' | 'Withdrawn';
+  address: string;
+  amount: bigint;
+  nonce?: bigint;
 }
 
-/** Background loop. Errors are logged, never fatal — the cursor only advances on success,
- * so a transient RPC failure just retries the same window. */
+/** Anchor events ride in "Program data: <base64>" log lines: disc(8) ++ borsh fields. */
+export function parseEventsFromLogs(logs: string[]): ParsedEvent[] {
+  const out: ParsedEvent[] = [];
+  for (const line of logs) {
+    if (!line.startsWith('Program data: ')) continue;
+    const raw = Buffer.from(line.slice('Program data: '.length), 'base64');
+    if (raw.length < 8) continue;
+    const d = raw.subarray(0, 8);
+    if (d.equals(EVENT_DEPOSITED) && raw.length >= 48) {
+      out.push({
+        kind: 'Deposited',
+        address: new PublicKey(raw.subarray(8, 40)).toBase58(),
+        amount: raw.readBigUInt64LE(40),
+      });
+    } else if (d.equals(EVENT_WITHDRAWN) && raw.length >= 56) {
+      out.push({
+        kind: 'Withdrawn',
+        address: new PublicKey(raw.subarray(8, 40)).toBase58(),
+        amount: raw.readBigUInt64LE(40),
+        nonce: raw.readBigUInt64LE(48),
+      });
+    }
+  }
+  return out;
+}
+
+/**
+ * Pull one batch of program transactions (finalized) and fold their events in. Safe to
+ * call repeatedly; safe to crash between calls — the cursor only advances after a batch
+ * lands, and (signature, event index) keys make re-processing a no-op.
+ */
+export async function indexOnce(
+  db: DB, cfg: ChainConfig,
+): Promise<{ txs: number; deposits: number; withdrawals: number }> {
+  const conn = connectionFor(cfg);
+  const until = getCursor(db) ?? undefined;
+  // newest-first page of finalized signatures back to the cursor
+  const sigs = await conn.getSignaturesForAddress(
+    cfg.programId, { until, limit: cfg.batchLimit ?? 100 }, 'finalized',
+  );
+  if (sigs.length === 0) return { txs: 0, deposits: 0, withdrawals: 0 };
+
+  let deposits = 0;
+  let withdrawals = 0;
+  // fold oldest-first so the cursor is always behind everything processed
+  for (const s of sigs.reverse()) {
+    if (s.err) continue;
+    const tx = await conn.getTransaction(s.signature, {
+      commitment: 'finalized', maxSupportedTransactionVersion: 0,
+    });
+    const logs = tx?.meta?.logMessages ?? [];
+    // A seasoning lot's clock must start when the deposit LANDED ON CHAIN, not when
+    // the indexer happened to see it (M4 finding, carried over from the EVM edge).
+    const at = tx?.blockTime ? tx.blockTime * 1000 : undefined;
+    const events = parseEventsFromLogs(logs);
+    events.forEach((ev, i) => {
+      const fresh = recordEvent(db, s.signature, i, s.slot, ev.kind, {
+        address: ev.address, amount: ev.amount.toString(),
+        ...(ev.nonce !== undefined ? { nonce: ev.nonce.toString() } : {}),
+      });
+      if (!fresh) return;
+      if (ev.kind === 'Deposited') {
+        creditDeposit(db, ev.address, ev.amount, s.signature, i, at);
+        deposits++;
+      } else {
+        markWithdrawalConfirmed(db, ev.nonce!.toString(), s.signature);
+        withdrawals++;
+      }
+    });
+  }
+  // cursor = newest signature in this batch (sigs was reversed; last item is newest)
+  setCursor(db, sigs[sigs.length - 1].signature);
+  return { txs: sigs.length, deposits, withdrawals };
+}
+
+/** Background loop. Errors are logged, never fatal — the cursor only advances on
+ * success, so a transient RPC failure just retries the same window. */
 export function startIndexer(
   db: DB, cfg: ChainConfig, intervalMs = 5_000,
   log: (msg: string) => void = () => {},
@@ -245,7 +394,7 @@ export function startIndexer(
     try {
       const r = await indexOnce(db, cfg);
       if (r.deposits || r.withdrawals) {
-        log(`indexed ${r.from}-${r.to}: ${r.deposits} deposit(s), ${r.withdrawals} withdrawal(s)`);
+        log(`indexed ${r.txs} tx(s): ${r.deposits} deposit(s), ${r.withdrawals} withdrawal(s)`);
       }
     } catch (e) {
       log(`indexer error (will retry): ${(e as Error).message}`);

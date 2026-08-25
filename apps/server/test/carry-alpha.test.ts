@@ -6,7 +6,7 @@ import {
   alphaView, applyAlphaCarry, idleDecayCompound, solvencyAudit,
 } from '../src/settlement.js';
 import { seedExchange, buyAlpha } from '../src/exchange.js';
-import { ALPHA_CARRY, VALVE } from '@outfox/shared';
+import { ALPHA_BASE_UNITS, ALPHA_CARRY, VALVE } from '@outfox/shared';
 
 // The ALPHA carry (ECONOMY.md §13.A idle decay + §13.D progressive carry) — the
 // build-vs-model gap named in sim/M4-CONTRACT-LOOP.md. These tests pin the arithmetic
@@ -14,7 +14,7 @@ import { ALPHA_CARRY, VALVE } from '@outfox/shared';
 // (the patient mule pays for the wait; held deposits cannot dodge the holding cost).
 
 const DAY = 86_400_000;
-const WEI = 10n ** 18n;
+const WEI = ALPHA_BASE_UNITS;
 const A = (n: number | bigint) => BigInt(n) * WEI;
 const W1 = '0x1111111111111111111111111111111111111111';
 const BIG_RESERVE = A(1_000_000);
@@ -76,9 +76,9 @@ describe('§13.A idle decay', () => {
     creditDeposit(db, W1, A(100), '0xtx1', 0, T0);
     applyAlphaCarry(db, p, T0 + DAY);
     // 100 ALPHA × 45 bps = 0.45 ALPHA
-    expect(alphaBalance(db, p)).toBe(9955n * 10n ** 16n);
-    expect(treasuryAlpha()).toBe(45n * 10n ** 16n);
-    expect(carryRows(p)).toEqual([{ delta_wei: (-(45n * 10n ** 16n)).toString(), ref: 'carry:1d' }]);
+    expect(alphaBalance(db, p)).toBe(9955n * 10n ** 7n);
+    expect(treasuryAlpha()).toBe(45n * 10n ** 7n);
+    expect(carryRows(p)).toEqual([{ delta_wei: (-(45n * 10n ** 7n)).toString(), ref: 'carry:1d' }]);
   });
 
   it('multi-day catch-up compounds per day with floor rounding, in ONE ledger row', () => {
@@ -122,7 +122,7 @@ describe('§13.D progressive carry', () => {
     creditDeposit(db, W1, A(1000), '0xtx1', 0, T0);
     applyAlphaCarry(db, p, T0 + DAY);
     // base: 1000 × 45 bps = 4.5 → 995.5; excess 745.5 × 450 bps = 33.5475
-    const expected = A(1000) - 45n * 10n ** 17n - 335_475n * 10n ** 14n;
+    const expected = A(1000) - 45n * 10n ** 8n - 335_475n * 10n ** 5n;
     expect(alphaBalance(db, p)).toBe(expected);
     expect(treasuryAlpha()).toBe(A(1000) - expected);
   });

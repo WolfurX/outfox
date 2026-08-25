@@ -358,9 +358,25 @@ export function verifyRegister(db: DB, playerId: number, email: string, code: st
  * route validated the identity token before calling here. Same §10.1 semantics as
  * verifyRegister minus the code machinery: upgrade in place (continuity — same account
  * row), and a credential collision returns the choose sheet, never a merge. */
-export function registerVerified(db: DB, playerId: number, email: string): VerifyResult {
-  const e = String(email).trim().toLowerCase();
+/** A verified subject is an email (Privy/dev path) or a `siws:<pubkey>` wallet subject
+ * (SIWS path). Both live in the players.email column; the prefix keeps the namespaces
+ * disjoint so a wallet subject can never collide with a real email. */
+function canonicalSubject(subject: string): string {
+  const s = String(subject).trim();
+  if (s.startsWith('siws:')) {
+    const pk = s.slice(5);
+    if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(pk)) {
+      throw new EngineError('bad_subject', 'that sign-in has no usable wallet');
+    }
+    return `siws:${pk}`;
+  }
+  const e = s.toLowerCase();
   if (!EMAIL_RE.test(e)) throw new EngineError('bad_email', 'that sign-in has no usable email');
+  return e;
+}
+
+export function registerVerified(db: DB, playerId: number, subject: string): VerifyResult {
+  const e = canonicalSubject(subject);
   return withTx(db, () => {
     const existing = db.prepare(`SELECT id, handle FROM players WHERE email = ?`).get(e) as
       { id: number; handle: string } | undefined;
@@ -377,8 +393,8 @@ export function registerVerified(db: DB, playerId: number, email: string): Verif
 /** Collision resolution for the verified-identity path: the presented (and re-verified)
  * token IS the authority — no code record to consume. Returns the existing player id
  * for the caller to rebind the session; the guest row is retired as in adoptExistingAccount. */
-export function adoptVerified(db: DB, email: string): number {
-  const e = String(email).trim().toLowerCase();
+export function adoptVerified(db: DB, subject: string): number {
+  const e = canonicalSubject(subject);
   const existing = db.prepare(`SELECT id FROM players WHERE email = ?`).get(e) as { id: number } | undefined;
   if (!existing) throw new EngineError('gone', 'account not found');
   return existing.id;

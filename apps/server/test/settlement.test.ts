@@ -6,10 +6,10 @@ import {
   priceWithdrawal, prepareClaim, recordSignedVoucher, markWithdrawalConfirmed,
   weeklyRemaining, solvencyAudit, outstandingNet, alphaView, refreshVesting,
 } from '../src/settlement.js';
-import { VALVE } from '@outfox/shared';
+import { ALPHA_BASE_UNITS, VALVE } from '@outfox/shared';
 
 const DAY = 86_400_000;
-const A = (n: number | bigint) => BigInt(n) * 10n ** 18n; // whole ALPHA → wei
+const A = (n: number | bigint) => BigInt(n) * ALPHA_BASE_UNITS; // whole ALPHA → base units
 const W1 = '0x1111111111111111111111111111111111111111';
 const W2 = '0x2222222222222222222222222222222222222222';
 const BIG_RESERVE = A(1_000_000);
@@ -140,7 +140,7 @@ describe('the §9 gates', () => {
   it('V5: the rolling weekly cap binds', () => {
     verify(p);
     creditDeposit(db, W1, A(1000), '0xtx2', 0);
-    const cap = BigInt(VALVE.weeklyCapAlpha) * 10n ** 18n;
+    const cap = BigInt(VALVE.weeklyCapAlpha) * ALPHA_BASE_UNITS;
     requestWithdrawal(db, p, cap, BIG_RESERVE);
     expect(weeklyRemaining(db, p)).toBe(0n);
     expect(() => requestWithdrawal(db, p, A(1), BIG_RESERVE)).toThrow(/weekly cash-out limit/);
@@ -149,7 +149,7 @@ describe('the §9 gates', () => {
   it('V5: the cap frees up after the week rolls', () => {
     verify(p);
     creditDeposit(db, W1, A(1000), '0xtx2', 0);
-    const cap = BigInt(VALVE.weeklyCapAlpha) * 10n ** 18n;
+    const cap = BigInt(VALVE.weeklyCapAlpha) * ALPHA_BASE_UNITS;
     requestWithdrawal(db, p, cap, BIG_RESERVE);
     const nextWeek = Date.now() + 8 * DAY;
     expect(weeklyRemaining(db, p, nextWeek)).toBe(cap);

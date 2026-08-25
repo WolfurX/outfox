@@ -161,6 +161,11 @@ export function openDb(path: string): DB {
       id INTEGER PRIMARY KEY CHECK (id = 1),
       last_block INTEGER NOT NULL
     );
+    -- Solana indexer cursor (signature-based; chain_cursor above is the EVM-era shape)
+    CREATE TABLE IF NOT EXISTS chain_cursor_sig (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      last_sig TEXT NOT NULL
+    );
 
     -- Deposits to an address with no linked player are held, not lost.
     CREATE TABLE IF NOT EXISTS unclaimed_deposits (

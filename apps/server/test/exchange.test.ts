@@ -8,10 +8,10 @@ import {
   seedExchange, poolSeedFromDeposit, getPool, buyAlpha, sellAlpha, quoteExchange,
   exchangeView, exchangeAudit, effectiveFeeBps, rollEma, buyCapacityCents, sellCapacityWei,
 } from '../src/exchange.js';
-import { EXCHANGE } from '@outfox/shared';
+import { ALPHA_BASE_UNITS, EXCHANGE } from '@outfox/shared';
 
 const DAY = 86_400_000;
-const A = (n: number | bigint) => BigInt(n) * 10n ** 18n;
+const A = (n: number | bigint) => BigInt(n) * ALPHA_BASE_UNITS;
 const W1 = '0x1111111111111111111111111111111111111111';
 
 // the sim's calibrated POL depth: e0 = 100 ¢ per ALPHA
@@ -261,7 +261,7 @@ describe('E5: the circuit-breaker fee', () => {
     // three days later: rolled forward with the standard recurrence toward the close
     const later = now + 3 * DAY;
     const pool = getPool(db)!;
-    const e = (Number(pool.creditCents) * 1e18) / Number(pool.alphaWei);
+    const e = (Number(pool.creditCents) * Number(ALPHA_BASE_UNITS)) / Number(pool.alphaWei);
     let f = 100, s = 100;
     const aF = 2 / (EXCHANGE.emaFastDays + 1), aS = 2 / (EXCHANGE.emaSlowDays + 1);
     for (let i = 0; i < 3; i++) { f += aF * (e - f); s += aS * (e - s); }

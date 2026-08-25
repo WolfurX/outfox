@@ -38,3 +38,14 @@ not carried into this repository.)*
   anchor 1.1.2, litesvm 0.16. Server suite verified on this machine: 105/105
   (vocab-guard exemption for sim/README vocabulary note — test-proven).
   Next: step 3 (server Solana adapter + SIWS at the Privy seam) → M4 rerun.
+- 2026-08-25 · INGEST · **Migration step 3 done — server on Solana**: `chain.ts` is now
+  the Solana adapter with the same seam (signVoucher = ed25519 over the program's
+  116-byte domain message; indexer = getSignaturesForAddress cursor + Anchor event
+  parse from logs, blockTime-keyed seasoning clocks preserved (M4 finding); deposit/
+  redeem ship as server-built base64 transactions — the approve step is gone, native
+  multi-ix txs replace ERC-2612). Ledger unit flip: ALPHA_BASE_UNITS = 1e9 (SPL 9dp)
+  centralized in @outfox/shared, every 18dp literal replaced, carry reference
+  schedule re-expressed, suite green. SIWS R1 at the Privy seam: purpose-bound
+  nonce message, subjects `siws:<base58>` disjoint from emails by construction,
+  register/adopt collision semantics reused; 10 new tests. Suite **115/115**.
+  Client (step 4) now targets: siws auth.mode + depositTx/redeemTx shapes.

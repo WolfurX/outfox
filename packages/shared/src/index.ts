@@ -1,3 +1,8 @@
+/** ALPHA on-chain units: SPL mint with 9 decimals. The game ledger stores ALPHA
+ * amounts in these base units ("wei" columns predate the Solana migration). */
+export const ALPHA_DECIMALS = 9;
+export const ALPHA_BASE_UNITS = 10n ** 9n;
+
 /**
  * @outfox/shared — the API contract and content catalog for the Phase-1 vertical slice.
  *

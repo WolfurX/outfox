@@ -15,7 +15,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { AlphaView, ExchangeView, PlayerView, ExchangeQuote } from '@outfox/shared';
-import { ALPHA_CARRY, EXCHANGE, VALVE } from '@outfox/shared';
+import { ALPHA_BASE_UNITS, ALPHA_CARRY, EXCHANGE, VALVE } from '@outfox/shared';
 import {
   ChevronLeft, Clock, Hourglass, Landmark, ScrollText, Shield, Wallet as WalletIcon,
 } from 'lucide-react';
@@ -25,7 +25,7 @@ import {
 } from './ds';
 import { connect, ensureChain, hasWallet, personalSign, sendTx, WalletError } from './wallet';
 
-const WEI = 10n ** 18n;
+const WEI = ALPHA_BASE_UNITS;
 const DAY_MS = 86_400_000;
 const WEEK_MS = 7 * DAY_MS;
 

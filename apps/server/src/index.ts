@@ -6,7 +6,6 @@ import Fastify from 'fastify';
 import cookie from '@fastify/cookie';
 import { createHash, randomBytes } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { getAddress, type Address, type Hex } from 'viem';
 import { openDb } from './db.js';
 import {
   createPlayer, playerView, listingsView, ledgerView, runCall, runGig, refill,
@@ -15,10 +14,11 @@ import {
   adoptVerified, EngineError,
 } from './engine.js';
 import { privyConfigFromEnv, verifyPrivyToken } from './auth-privy.js';
+import { signInMessage, siwsSubject, verifySignIn } from './auth-siws.js';
+import { PublicKey } from '@solana/web3.js';
 import {
-  chainConfigFromEnv, publicClientFor, startIndexer, signVoucher,
-  linkMessage, verifyLinkSignature, alphaAddressFor, approveCalldata,
-  depositCalldata, redeemCalldata,
+  chainConfigFromEnv, startIndexer, signVoucher, linkMessage, verifyLinkSignature,
+  alphaMintFor, reserveFor, prepareDepositTx, prepareRedeemTx, statePda,
 } from './chain.js';
 import {
   alphaView, issueLinkNonce, consumeLinkNonce, linkWallet, requestWithdrawal,
@@ -27,7 +27,7 @@ import {
 import {
   getPool, seedExchange, exchangeView, quoteExchange, buyAlpha, sellAlpha, exchangeAudit,
 } from './exchange.js';
-import { CALLS, GIG, VALVE } from '@outfox/shared';
+import { ALPHA_BASE_UNITS, CALLS, GIG, VALVE } from '@outfox/shared';
 
 const DB_PATH = process.env.OUTFOX_DB ?? fileURLToPath(new URL('../outfox.sqlite', import.meta.url));
 const PORT = Number(process.env.PORT ?? 8787);
@@ -66,7 +66,14 @@ app.post('/api/session/bootstrap', async (req, reply) => {
     catalog: { calls: CALLS, gig: GIG },
     // which R1 adapter the client should drive (§10.2): the Privy sheet when the
     // release app is configured, the dev email+code sheet otherwise
-    auth: PRIVY ? { mode: 'privy' as const, privyAppId: PRIVY.appId } : { mode: 'dev' as const },
+    // which R1 adapter the client should drive: SIWS is the production mode on
+    // Solana; Privy remains available if configured; the dev email+code sheet is the
+    // chainless fallback for tests and local worlds.
+    auth: PRIVY
+      ? { mode: 'privy' as const, privyAppId: PRIVY.appId }
+      : DEV_AUTH
+        ? { mode: 'dev' as const }
+        : { mode: 'siws' as const },
   };
 });
 
@@ -120,6 +127,39 @@ app.post('/api/register/privy', async (req) => {
     return { player: playerView(db, existingId), listings: listingsView(db, existingId) };
   }
   const r = registerVerified(db, playerId, identity.email);
+  if (r.collision) return { collision: { existingHandle: r.collision.existingHandle } };
+  return { player: playerView(db, playerId) };
+});
+
+// --- R1 production adapter (SIWS). Two steps: a nonce challenge, then the signed
+// message both registers and — on `adopt` — resolves a collision. The signature is
+// verified on every call; the message is purpose-bound (never the R2 link message). ---
+app.post('/api/register/siws/nonce', async (req) => {
+  const playerId = requirePlayer(req);
+  const nonce = issueLinkNonce(db, playerId);
+  return { nonce, message: signInMessage(nonce, ORIGIN) };
+});
+
+app.post('/api/register/siws', async (req) => {
+  const playerId = requirePlayer(req);
+  const { address, nonce, signature, adopt } = (req.body ?? {}) as
+    { address?: string; nonce?: string; signature?: string; adopt?: boolean };
+  let subject: string;
+  try {
+    subject = siwsSubject(String(address ?? ''));
+  } catch {
+    throw new EngineError('bad_address', 'that is not a valid wallet address');
+  }
+  consumeLinkNonce(db, playerId, String(nonce ?? ''));
+  const ok = verifySignIn(String(address), signInMessage(String(nonce), ORIGIN), String(signature ?? ''));
+  if (!ok) throw new EngineError('bad_signature', 'signature does not match that wallet');
+  if (adopt) {
+    const existingId = adoptVerified(db, subject);
+    const cookieToken = req.cookies[COOKIE]!;
+    db.prepare(`UPDATE sessions SET player_id = ? WHERE token_hash = ?`).run(existingId, hash(cookieToken));
+    return { player: playerView(db, existingId), listings: listingsView(db, existingId) };
+  }
+  const r = registerVerified(db, playerId, subject);
   if (r.collision) return { collision: { existingHandle: r.collision.existingHandle } };
   return { player: playerView(db, playerId) };
 });
@@ -189,15 +229,7 @@ function requireChain() {
 
 /** Live reserve — the solvency ceiling every withdrawal request is checked against. */
 async function reserveWei(): Promise<bigint> {
-  const cfg = requireChain();
-  return publicClientFor(cfg).readContract({
-    address: cfg.settlement,
-    abi: [{
-      type: 'function', name: 'reserve', stateMutability: 'view',
-      inputs: [], outputs: [{ type: 'uint256' }],
-    }],
-    functionName: 'reserve',
-  }) as Promise<bigint>;
+  return reserveFor(requireChain());
 }
 
 app.get('/api/alpha', async (req) => {
@@ -216,14 +248,14 @@ app.post('/api/wallet/link', async (req) => {
   const playerId = requirePlayer(req);
   const { address, nonce, signature } = (req.body ?? {}) as
     { address?: string; nonce?: string; signature?: string };
-  let addr: Address;
+  let addr: string;
   try {
-    addr = getAddress(String(address ?? ''));
+    addr = new PublicKey(String(address ?? '')).toBase58();
   } catch {
     throw new EngineError('bad_address', 'that is not a valid wallet address');
   }
   consumeLinkNonce(db, playerId, String(nonce ?? ''));
-  const ok = await verifyLinkSignature(addr, linkMessage(String(nonce), ORIGIN), signature as Hex);
+  const ok = await verifyLinkSignature(addr, linkMessage(String(nonce), ORIGIN), String(signature ?? ''));
   if (!ok) throw new EngineError('bad_signature', 'signature does not match that wallet');
   linkWallet(db, playerId, addr);
   return { player: playerView(db, playerId), alpha: alphaView(db, playerId) };
@@ -261,7 +293,7 @@ app.post('/api/withdraw/claim', async (req) => {
   const { id } = (req.body ?? {}) as { id?: number };
   const c = prepareClaim(db, playerId, Number(id));
   const signature = await signVoucher(cfg, {
-    to: c.to as Address, amount: c.amountWei, nonce: c.nonce, deadline: c.deadline,
+    to: c.to, amount: c.amountWei, nonce: c.nonce, deadline: c.deadline,
   });
   recordSignedVoucher(db, Number(id), signature, c.deadline);
   return {
@@ -273,20 +305,21 @@ app.post('/api/withdraw/claim', async (req) => {
       deadline: Number(c.deadline),
       signature,
       chainId: cfg.chainId,
-      settlement: cfg.settlement,
+      program: cfg.programId.toBase58(),
     },
-    redeemCalldata: redeemCalldata({
-      to: c.to as Address, amount: c.amountWei, nonce: c.nonce,
-      deadline: c.deadline, signature: signature as Hex,
+    // one wallet transaction: [compute budget, ed25519 verify, withdraw]
+    redeemTx: await prepareRedeemTx(cfg, c.to, {
+      to: c.to, amount: c.amountWei, nonce: c.nonce,
+      deadline: c.deadline, signature,
     }),
   };
 });
 
 // --- deposits: two wallet transactions, both encoded here (client has no ABI code) ---
 app.post('/api/deposit/prepare', async (req) => {
-  requirePlayer(req);
+  const playerId = requirePlayer(req);
   const cfg = requireChain();
-  const { amountWei } = (req.body ?? {}) as { amountWei?: string };
+  const { amountWei, from } = (req.body ?? {}) as { amountWei?: string; from?: string };
   let amt: bigint;
   try {
     amt = BigInt(String(amountWei ?? '0'));
@@ -294,14 +327,22 @@ app.post('/api/deposit/prepare', async (req) => {
     throw new EngineError('bad_amount', 'invalid amount');
   }
   if (amt <= 0n) throw new EngineError('bad_amount', 'amount must be positive');
-  const token = await alphaAddressFor(cfg);
+  let depositor: string;
+  try {
+    depositor = new PublicKey(String(from ?? '')).toBase58();
+  } catch {
+    throw new EngineError('bad_address', 'a depositing wallet address is required');
+  }
+  void playerId;
+  const token = await alphaMintFor(cfg);
   return {
     chainId: cfg.chainId,
-    token,
-    settlement: cfg.settlement,
+    token: token.toBase58(),
+    program: cfg.programId.toBase58(),
+    state: statePda(cfg).toBase58(),
     amountWei: amt.toString(),
-    approveData: approveCalldata(cfg.settlement, amt),
-    depositData: depositCalldata(amt),
+    // one wallet transaction; no approve step exists on Solana
+    depositTx: await prepareDepositTx(cfg, depositor, amt),
   };
 });
 
@@ -311,7 +352,7 @@ app.post('/api/deposit/prepare', async (req) => {
 // (exchange.ts E6). Depth at launch is a pending owner decision — this dev default
 // mirrors the sim's calibrated amm_credit0/amm_vig0 (e0 = 100 Scrip per ALPHA).
 if (process.env.OUTFOX_DEV_SEED_EXCHANGE && !getPool(db)) {
-  seedExchange(db, 3_000_000, 30_000n * 10n ** 18n, 'dev-genesis');
+  seedExchange(db, 3_000_000, 30_000n * ALPHA_BASE_UNITS, 'dev-genesis');
   console.log('[exchange] dev pool seeded (3,000,000 Scrip / 30,000 ALPHA)');
 }
 
@@ -409,7 +450,7 @@ console.log(`outfox slice server on :${PORT} (db: ${DB_PATH})`);
 
 if (chain) {
   startIndexer(db, chain, 5_000, (m) => console.log(`[indexer] ${m}`));
-  console.log(`[indexer] watching Settlement ${chain.settlement} on chain ${chain.chainId}`);
+  console.log(`[indexer] watching program ${chain.programId.toBase58()} on chain ${chain.chainId}`);
 } else {
-  console.log('[indexer] chain edge not configured (set OUTFOX_RPC_URL / _CHAIN_ID / _SETTLEMENT)');
+  console.log('[indexer] chain edge not configured (set OUTFOX_RPC_URL / _CHAIN_ID / _PROGRAM_ID)');
 }

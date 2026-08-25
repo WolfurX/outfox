@@ -21,11 +21,11 @@
 import { randomBytes } from 'node:crypto';
 import type { DB } from './db.js';
 import { withTx, EngineError } from './engine.js';
-import { VALVE, ALPHA_CARRY, type WithdrawalStatus, type AlphaView, type WithdrawalView } from '@outfox/shared';
+import { ALPHA_BASE_UNITS, VALVE, ALPHA_CARRY, type WithdrawalStatus, type AlphaView, type WithdrawalView } from '@outfox/shared';
 
 const DAY_MS = 86_400_000;
 const WEEK_MS = 7 * DAY_MS;
-const WEI_PER_ALPHA = 10n ** 18n;
+const WEI_PER_ALPHA = ALPHA_BASE_UNITS;
 
 interface LotRow { id: number; remaining_wei: string; acquired_at: number }
 interface WdRow {
