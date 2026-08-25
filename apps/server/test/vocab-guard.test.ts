@@ -12,8 +12,9 @@ const GUARDED = ['apps/web/src', 'apps/server/src', 'packages/shared/src', 'sim'
 // case-sensitive, word-bounded: "VIG" the token name, never "navigate"
 const FORBIDDEN = /\bVIG\b|\$VIG|\bMEMPOOL\b/;
 // sim/ result records (scorecards, probes, audit logs) are immutable history and keep
-// the old names; only live sim code and the README are guarded.
-const RECORD = /sim[\\/].*\.(txt|json)$|sim[\\/](AUDIT-2|REDTEAM|M4-CONTRACT-LOOP)\.md$/;
+// the old names; sim/README.md is exempt because its vocabulary note must name the
+// retired names to explain the records. Only live sim code is guarded.
+const RECORD = /sim[\\/].*\.(txt|json)$|sim[\\/](AUDIT-2|REDTEAM|M4-CONTRACT-LOOP|README)\.md$/;
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const name of readdirSync(dir)) {

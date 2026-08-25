@@ -31,3 +31,8 @@ art/raw/
 
 # founders-only material (never committed)
 private/
+
+# solana programs
+programs/target/
+programs/.anchor/
+test-ledger/

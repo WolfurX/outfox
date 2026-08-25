@@ -32,7 +32,7 @@ to the public repo `outfox-whitepaper` and GitBook re-imports it —
 | # | Step | Status |
 |---|---|---|
 | 1 | Fresh repo, vocabulary unification, rename purity proof, retired-vocab guard | ✅ this commit |
-| 2 | Anchor programs ($ALPHA mint + Settlement) to `contracts/` reference semantics | ⬜ next build |
+| 2 | Anchor programs ($ALPHA mint + Settlement) to `contracts/` reference semantics | ✅ built + tested (`programs/`): 28 LiteSVM integration tests (per-case port of `Settlement.t.sol`, N/A cases documented) + 6 unit tests on the window math; ed25519 voucher w/ program-id+chain-id domain; nonce PDAs; leaky bucket exact incl. drain-at-old-rate on cap change |
 | 3 | Server: Solana adapter + SIWS auth at the Privy seam | ⬜ |
 | 4 | Client: Jupiter wallet kit + SIWS login sheet | ⬜ |
 | 5 | M4 rerun on local validator → devnet end-to-end | ⬜ gate for "chain edge done" |

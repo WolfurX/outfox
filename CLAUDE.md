@@ -26,7 +26,8 @@ economy code ships until it passes at full seeds).
 **$ALPHA** the token, the THEME-OUTFOX.md terms for everything player-facing. The
 pre-Solana dev-era names are retired; they survive ONLY inside immutable sim result
 records (`sim/*.txt`, `sim/results_*.json`, `sim/sweep_*`, `sim/AUDIT-2.md`,
-`sim/REDTEAM.md`, `sim/M4-CONTRACT-LOOP.md`) — never edit those files to "fix" the
+`sim/REDTEAM.md`, `sim/M4-CONTRACT-LOOP.md`) and the explanatory vocabulary note in
+`sim/README.md` — never edit those files to "fix" the
 names: they are the evidence trail for the committed scorecards, and rename purity was
 proven by an identical-seed A/B diff (2026-08-25, note in `sim/README.md`).
 `apps/server/test/vocab-guard.test.ts` enforces that the retired names never re-enter

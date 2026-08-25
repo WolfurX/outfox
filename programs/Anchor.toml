@@ -1,0 +1,19 @@
+[toolchain]
+anchor_version = "1.1.2"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+settlement = "FFNwC5HX9jzjnNrLiUkJ3y6uovVCGCpms5jo9R2Yn9o1"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "true"
+
+[workspace]
+members = ["settlement"]
