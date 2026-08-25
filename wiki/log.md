@@ -20,3 +20,8 @@ not carried into this repository.)*
   `.gitbook.yaml` roots GitBook at whitepaper/. Assets: mascot + 2 reused app scenes +
   3 new generated scenes (hero street, skulk crew, clearinghouse), all style-guide
   compliant, no text-in-image. Owner hook-up pending: GitBook Git Sync OAuth.
+- 2026-08-25 · INGEST · **Whitepaper published**: https://outfox.gitbook.io/whitepaper/
+  via a public mirror repo (`outfox-whitepaper`) + GitBook API import (space
+  f3b29NcYLjPo3cnhExJ4, site site_rhtAM, org hostname `outfox`). Update pipeline =
+  `scripts/publish-whitepaper.sh` (mirror → push → re-import). All 17 pages + images
+  verified rendering.

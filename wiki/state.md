@@ -21,7 +21,11 @@ halves**) is now the frozen reference in `contracts/` for the Anchor rewrite in
 (root), updated to Solana and redaction-safe; images in `whitepaper/.gitbook/assets/`
 (reused app art + three generated scenes). WHITEPAPER.md remains the single-file
 original; when the two drift, the `whitepaper/` pages are the published canon.
-Hook-up: GitBook Git Sync → this repo (owner does the OAuth install).
+**PUBLISHED: https://outfox.gitbook.io/whitepaper/** (GitBook site `site_rhtAM`, space
+`f3b29NcYLjPo3cnhExJ4`, org hostname set to `outfox`). Pipeline: content is mirrored
+to the public repo `outfox-whitepaper` and GitBook re-imports it —
+`scripts/publish-whitepaper.sh` does the whole thing; run it after editing
+`whitepaper/`. Everything under `whitepaper/` is public the moment it runs.
 
 ## Solana migration status (2026-08-25 — `docs/SOLANA-FEASIBILITY.md` §6)
 
