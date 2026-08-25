@@ -14,6 +14,15 @@ PWA); the EVM-era chain edge (proven end-to-end on testnet 46630, **M4 complete,
 halves**) is now the frozen reference in `contracts/` for the Anchor rewrite in
 `programs/`. Operator revenue is formalized and sim-proven.
 
+## Whitepaper (public site)
+
+`whitepaper/` is a GitBook-ready public whitepaper (17 pages, SUMMARY.md TOC,
+`.gitbook.yaml` at repo root points GitBook at it). Content derives from WHITEPAPER.md
+(root), updated to Solana and redaction-safe; images in `whitepaper/.gitbook/assets/`
+(reused app art + three generated scenes). WHITEPAPER.md remains the single-file
+original; when the two drift, the `whitepaper/` pages are the published canon.
+Hook-up: GitBook Git Sync → this repo (owner does the OAuth install).
+
 ## Solana migration status (2026-08-25 — `docs/SOLANA-FEASIBILITY.md` §6)
 
 | # | Step | Status |

@@ -13,3 +13,10 @@ not carried into this repository.)*
   retired-names guard; supersession banners on the prior-pivot docs; `contracts/`
   frozen as the EVM behavioral reference for the Anchor port. Updated `state.md`,
   `decisions.md`, `index.md`. Next: Anchor programs (migration step 2).
+- 2026-08-25 · INGEST · **Public whitepaper built** (`whitepaper/`, GitBook-ready):
+  17 pages from WHITEPAPER.md restructured GitBook-style (game/economy/token/evidence/
+  status sections), Solana-current, redaction rules applied (no internal strategy, no
+  prior-chain naming beyond "an EVM testnet"), gambling-vocab blacklist respected.
+  `.gitbook.yaml` roots GitBook at whitepaper/. Assets: mascot + 2 reused app scenes +
+  3 new generated scenes (hero street, skulk crew, clearinghouse), all style-guide
+  compliant, no text-in-image. Owner hook-up pending: GitBook Git Sync OAuth.
