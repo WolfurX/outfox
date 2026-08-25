@@ -39,7 +39,8 @@ interface WdRow {
  * this database — a row id would collide with an already-burned nonce after a DB restore
  * or across two instances of the server. 256 random bits cannot collide in practice. */
 function newNonce(): string {
-  return BigInt('0x' + randomBytes(32).toString('hex')).toString();
+  // u64: the settlement program's nonce space (a PDA seed on Solana)
+  return BigInt('0x' + randomBytes(8).toString('hex')).toString();
 }
 
 // ----- balances (a fold over lots) -------------------------------------------
@@ -158,7 +159,9 @@ export function creditDeposit(
   db: DB, address: string, amountWei: bigint, txHash: string, logIndex: number,
   now = Date.now(),
 ): void {
-  const addr = address.toLowerCase();
+  // base58 is case-sensitive: callers pass the canonical form (PublicKey.toBase58()),
+  // and it is stored and compared verbatim.
+  const addr = address;
   withTx(db, () => {
     const w = db.prepare(`SELECT player_id FROM wallets WHERE address = ?`).get(addr) as
       { player_id: number } | undefined;
@@ -203,7 +206,9 @@ export function consumeLinkNonce(db: DB, playerId: number, nonce: string, now = 
  * this address before it was linked. One wallet ↔ one player: an address already linked
  * elsewhere is rejected rather than silently re-pointed. */
 export function linkWallet(db: DB, playerId: number, address: string, now = Date.now()): void {
-  const addr = address.toLowerCase();
+  // base58 is case-sensitive: callers pass the canonical form (PublicKey.toBase58()),
+  // and it is stored and compared verbatim.
+  const addr = address;
   withTx(db, () => {
     const taken = db.prepare(`SELECT player_id FROM wallets WHERE address = ?`).get(addr) as
       { player_id: number } | undefined;

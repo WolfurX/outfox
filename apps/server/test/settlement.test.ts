@@ -123,7 +123,7 @@ describe('the §9 gates', () => {
     // the nonce is a random uint256, NOT the row id: the contract's nonce space is
     // global and permanent, so row ids would collide after a DB restore (found by
     // driving the real chain — a fresh DB reused nonce 1, already burned on-chain).
-    expect(c.nonce).toBeGreaterThan(2n ** 64n);
+    expect(c.nonce).toBeGreaterThan(2n ** 32n); // random u64 (the program's nonce space), not a row counter
   });
 
   it('nonces are unique and unguessable across withdrawals', () => {
@@ -134,7 +134,7 @@ describe('the §9 gates', () => {
     const na = prepareClaim(db, p, a.id, later).nonce;
     const nb = prepareClaim(db, p, b.id, later).nonce;
     expect(na).not.toBe(nb);
-    expect(na).toBeGreaterThan(2n ** 128n); // 256-bit random, not a counter
+    expect(na).toBeGreaterThan(2n ** 32n); // random u64, not a counter
   });
 
   it('V5: the rolling weekly cap binds', () => {

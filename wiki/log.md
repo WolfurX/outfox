@@ -49,3 +49,16 @@ not carried into this repository.)*
   nonce message, subjects `siws:<base58>` disjoint from emails by construction,
   register/adopt collision semantics reused; 10 new tests. Suite **115/115**.
   Client (step 4) now targets: siws auth.mode + depositTx/redeemTx shapes.
+- 2026-08-25 · INGEST · **M4 contract-in-the-loop GREEN on Solana** (`scripts/
+  m4-contract-loop.ts`, LiteSVM edition): same compiled settlement.so + real SPL/
+  ed25519 programs, chain+game clocks warped together; events fold through the REAL
+  indexer logic (foldTransaction extracted; transport is in-process — documented
+  departure). All checks pass; the record's numbers reproduce (fast in-out −45.0%,
+  farmed channel −45.9%, patient mule now −29.0% because the §13.A carry is live —
+  the original run's <10% predates the carry and its scope-limit note is retired).
+  Found & fixed en route: alphaMintFor read a fixed offset past a borsh Option
+  (state parser added); EVM address lowercasing corrupted base58 (removed); nonces
+  were 256-bit vs the program's u64 space (now random u64, tests updated);
+  exchangeAudit's treasury identity predated carry capture (now feesAlpha + carry).
+  Suite 115/115. Remaining for step 5: devnet deploy + e2e port. Step 4 (client)
+  untouched — web still speaks the EVM tx shapes.

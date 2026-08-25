@@ -86,17 +86,48 @@ export function ataFor(owner: PublicKey, mint: PublicKey): PublicKey {
   )[0];
 }
 
+export interface SettlementStateView {
+  admin: PublicKey;
+  pendingAdmin: PublicKey | null;
+  signer: PublicKey;
+  alphaMint: PublicKey;
+  windowCap: bigint;
+  bucket: bigint;
+  lastDrain: bigint;
+  chainId: bigint;
+  paused: boolean;
+}
+
+/** Borsh-decode the settlement state account. `pending_admin` is an Option, so every
+ * later field's offset depends on it — never read fixed offsets past byte 40. */
+export function parseSettlementState(data: Uint8Array): SettlementStateView {
+  const buf = Buffer.from(data);
+  let o = 8; // anchor discriminator
+  const admin = new PublicKey(buf.subarray(o, o + 32)); o += 32;
+  let pendingAdmin: PublicKey | null = null;
+  if (buf.readUInt8(o++) === 1) {
+    pendingAdmin = new PublicKey(buf.subarray(o, o + 32)); o += 32;
+  }
+  const signer = new PublicKey(buf.subarray(o, o + 32)); o += 32;
+  const alphaMint = new PublicKey(buf.subarray(o, o + 32)); o += 32;
+  const windowCap = buf.readBigUInt64LE(o); o += 8;
+  const bucket = buf.readBigUInt64LE(o); o += 8;
+  const lastDrain = buf.readBigInt64LE(o); o += 8;
+  const chainId = buf.readBigUInt64LE(o); o += 8;
+  const paused = buf.readUInt8(o) === 1;
+  return { admin, pendingAdmin, signer, alphaMint, windowCap, bucket, lastDrain, chainId, paused };
+}
+
 let mintCache: { state: string; mint: PublicKey } | null = null;
 
 /** The ALPHA mint, read from the on-chain settlement state itself (set at initialize,
- * so cached for the process lifetime — no separate env var to drift).
- * State layout: disc(8) admin(32) pending_admin(1+32) signer(32) alpha_mint(32) ... */
+ * so cached for the process lifetime — no separate env var to drift). */
 export async function alphaMintFor(cfg: ChainConfig): Promise<PublicKey> {
   const state = statePda(cfg);
   if (mintCache && mintCache.state === state.toBase58()) return mintCache.mint;
   const info = await connectionFor(cfg).getAccountInfo(state);
   if (!info) throw new Error('settlement state account not found — program not initialized?');
-  const mint = new PublicKey(info.data.subarray(105, 137));
+  const mint = parseSettlementState(info.data).alphaMint;
   mintCache = { state: state.toBase58(), mint };
   return mint;
 }
@@ -152,7 +183,7 @@ function disc(name: string): Buffer {
   return createHash('sha256').update(`global:${name}`).digest().subarray(0, 8);
 }
 
-function depositIx(cfg: ChainConfig, mint: PublicKey, depositor: PublicKey, amount: bigint): TransactionInstruction {
+export function depositIx(cfg: ChainConfig, mint: PublicKey, depositor: PublicKey, amount: bigint): TransactionInstruction {
   const state = statePda(cfg);
   const data = Buffer.alloc(16);
   disc('deposit').copy(data, 0);
@@ -170,7 +201,7 @@ function depositIx(cfg: ChainConfig, mint: PublicKey, depositor: PublicKey, amou
   });
 }
 
-function withdrawIx(
+export function withdrawIx(
   cfg: ChainConfig, mint: PublicKey, payer: PublicKey,
   v: { to: PublicKey; amount: bigint; nonce: bigint; deadline: bigint },
   ed25519IxIndex: number,
@@ -300,6 +331,33 @@ function recordEvent(
   return true;
 }
 
+/** Fold one transaction's events into the ledger. This IS the indexing logic — the
+ * production indexer feeds it from RPC, and the M4 harness feeds it from an in-process
+ * chain; the parse, idempotency, and blockTime seasoning-clock rules are shared.
+ * A seasoning lot's clock starts when the deposit LANDED ON CHAIN, not when the
+ * indexer happened to see it (M4 finding, carried over from the EVM edge). */
+export function foldTransaction(
+  db: DB, signature: string, slot: number, logs: string[], blockTimeMs: number | undefined,
+): { deposits: number; withdrawals: number } {
+  let deposits = 0;
+  let withdrawals = 0;
+  parseEventsFromLogs(logs).forEach((ev, i) => {
+    const fresh = recordEvent(db, signature, i, slot, ev.kind, {
+      address: ev.address, amount: ev.amount.toString(),
+      ...(ev.nonce !== undefined ? { nonce: ev.nonce.toString() } : {}),
+    });
+    if (!fresh) return;
+    if (ev.kind === 'Deposited') {
+      creditDeposit(db, ev.address, ev.amount, signature, i, blockTimeMs);
+      deposits++;
+    } else {
+      markWithdrawalConfirmed(db, ev.nonce!.toString(), signature);
+      withdrawals++;
+    }
+  });
+  return { deposits, withdrawals };
+}
+
 interface ParsedEvent {
   kind: 'Deposited' | 'Withdrawn';
   address: string;
@@ -357,25 +415,10 @@ export async function indexOnce(
     const tx = await conn.getTransaction(s.signature, {
       commitment: 'finalized', maxSupportedTransactionVersion: 0,
     });
-    const logs = tx?.meta?.logMessages ?? [];
-    // A seasoning lot's clock must start when the deposit LANDED ON CHAIN, not when
-    // the indexer happened to see it (M4 finding, carried over from the EVM edge).
-    const at = tx?.blockTime ? tx.blockTime * 1000 : undefined;
-    const events = parseEventsFromLogs(logs);
-    events.forEach((ev, i) => {
-      const fresh = recordEvent(db, s.signature, i, s.slot, ev.kind, {
-        address: ev.address, amount: ev.amount.toString(),
-        ...(ev.nonce !== undefined ? { nonce: ev.nonce.toString() } : {}),
-      });
-      if (!fresh) return;
-      if (ev.kind === 'Deposited') {
-        creditDeposit(db, ev.address, ev.amount, s.signature, i, at);
-        deposits++;
-      } else {
-        markWithdrawalConfirmed(db, ev.nonce!.toString(), s.signature);
-        withdrawals++;
-      }
-    });
+    const r = foldTransaction(db, s.signature, s.slot, tx?.meta?.logMessages ?? [],
+      tx?.blockTime ? tx.blockTime * 1000 : undefined);
+    deposits += r.deposits;
+    withdrawals += r.withdrawals;
   }
   // cursor = newest signature in this batch (sigs was reversed; last item is newest)
   setCursor(db, sigs[sigs.length - 1].signature);

@@ -379,7 +379,12 @@ export function exchangeAudit(db: DB): {
     feesAlpha += BigInt(r.fee_alpha);
   }
   const treasury = BigInt((db.prepare(`SELECT wei FROM treasury_alpha WHERE id = 1`).get() as { wei: string }).wei);
-  const holds = credit === pool.creditCents && alpha === pool.alphaWei && treasury === feesAlpha;
+  // The ALPHA treasury holds exchange fees PLUS §13.A carry captures (every 'carry'
+  // ledger row is a negative player delta whose absolute value was captured).
+  const carry = BigInt(((db.prepare(
+    `SELECT COALESCE(SUM(CAST(delta_wei AS INTEGER)), 0) AS s FROM alpha_ledger WHERE kind = 'carry'`
+  ).get() as { s: number | bigint }).s ?? 0));
+  const holds = credit === pool.creditCents && alpha === pool.alphaWei && treasury === feesAlpha - carry;
   return {
     holds,
     poolScripCents: pool.creditCents.toString(), poolAlphaWei: pool.alphaWei.toString(),

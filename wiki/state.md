@@ -35,7 +35,7 @@ to the public repo `outfox-whitepaper` and GitBook re-imports it —
 | 2 | Anchor programs ($ALPHA mint + Settlement) to `contracts/` reference semantics | ✅ built + tested (`programs/`): 28 LiteSVM integration tests (per-case port of `Settlement.t.sol`, N/A cases documented) + 6 unit tests on the window math; ed25519 voucher w/ program-id+chain-id domain; nonce PDAs; leaky bucket exact incl. drain-at-old-rate on cap change |
 | 3 | Server: Solana adapter + SIWS auth at the Privy seam | ✅ `chain.ts` rewritten (ed25519 vouchers, signature-cursor indexer w/ blockTime seasoning clocks, server-built base64 wallet txs replacing calldata, escrow-ATA reserve); ledger units flipped 18dp→9dp via shared `ALPHA_BASE_UNITS`; `auth-siws.ts` + `/api/register/siws` at the §10.1 seam (subjects namespaced `siws:`); suite 115/115 |
 | 4 | Client: Jupiter wallet kit + SIWS login sheet | ⬜ |
-| 5 | M4 rerun on local validator → devnet end-to-end | ⬜ gate for "chain edge done" |
+| 5 | M4 rerun → devnet end-to-end | 🟡 **M4 harness GREEN on the Solana program** (LiteSVM, all checks: PoR every step, firewall, fast channel −45.0/−45.9%, patient mule −29% incl. §13.A carry, global cap + linear refill). Remaining: devnet deploy + e2e (port of e2e-testnet.ts + genesis script) |
 | 6 | Phase C: whitepaper/distribution updates, §4 verifications, launch materials | ⬜ |
 
 Toolchain note: the dev box needs nodejs/npm, rustup, solana CLI, anchor installed
