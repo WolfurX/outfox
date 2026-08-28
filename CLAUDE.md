@@ -54,6 +54,29 @@ over unchanged, with the model, calibration, and committed scorecards intact.
   wallet sign-in (SIWS) via Jupiter's wallet kit, keeping the rung-ladder collision
   semantics from the provider-agnostic auth seam.
 
+## Security posture (standing — this project handles user funds)
+
+This is custody code: real people's money crosses the chain edge. Treat every change to
+the settlement program (`programs/`), the chain adapter (`apps/server/src/chain.ts`),
+the §9 gates (`apps/server/src/settlement.ts`), the exchange (`apps/server/src/
+exchange.ts`), and the auth adapters as security-critical.
+
+- **Model floor: Fable-grade, no downgrades.** Every subagent spawned for work on this
+  project runs on Fable (the main-loop model) or higher — never a cheaper tier, and
+  never a `model` override that downgrades security-relevant review, review-verify, or
+  implementation. Fable and Mythos 5 are the same underlying model; this is the
+  capability floor, deliberately.
+- **Adversarial review, not self-review.** Custody-touching changes get an independent
+  adversarial pass (fresh agent or reviewer, not the author) before they are called
+  done. Money-path changes carry a regression test that goes red on the exact defect.
+- **Fail closed.** On any ambiguity in a value-moving path, refuse rather than guess.
+  The on-chain program enforces only what the chain must (single-use nonce, expiry,
+  signature, pause, rolling cap); every economic gate lives server-side and runs BEFORE
+  a voucher is signed. Neither layer may weaken assuming the other will catch it.
+- **A professional third-party smart-contract + economic audit is a hard pre-mainnet
+  gate**, alongside the counsel gate. In-house hardening raises the floor; it is not a
+  substitute for an external audit of code that holds funds.
+
 ## Repo hygiene
 
 - **Never commit secrets** — keys, RPC tokens, wallet material, `.env` contents.
