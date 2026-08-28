@@ -139,3 +139,11 @@ not carried into this repository.)*
   Instagrant application drafted (internal APPLICATIONS.md; link + milestones ready
   for owner submission). Domain check: outfox.game unregistered as of today (owner
   purchase, ~$30/yr).
+- 2026-08-28 · INGEST · **Whitepaper updated + republished** (owner ask): roadmap
+  phase 2 reflects the built wallet sign-in + the chosen verification class
+  (document-and-liveness with biometric dedupe; Orb-based ruled out for launch
+  geography; provider pinned at legal review) — same story propagated to
+  the-simulation, getting-value-out, and what-can-go-wrong (load-bearing-risk
+  framing kept); roadmap phase 6 + the-token now carry the public commitment that
+  launch liquidity is permanently locked at creation, verifiable on-chain (venue
+  itself stays internal). Redaction-safe: no vendor or market names.

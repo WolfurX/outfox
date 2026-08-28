@@ -8,7 +8,7 @@ $ALPHA mint and the settlement program, written to the semantics already verifie
 
 ## 2. Wallet and identity
 
-Wallet sign-in on Solana wired into the existing guest → registered ladder. Selection of the proof-of-personhood provider for cash-out, the decision the simulation identifies as the binding sybil defense.
+Wallet sign-in on Solana is built and wired into the existing guest → registered ladder. The cash-out verification class is chosen after a provider coverage study: document-and-liveness verification with biometric duplicate detection, the check the simulation identifies as the binding sybil defense (Orb-based verification was ruled out for our launch geography). Final provider selection is coupled to the legal review.
 
 ## 3. Economy systems, one at a time
 
@@ -24,7 +24,7 @@ Counsel review of the chance/cashable-value separation, money-transmission expos
 
 ## 6. Launch
 
-Mainnet deploy under the stated custody model (multisig admin, bounded signer risk), published economic parameters and policy rules, and the cash-out valve opening last.
+Mainnet deploy under the stated custody model (multisig admin, bounded signer risk), published economic parameters and policy rules, launch liquidity seeded by the operator and permanently locked at creation, verifiable on-chain, and the cash-out valve opening last.
 
 ***
 

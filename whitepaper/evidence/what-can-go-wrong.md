@@ -10,7 +10,7 @@ What is *not* green in that run, reported because we said we would: the token's 
 
 ## Identity is the load-bearing assumption
 
-Several defenses are per-identity: the sybil bounds, the whale-tail fix, the weekly caps. If cheap fake identities are available at scale, all of them weaken. Proof of personhood at cash-out and funding-graph analysis are the answers, and their real-world quality is an open question, not a solved one. The simulation is explicit that personhood-check quality is the binding sybil defense; choosing the provider is an open decision.
+Several defenses are per-identity: the sybil bounds, the whale-tail fix, the weekly caps. If cheap fake identities are available at scale, all of them weaken. Proof of personhood at cash-out and funding-graph analysis are the answers. The check's class is now chosen (document-and-liveness verification with biometric duplicate detection; the final provider is pinned at the legal review), but its real-world quality is still an open question, not a solved one. The simulation is explicit that this check is the binding sybil defense, and it will be measured live against the same bar.
 
 ## The model has boundaries
 

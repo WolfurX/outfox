@@ -14,7 +14,7 @@ An early version of this gate was audited and found too kind: several criteria c
 
 * **Standard gate: all 6 scenarios, all 12 criteria, at 500 seeds.**
 * **Adversarial suite: 6 of 7 pass on the survival criteria** (integrity, solvency, inequality, working sinks, the firewall, recovery). Two peacetime-stability criteria, monetary smoothness and the CPI band, are reported as diagnostics under attack rather than silently waived: no economy holds peacetime price variance during a coordinated attack, and the scoping is printed on every scorecard.
-* **The one remaining failure is reported, not tuned away.** A sophisticated sybil ring extracts about 6% of cash-out value against a 5% bar. Scaling the attack up shows the defense that actually binds: not withdrawal caps (the simulation demonstrates no throughput cap moves this number), but the **quality of the proof-of-personhood check**. That is a product decision, still open, and this document says so.
+* **The one remaining failure is reported, not tuned away.** A sophisticated sybil ring extracts about 6% of cash-out value against a 5% bar. Scaling the attack up shows the defense that actually binds: not withdrawal caps (the simulation demonstrates no throughput cap moves this number), but the **quality of the proof-of-personhood check**. That decision has since been narrowed: the check will be document-and-liveness verification with biometric duplicate detection, chosen after a provider coverage study, with the final provider pinned at the legal review. Its live quality remains something to measure against this same bar, not assume.
 * **21 parameters swept, zero knife-edges.** Every calibrated value sits inside a multi-point safe interval.
 
 ## What survived contact with real contracts
