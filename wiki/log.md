@@ -81,3 +81,16 @@ not carried into this repository.)*
   62.4 KB gz, live harness `apps/web/scripts/verify-live.cjs` 14/14 (Brave headless,
   stub wallet, world A under id-ID). Remaining: step 5b (devnet deploy + e2e + genesis
   script), then Phase C.
+- 2026-08-28 · INGEST · **Step 5b scripts built + local-validator rehearsal GREEN**:
+  `scripts/genesis.ts` — cluster genesis as ONE atomic transaction (create mint 9dp,
+  mint fixed 2M to treasury, REVOKE mint authority, top up admin rent in-tx,
+  initialize settlement state + escrow; a partial genesis cannot exist; a rerun
+  refuses on the existing state PDA). `scripts/e2e-devnet.ts` — port of the EVM
+  e2e through the REAL server tx builders (prepareDepositTx/prepareRedeemTx, what
+  the client relays): deposit → indexer credit (idempotency re-checked) → §9 gates
+  (45% all-fresh fee, vesting) → voucher sign → forged signature rejected on-chain →
+  redeem pays net → replay rejected (nonce PDA) → admin pause blocks deposits →
+  unpause flows → indexer confirms → solvency audit holds. ALL CHECKS PASSED against
+  solana-test-validator (agave 3.1.10) with the real deployed .so. No custody code
+  changed (scripts only) — no adversarial pass required by the posture. Devnet run
+  pending faucet SOL only; keys staged in ~/.config/outfox/devnet (throwaway).
