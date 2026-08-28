@@ -119,3 +119,12 @@ not carried into this repository.)*
   Burn & Earn at ≥$25K is the POL floor; Colosseum Sep 28–Nov 2 is the timed launch
   moment; honest success band 100–500 DAU at day 60. Whitepaper roadmap phase-4
   wording updated + republished. Launch materials remain (event-driven).
+- 2026-08-28 · DECISION · **Owner round on the Phase-C briefs**: POL venue = Meteora
+  DAMM v2 (full-range, permanent lock at creation, activation-point + fee-scheduler
+  anti-snipe; depth open, $25K floor stands). Publish regardless of grant outcome
+  (the agentic-grant move is 200 USDG tooling money and gates nothing; nudge ~Sep 2;
+  Superteam ID instagrant + Colosseum are the real applications). PoP question
+  answered: piggybacking a wallet/platform (e.g. Jupiter) is identity, not
+  personhood — never R3; a Solana Attestation Service fast lane (approved KYC
+  issuers) filed as backlog beside the Didit recommendation. Detail: internal
+  PHASE-C-DECISIONS.md / decisions trail.

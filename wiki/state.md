@@ -58,12 +58,18 @@ before steps 2–5 (owner password required for the pacman half).
 | 10 | Legal Phase-0 (geofence, MSB, counsel) | ⬜ hard launch gate |
 | 11 | Distribution execution | plan adopted (`DISTRIBUTION-PLAN.md`), not started |
 
-## Owner decisions — now DECISION-READY (internal briefs, 2026-08-28)
+## Owner decisions — status (internal briefs, 2026-08-28)
 
-R3 PoP provider, POL depth/venue, on-ramp rail timing, and the grant plan each have
-a research-backed brief with a recommendation (internal, gitignored); op_take rates
-remain a pure owner number; counsel engagement remains the hard gate and now has its
-sharpest question formulated (does cash-out make us a VASP → KYC mandatory anyway?).
+**Decided 2026-08-28:** POL venue = Meteora DAMM v2 (full-range, permanent lock at
+creation, anti-snipe suite; depth still open, $25K floor recommended) · publish
+regardless of grant outcome (the 200-USDG tooling-grant move gates nothing; nudge
+Superteam ~Sep 2 if silent; instagrant + Colosseum proceed) · PoP delegation
+question answered (wallet/platform sign-in is never PoP; SAS-attestation fast lane
+= backlog beside the Didit recommendation).
+**Still open:** R3 PoP provider final call (waits on counsel; Didit recommended),
+POL depth at launch, op_take rates, grant-money boundary confirmation, counsel
+engagement (the hard gate; sharpest question: does cash-out make us a VASP → KYC
+mandatory anyway?).
 
 ## Open queues
 
