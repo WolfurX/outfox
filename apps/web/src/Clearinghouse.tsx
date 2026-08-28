@@ -9,7 +9,7 @@
  *  - Over-cap entry is impossible, not an error: inputs clamp to live capacity.
  *  - A quote never worsens after display: swaps carry minOut; cash-out fees are
  *    priced at request time and seasoning only ages in the player's favor.
- *  - The client carries no ABI code: wallet transactions relay server calldata.
+ *  - The client carries no chain code: wallets sign server-built transactions as-is.
  *  - Unseasoned is NOT Unsettled: seasoning is a time state on Settled-provenance
  *    ALPHA and must never borrow the firewall's hatch/tone.
  */
@@ -23,25 +23,36 @@ import { api } from './api';
 import {
   Amount, Banner, Button, Chip, EmptyState, ListRow, Meter, RowGroup, Sheet, Skeleton, Spark,
 } from './ds';
-import { connect, ensureChain, hasWallet, personalSign, sendTx, WalletError } from './wallet';
+import {
+  connect, hasWallet, pickWallet, rememberWallet, sendTx, signMessage, WalletError,
+  type StdWallet,
+} from './wallet';
+import { WalletPicker } from './WalletPicker';
 
 const WEI = ALPHA_BASE_UNITS;
 const DAY_MS = 86_400_000;
 const WEEK_MS = 7 * DAY_MS;
 
-// ----- exact ALPHA formatting (no floats near money) --------------------------
+// ----- exact ALPHA formatting (no floats near money; SPL 9dp base units) ------
 
 function fmtAlpha(wei: bigint | string, dp = 4): string {
   const w = BigInt(wei);
   const whole = w / WEI;
-  const frac = (w % WEI).toString().padStart(18, '0').slice(0, dp).replace(/0+$/, '');
+  const frac = (w % WEI).toString().padStart(9, '0').slice(0, dp).replace(/0+$/, '');
   return `${whole.toLocaleString()}${frac ? '.' + frac : ''}`;
 }
 
+/** Machine form for input fills and clamps: never locale-grouped — in dot-grouping
+ * locales (incl. id-ID) a grouped string re-parses 1000x off. Display uses fmtAlpha. */
+function fmtAlphaPlain(wei: bigint): string {
+  const frac = (wei % WEI).toString().padStart(9, '0').replace(/0+$/, '');
+  return `${wei / WEI}${frac ? '.' + frac : ''}`;
+}
+
 function parseAlpha(s: string): bigint | null {
-  const m = s.trim().match(/^(\d+)(?:\.(\d{0,18}))?$/);
+  const m = s.trim().match(/^(\d+)(?:\.(\d{0,9}))?$/);
   if (!m) return null;
-  return BigInt(m[1]) * WEI + BigInt((m[2] ?? '').padEnd(18, '0') || '0');
+  return BigInt(m[1]) * WEI + BigInt((m[2] ?? '').padEnd(9, '0') || '0');
 }
 
 const dateShort = (t: number) =>
@@ -74,6 +85,15 @@ export function Clearinghouse({ player, srvNow, run, onBack }: {
   const [history, setHistory] = useState<number[]>([]);
   const [rules, setRules] = useState(false);
   const [note, setNote] = useState<string | null>(null); // wallet-step status line
+  // A flow that needs a wallet parks its continuation here when several wallets are
+  // detected and none is remembered; the picker sheet resumes it.
+  const [pick, setPick] = useState<((w: StdWallet) => void) | null>(null);
+
+  const withWallet = useCallback((fn: (w: StdWallet) => void) => {
+    const w = pickWallet();
+    if (w) fn(w);
+    else setPick(() => fn);
+  }, []);
 
   const refreshAlpha = useCallback(() => {
     api.alpha()
@@ -125,9 +145,21 @@ export function Clearinghouse({ player, srvNow, run, onBack }: {
       <AlphaBook alphaV={alphaV} chainOff={chainOff} srvNow={srvNow} />
       <CashOut
         player={player} alphaV={alphaV} chainOff={chainOff} srvNow={srvNow} run={run}
-        setNote={setNote} onAlpha={setAlphaV} refresh={refreshAlpha}
+        setNote={setNote} onAlpha={setAlphaV} refresh={refreshAlpha} withWallet={withWallet}
       />
-      <Deposit player={player} chainOff={chainOff} setNote={setNote} />
+      <Deposit player={player} alphaV={alphaV} chainOff={chainOff} setNote={setNote} withWallet={withWallet} />
+
+      {pick && (
+        <Sheet title="Choose a wallet" onClose={() => setPick(null)}
+          footer={<Button variant="secondary" full onClick={() => setPick(null)}>Cancel</Button>}>
+          <WalletPicker onPick={(w) => {
+            rememberWallet(w);
+            const resume = pick;
+            setPick(null);
+            resume(w);
+          }} />
+        </Sheet>
+      )}
 
       {rules && (
         <Sheet title="Clearinghouse Rules" onClose={() => setRules(false)}
@@ -251,7 +283,7 @@ function ExchangeDesk({ player, exchange, off, run, alphaWei, onDone }: {
     if (side === 'buy' && clean && Number(clean) > buyCap) clean = String(buyCap);
     if (side === 'sell') {
       const parsed = parseAlpha(clean);
-      if (parsed !== null && parsed > sellCap) clean = fmtAlpha(sellCap, 18).replace(/,/g, '');
+      if (parsed !== null && parsed > sellCap) clean = fmtAlphaPlain(sellCap);
     }
     setAmt(clean);
     requote(side, clean);
@@ -296,7 +328,7 @@ function ExchangeDesk({ player, exchange, off, run, alphaWei, onDone }: {
             placeholder={side === 'buy' ? 'Scrip to spend' : '$ALPHA to sell'}
             value={amt} onChange={(e) => setAmount(e.target.value)}
           />
-          <Button size="sm" onClick={() => setAmount(side === 'buy' ? String(buyCap) : fmtAlpha(sellCap, 18).replace(/,/g, ''))}>
+          <Button size="sm" onClick={() => setAmount(side === 'buy' ? String(buyCap) : fmtAlphaPlain(sellCap))}>
             Max
           </Button>
         </div>
@@ -392,10 +424,11 @@ function WeeklyCapacity({ alphaV, srvNow }: { alphaV: AlphaView; srvNow: number 
 
 // ----- cash-out ----------------------------------------------------------------
 
-function CashOut({ player, alphaV, chainOff, srvNow, run, setNote, onAlpha, refresh }: {
+function CashOut({ player, alphaV, chainOff, srvNow, run, setNote, onAlpha, refresh, withWallet }: {
   player: PlayerView; alphaV: AlphaView | null; chainOff: boolean; srvNow: number;
   run: Runner; setNote: (s: string | null) => void;
   onAlpha: (a: AlphaView) => void; refresh: () => void;
+  withWallet: (fn: (w: StdWallet) => void) => void;
 }) {
   const [amt, setAmt] = useState('');
   const [confirm, setConfirm] = useState(false);
@@ -412,15 +445,15 @@ function CashOut({ player, alphaV, chainOff, srvNow, run, setNote, onAlpha, refr
   }
   if (!alphaV) return <Skeleton height={120} />;
 
-  const linkWallet = async () => {
+  const linkWallet = async (w: StdWallet) => {
     setBusy(true);
     setNote('Waiting for the wallet...');
     try {
-      const address = await connect();
+      const account = await connect(w);
       const { nonce, message } = await api.walletNonce();
       setNote('Sign the link message in your wallet. It moves no funds.');
-      const signature = await personalSign(address, message);
-      const r = await run(() => api.walletLink(address, nonce, signature));
+      const signature = await signMessage(w, account, message);
+      const r = await run(() => api.walletLink(account.address, nonce, signature));
       if (r && 'alpha' in r) onAlpha((r as { alpha: AlphaView }).alpha);
       setNote(null);
     } catch (e) {
@@ -446,7 +479,8 @@ function CashOut({ player, alphaV, chainOff, srvNow, run, setNote, onAlpha, refr
           title="Link a wallet"
           sub="Cash-outs settle on chain, to a wallet you prove you control."
           trail={hasWallet()
-            ? <Button variant="primary" size="sm" disabled={busy} onClick={linkWallet}>Link</Button>
+            ? <Button variant="primary" size="sm" disabled={busy}
+                onClick={() => withWallet((w) => void linkWallet(w))}>Link</Button>
             : <span className="ofx-statline">No wallet in this browser</span>}
         />
       </RowGroup>
@@ -478,7 +512,7 @@ function CashOut({ player, alphaV, chainOff, srvNow, run, setNote, onAlpha, refr
   const setAmount = (text: string) => {
     let clean = text.replace(/[^0-9.]/g, '');
     const parsed = parseAlpha(clean);
-    if (parsed !== null && parsed > cap) clean = fmtAlpha(cap, 18).replace(/,/g, '');
+    if (parsed !== null && parsed > cap) clean = fmtAlphaPlain(cap);
     setAmt(clean);
   };
 
@@ -500,7 +534,7 @@ function CashOut({ player, alphaV, chainOff, srvNow, run, setNote, onAlpha, refr
           aria-label="$ALPHA to cash out" placeholder="$ALPHA to cash out"
           value={amt} onChange={(e) => setAmount(e.target.value)}
         />
-        <Button size="sm" onClick={() => setAmount(fmtAlpha(cap, 18).replace(/,/g, ''))}>Max</Button>
+        <Button size="sm" onClick={() => setAmount(fmtAlphaPlain(cap))}>Max</Button>
       </div>
       {fees !== null && gross !== null && (
         <>
@@ -537,30 +571,33 @@ function CashOut({ player, alphaV, chainOff, srvNow, run, setNote, onAlpha, refr
             trail={<Amount value={fmtAlpha(fees.net)} unit="$ALPHA" size="md" />} />
         </Sheet>
       )}
-      <Pending alphaV={alphaV} setNote={setNote} refresh={refresh} />
+      <Pending alphaV={alphaV} setNote={setNote} refresh={refresh} withWallet={withWallet} />
     </RowGroup>
   );
 }
 
 // ----- pending clearances ------------------------------------------------------
 
-function Pending({ alphaV, setNote, refresh }: {
+function Pending({ alphaV, setNote, refresh, withWallet }: {
   alphaV: AlphaView; setNote: (s: string | null) => void; refresh: () => void;
+  withWallet: (fn: (w: StdWallet) => void) => void;
 }) {
   const [busyId, setBusyId] = useState<number | null>(null);
 
-  const redeem = async (id: number) => {
+  const redeem = async (w: StdWallet, id: number) => {
     setBusyId(id);
     setNote('Preparing the voucher...');
     try {
       const claim = await api.withdrawClaim(id);
-      await ensureChain(claim.voucher.chainId);
+      const account = await connect(w);
+      // the server built the transaction with the voucher's recipient as fee payer —
+      // only that wallet can sign it. Fail closed with the reason, not a wallet error.
+      if (account.address !== claim.voucher.to) {
+        setNote(`Switch to your linked wallet (${claim.voucher.to.slice(0, 4)}…${claim.voucher.to.slice(-4)}) — the voucher redeems from there.`);
+        return;
+      }
       setNote('Confirm the redemption in your wallet. Your wallet pays the network fee.');
-      await sendTx({
-        from: claim.voucher.to,
-        to: claim.voucher.settlement,
-        data: claim.redeemCalldata,
-      });
+      await sendTx(w, account, claim.redeemTx, claim.voucher.chainId);
       setNote('Sent. It lands after the chain confirms; this list updates on its own.');
       refresh();
     } catch (e) {
@@ -593,7 +630,7 @@ function Pending({ alphaV, setNote, refresh }: {
               title={`${net} $ALPHA`} sub="Vested. Redeem it from your linked wallet."
               trail={
                 <Button variant="primary" size="sm" disabled={busyId !== null}
-                  onClick={() => redeem(w.id)}>
+                  onClick={() => withWallet((wal) => void redeem(wal, w.id))}>
                   Redeem
                 </Button>
               } />
@@ -612,8 +649,10 @@ function Pending({ alphaV, setNote, refresh }: {
 
 // ----- deposits ----------------------------------------------------------------
 
-function Deposit({ player, chainOff, setNote }: {
-  player: PlayerView; chainOff: boolean; setNote: (s: string | null) => void;
+function Deposit({ player, alphaV, chainOff, setNote, withWallet }: {
+  player: PlayerView; alphaV: AlphaView | null; chainOff: boolean;
+  setNote: (s: string | null) => void;
+  withWallet: (fn: (w: StdWallet) => void) => void;
 }) {
   const [amt, setAmt] = useState('');
   const [busy, setBusy] = useState(false);
@@ -622,16 +661,21 @@ function Deposit({ player, chainOff, setNote }: {
   const wei = parseAlpha(amt);
   const valid = wei !== null && wei > 0n;
 
-  const doDeposit = async () => {
+  const doDeposit = async (w: StdWallet) => {
     if (!wei) return;
     setBusy(true);
     try {
-      const prep = await api.depositPrepare(wei.toString());
-      await ensureChain(prep.chainId);
-      const from = await connect();
-      setNote('Two wallet steps: allow the Clearinghouse to take the deposit, then send it. Your wallet pays the network fee.');
-      await sendTx({ from, to: prep.token, data: prep.approveData });
-      await sendTx({ from, to: prep.settlement, data: prep.depositData });
+      const account = await connect(w);
+      // deposits credit by depositor address: any other account's tokens would land
+      // in escrow unclaimed with no way to link that address later. Fail closed.
+      const linked = alphaV?.wallet?.address;
+      if (linked && account.address !== linked) {
+        setNote(`Switch to your linked wallet (${linked.slice(0, 4)}…${linked.slice(-4)}) — deposits from other wallets cannot reach your Book.`);
+        return;
+      }
+      const prep = await api.depositPrepare(wei.toString(), account.address);
+      setNote('Confirm the deposit in your wallet — one step. Your wallet pays the network fee.');
+      await sendTx(w, account, prep.depositTx, prep.chainId);
       setNote('Deposit sent. It lands on your Book after the chain confirms.');
       setAmt('');
     } catch (e) {
@@ -649,7 +693,8 @@ function Deposit({ player, chainOff, setNote }: {
           aria-label="$ALPHA to deposit" placeholder="$ALPHA to deposit"
           value={amt} onChange={(e) => setAmt(e.target.value.replace(/[^0-9.]/g, ''))}
         />
-        <Button variant="primary" size="sm" disabled={!valid || busy || !hasWallet()} onClick={doDeposit}>
+        <Button variant="primary" size="sm" disabled={!valid || busy || !hasWallet()}
+          onClick={() => withWallet((w) => void doDeposit(w))}>
           Deposit
         </Button>
       </div>

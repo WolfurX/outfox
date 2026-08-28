@@ -236,9 +236,10 @@ export interface BootstrapResponse {
   player: PlayerView;
   listings: ListingView[];
   catalog: { calls: CallDef[]; gig: GigDef };
-  /** Which R1 adapter the client drives (§10.2): 'privy' when the production app is
-   * configured server-side, 'dev' for the email+code slice adapter. */
-  auth: { mode: 'dev' | 'privy'; privyAppId?: string };
+  /** Which R1 adapter the client drives (§10.2): 'siws' is the production mode on
+   * Solana (wallet sign-in), 'privy' when that app is configured server-side, 'dev'
+   * for the email+code slice adapter (chainless worlds and tests). */
+  auth: { mode: 'dev' | 'privy' | 'siws'; privyAppId?: string };
 }
 
 export interface ActionResponse {
@@ -306,9 +307,9 @@ export interface Voucher {
   nonce: string;
   deadline: number;
   signature: string;
-  /** so the client can never submit to the wrong chain/contract */
+  /** so the client can never submit to the wrong chain/program */
   chainId: number;
-  settlement: string;
+  program: string;
 }
 
 export interface AlphaView {
@@ -372,20 +373,22 @@ export interface AlphaResponse {
   };
 }
 
-/** Claim response: the voucher plus ready-to-send calldata — the client carries no ABI
- * code; it hands `redeemCalldata` to the wallet as-is. */
+/** Claim response: the voucher plus one ready-to-sign wallet transaction
+ * ([compute budget, ed25519 verify, withdraw], base64) — the client carries no chain
+ * code; it relays `redeemTx` to the wallet as-is. Fee payer is the voucher's `to`. */
 export interface ClaimResponse {
   withdrawal: WithdrawalView;
   voucher: Voucher;
-  redeemCalldata: string;
+  redeemTx: string;
 }
 
-/** Deposit is two wallet transactions (approve, then deposit), both encoded server-side. */
+/** Deposit is ONE wallet transaction (no approve step on Solana), encoded server-side
+ * for the requesting depositor. */
 export interface DepositPrepareResponse {
   chainId: number;
   token: string;
-  settlement: string;
+  program: string;
+  state: string;
   amountWei: string;
-  approveData: string;
-  depositData: string;
+  depositTx: string;
 }

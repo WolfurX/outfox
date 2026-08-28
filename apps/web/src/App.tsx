@@ -280,6 +280,7 @@ export default function App() {
 
       {register && (
         <RegisterSheet
+          mode={boot.auth.mode}
           reason={register.reason}
           onClose={() => setRegister(null)}
           onDone={(pl) => { absorb(pl); const resume = register.resume; setRegister(null); resume(); }}

@@ -52,7 +52,7 @@ completed AUDIT-2 campaign:
 | $ALPHA token | ERC-20, fixed 2,000,000, no mint function | SPL mint, fixed 2,000,000, **mint authority revoked** at genesis |
 | Settlement | Solidity contract: escrow, deposits, signed-voucher withdrawals, global rolling cap, pause | Anchor program: PDA escrow, same semantics; vouchers via native ed25519 verification |
 | Server chain adapter | `chain.ts` (EIP-1193 calldata encoding) | Solana adapter (server-built transactions; client stays ABI-free, same architecture) |
-| Client wallet layer | `wallet.ts` (~90-line EIP-1193 relay) | Wallet-standard adapter via Jupiter's wallet kit; SIWS message auth replacing the Privy token verify at the same seam (rung semantics unchanged) |
+| Client wallet layer | `wallet.ts` (~90-line EIP-1193 relay) | Wallet Standard relay implemented directly (no wallet library — see the §4 Jupiter-kit verification outcome); SIWS message auth replacing the Privy token verify at the same seam (rung semantics unchanged) |
 | Proof-of-reserves | Contract balance vs ledger | Escrow token-account balance vs ledger (same invariant) |
 | M4 harness | anvil + viem loop | local validator (`solana-test-validator`) + the same priced scenarios |
 
@@ -63,7 +63,14 @@ passes on Solana. Deploy target order: localnet (M4) → devnet → mainnet only
 ## 4. Verification queue (claims to check before they are relied on — none are
 asserted as fact yet)
 
-- Jupiter wallet kit: current package, SIWS support, license, maintenance state.
+- ~~Jupiter wallet kit: current package, SIWS support, license, maintenance state.~~
+  **Verified 2026-08-28 and REJECTED:** `@jup-ag/wallet-adapter` 0.2.6 is MIT and
+  maintained (last publish 2026-08), but its dependency tree ships `@coral-xyz/anchor`,
+  emotion, and react-query into the client bundle plus its own modal UI — violating the
+  client architecture (no chain code, no foreign UI system) and the perf budget.
+  Resolution: the Wallet Standard window-event protocol is implemented directly in
+  `apps/web/src/wallet.ts` (zero dependencies; `standard:connect`, `solana:signMessage`,
+  `solana:signAndSendTransaction`), which every major Solana wallet registers into.
 - On-ramp rails for F3 on Solana (the load-bearing faucet): providers, geo coverage,
   conversion friction. `ONRAMP-COVERAGE.md` was Robinhood/USDG-specific and is
   superseded; redo the coverage study for Solana.

@@ -596,6 +596,17 @@ Four rows, no sliders in Phase-1.
 
 ## 10. Identity ladder & sessions
 
+> **Solana migration note (2026-08-28, per SOLANA-FEASIBILITY.md §3/§6 step 4):** the
+> R1 mechanism in this section is superseded. R1 is now **SIWS** — a Solana wallet
+> sign-in against the same provider-agnostic seam (rung semantics, collision choose
+> sheet, and demanding-surface triggers unchanged). Privy/embedded-4337/SIWE specifics
+> below are the archived EVM-era design. Consequences: R1 is the one sanctioned wallet
+> ceremony (the §10.1 jargon ban softens exactly there — the wallet is named plainly,
+> with the promise that signing moves no funds); R2 keeps its separate purpose-bound
+> link message; deposits are one wallet transaction (no approve step). The wallet
+> layer is a direct Wallet Standard relay (`apps/web/src/wallet.ts`), never a vendor
+> modal kit.
+
 Implements the feasibility conditions at the UI layer: SIWE + embedded wallets preserving
 **“no wallet until you need value.”** Internal terms (Clean/Bound, w_cap, F3/F4, PoP)
 never appear in player copy.

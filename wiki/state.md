@@ -34,7 +34,7 @@ to the public repo `outfox-whitepaper` and GitBook re-imports it —
 | 1 | Fresh repo, vocabulary unification, rename purity proof, retired-vocab guard | ✅ this commit |
 | 2 | Anchor programs ($ALPHA mint + Settlement) to `contracts/` reference semantics | ✅ built + tested (`programs/`): 28 LiteSVM integration tests (per-case port of `Settlement.t.sol`, N/A cases documented) + 6 unit tests on the window math; ed25519 voucher w/ program-id+chain-id domain; nonce PDAs; leaky bucket exact incl. drain-at-old-rate on cap change |
 | 3 | Server: Solana adapter + SIWS auth at the Privy seam | ✅ `chain.ts` rewritten (ed25519 vouchers, signature-cursor indexer w/ blockTime seasoning clocks, server-built base64 wallet txs replacing calldata, escrow-ATA reserve); ledger units flipped 18dp→9dp via shared `ALPHA_BASE_UNITS`; `auth-siws.ts` + `/api/register/siws` at the §10.1 seam (subjects namespaced `siws:`); suite 115/115 |
-| 4 | Client: Jupiter wallet kit + SIWS login sheet | ⬜ |
+| 4 | Client: wallet layer + SIWS login sheet | ✅ 2026-08-28 — Wallet Standard relay implemented DIRECTLY (`wallet.ts` rewrite, zero deps; Jupiter kit verified and REJECTED — ships anchor/emotion/react-query + own modal UI, see SOLANA-FEASIBILITY §4); SIWS register/adopt sheet at the same collision semantics; Clearinghouse ported to single-tx deposit + base64 `redeemTx` (fee-payer + linked-wallet fail-closed guards); 18dp→9dp input/format fix; adversarial review (fresh agent) found 2 gating defects (deposit-strand path, id-ID locale 1000× round-trip) — fixed + regression-probed. Live harness `apps/web/scripts/verify-live.cjs` **14/14** (Brave headless, stub wallet-standard wallet, world A under id-ID); suite 115/115; build 62.4 KB gz |
 | 5 | M4 rerun → devnet end-to-end | 🟡 **M4 harness GREEN on the Solana program** (LiteSVM, all checks: PoR every step, firewall, fast channel −45.0/−45.9%, patient mule −29% incl. §13.A carry, global cap + linear refill). Remaining: devnet deploy + e2e (port of e2e-testnet.ts + genesis script) |
 | 6 | Phase C: whitepaper/distribution updates, §4 verifications, launch materials | ⬜ |
 
@@ -206,4 +206,4 @@ This repo is the **fresh-history Solana continuation** of a private development
 repository; the pre-migration history is not carried over (provenance details:
 founders' private notes). Work happens on `master`.
 
-as-of: solana-migration commit (2026-08-25)
+as-of: step-4 client commit (2026-08-28)

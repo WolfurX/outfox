@@ -55,6 +55,12 @@ export const api = {
     post<RegisterVerifyResponse>('/api/register/verify', { email, code }),
   registerAdopt: (email: string) => post<MarketResponse>('/api/register/adopt', { email }),
 
+  // R1 production adapter (SIWS): nonce challenge, then the signed message registers —
+  // or, with adopt, rebinds the session to the colliding account (fresh nonce each call).
+  siwsNonce: () => post<{ nonce: string; message: string }>('/api/register/siws/nonce'),
+  registerSiws: (address: string, nonce: string, signature: string, adopt?: boolean) =>
+    post<RegisterVerifyResponse>('/api/register/siws', { address, nonce, signature, adopt }),
+
   // ----- the Clearinghouse (exchange + chain edge) -----
   exchange: () => get<ExchangeResponse>('/api/exchange'),
   exchangeHistory: () => get<ExchangeHistoryResponse>('/api/exchange/history'),
@@ -70,6 +76,6 @@ export const api = {
   withdrawRequest: (amountWei: string) =>
     post<{ withdrawal: WithdrawalView; alpha: AlphaView }>('/api/withdraw/request', { amountWei }),
   withdrawClaim: (id: number) => post<ClaimResponse>('/api/withdraw/claim', { id }),
-  depositPrepare: (amountWei: string) =>
-    post<DepositPrepareResponse>('/api/deposit/prepare', { amountWei }),
+  depositPrepare: (amountWei: string, from: string) =>
+    post<DepositPrepareResponse>('/api/deposit/prepare', { amountWei, from }),
 };

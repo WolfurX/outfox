@@ -62,3 +62,22 @@ not carried into this repository.)*
   exchangeAudit's treasury identity predated carry capture (now feesAlpha + carry).
   Suite 115/115. Remaining for step 5: devnet deploy + e2e port. Step 4 (client)
   untouched — web still speaks the EVM tx shapes.
+- 2026-08-28 · INGEST · **Migration step 4 done — client on Solana**: `wallet.ts`
+  rewritten as a direct Wallet Standard relay (zero deps; the §4 Jupiter-kit item
+  verified 2026-08-28 and rejected — it ships anchor+emotion+react-query and its own
+  modal UI into the bundle). SIWS register/adopt behind the same sheet + collision
+  semantics (adopt signs a fresh nonce, pinned to the colliding account); privy mode
+  gets an honest refusal; dev sheet unchanged. Clearinghouse: R2 link via wallet-standard
+  signMessage; deposit is ONE server-built tx with a linked-wallet fail-closed guard
+  (unlinked depositor would strand funds in unclaimed escrow); redeem relays base64
+  `redeemTx` with the fee-payer check; leftover 18dp fmt/parse fixed to 9dp, and
+  machine fills use a locale-proof formatter (id-ID dot-grouping re-parsed Max fills
+  1000× off — found by the adversarial review pass, both gating findings fixed with
+  regression probes). Shared types caught up to the server's real responses
+  (`auth.mode 'siws'`, `Voucher.program`, `redeemTx`, single-tx deposit shape).
+  DESIGN-SYSTEM-WEB §10 carries the migration note (R1 = the one sanctioned wallet
+  ceremony). Whitepaper status page updated (wallet sign-in built; harness green
+  locally; devnet still the gate) + published. Verification: suite 115/115, build
+  62.4 KB gz, live harness `apps/web/scripts/verify-live.cjs` 14/14 (Brave headless,
+  stub wallet, world A under id-ID). Remaining: step 5b (devnet deploy + e2e + genesis
+  script), then Phase C.
