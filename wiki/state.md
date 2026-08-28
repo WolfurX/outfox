@@ -37,7 +37,7 @@ to the public repo `outfox-whitepaper` and GitBook re-imports it —
 | 3 | Server: Solana adapter + SIWS auth at the Privy seam | ✅ `chain.ts` rewritten (ed25519 vouchers, signature-cursor indexer w/ blockTime seasoning clocks, server-built base64 wallet txs replacing calldata, escrow-ATA reserve); ledger units flipped 18dp→9dp via shared `ALPHA_BASE_UNITS`; `auth-siws.ts` + `/api/register/siws` at the §10.1 seam (subjects namespaced `siws:`); suite 115/115 |
 | 4 | Client: wallet layer + SIWS login sheet | ✅ 2026-08-28 — Wallet Standard relay implemented DIRECTLY (`wallet.ts` rewrite, zero deps; Jupiter kit verified and REJECTED — ships anchor/emotion/react-query + own modal UI, see SOLANA-FEASIBILITY §4); SIWS register/adopt sheet at the same collision semantics; Clearinghouse ported to single-tx deposit + base64 `redeemTx` (fee-payer + linked-wallet fail-closed guards); 18dp→9dp input/format fix; adversarial review (fresh agent) found 2 gating defects (deposit-strand path, id-ID locale 1000× round-trip) — fixed + regression-probed. Live harness `apps/web/scripts/verify-live.cjs` **14/14** (Brave headless, stub wallet-standard wallet, world A under id-ID); suite 115/115; build 62.4 KB gz |
 | 5 | M4 rerun → devnet end-to-end | ✅ 2026-08-28 — **M4 harness GREEN** (LiteSVM, all checks, 2026-08-25 log) → genesis + e2e scripts green on a local validator → **DEVNET DEPLOYED + E2E GREEN**: `scripts/genesis.ts` (ONE atomic tx: mint 2M, revoke authority, initialize) and `scripts/e2e-devnet.ts` (through the same server-built txs the client relays: deposit → index (idempotent) → §9 gates → vest → sign → **forgery rejected** → redeem → **replay rejected** → **pause honored** → confirm → PoR holds; ALL CHECKS PASSED on devnet). Record: `programs/deployments/devnet.md`. `contracts/` + `e2e-testnet.ts` + viem dep deleted at the gate per canon. Keys: `~/.config/outfox/devnet/` (throwaway) |
-| 6 | Phase C: whitepaper/distribution updates, §4 verifications, launch materials | ⬜ |
+| 6 | Phase C: whitepaper/distribution updates, §4 verifications, launch materials | 🟡 2026-08-28 — **§4 verification queue fully CLOSED** (4 parallel research passes + measured devnet fee/CU data; outcomes in SOLANA-FEASIBILITY §4, full briefs internal): Jupiter kit rejected · on-ramp study redone for Solana (USDC-first; day-0 = wallet built-in ramps) · PoP verified (World ID dead for SEA; biometric-dedupe KYC class is the target — internal brief w/ recommendation) · DEX/POL verified (Raydium CPMM + Burn & Earn lock, ≥$25K floor) · grants verified (Superteam Indonesia instagrant → Colosseum Sep 28–Nov 2 → Foundation convertible) · fees measured (redeem = 2-sig cost incl. ed25519 precompile). **DISTRIBUTION-PLAN rewritten for Solana** (internal): honest base rates (day-60 success band 100–500 DAU ≈ top-3 actual Solana game), channel stack = founder-account CT receipts + Solana dApp Store TWA + Colosseum + ecosystem media + Superteam ID; kill machinery unchanged; grants-reversal recorded. Whitepaper roadmap updated + published. Remaining: launch materials themselves (hackathon entry, announcement copy — event-driven) |
 
 Toolchain note: the dev box needs nodejs/npm, rustup, solana CLI, anchor installed
 before steps 2–5 (owner password required for the pacman half).
@@ -57,6 +57,13 @@ before steps 2–5 (owner password required for the pacman half).
 | 9 | Retention stack | ⬜ |
 | 10 | Legal Phase-0 (geofence, MSB, counsel) | ⬜ hard launch gate |
 | 11 | Distribution execution | plan adopted (`DISTRIBUTION-PLAN.md`), not started |
+
+## Owner decisions — now DECISION-READY (internal briefs, 2026-08-28)
+
+R3 PoP provider, POL depth/venue, on-ramp rail timing, and the grant plan each have
+a research-backed brief with a recommendation (internal, gitignored); op_take rates
+remain a pure owner number; counsel engagement remains the hard gate and now has its
+sharpest question formulated (does cash-out make us a VASP → KYC mandatory anyway?).
 
 ## Open queues
 

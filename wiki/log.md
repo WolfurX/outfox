@@ -106,3 +106,16 @@ not carried into this repository.)*
   deleted (git history keeps them), viem dependency dropped; suite 115/115 after.
   Whitepaper status page updated (devnet verified; mainnet stays behind audit +
   counsel) + published. Remaining: Phase C (step 6) only.
+- 2026-08-28 · INGEST · **Phase C: §4 verification queue CLOSED + distribution plan
+  rewritten for Solana.** Four parallel adversarially-briefed research passes
+  (on-ramp, PoP, DEX/POL+grants, distribution channels; provider-page/API-verified,
+  confidence-flagged) + fee/CU measured from the live devnet txs. Public outcomes in
+  SOLANA-FEASIBILITY §4 (all items struck); full briefs + recommendations in the
+  internal docs (PHASE-C-DECISIONS, ONRAMP-COVERAGE Solana edition,
+  DISTRIBUTION-PLAN Solana revision — the 2026-07-03 no-grants decision recorded as
+  reversed with the OPSEC retirement that motivated it). Load-bearing findings:
+  native USDC-SPL everywhere kills the bridge-fallback architecture; World ID is
+  unusable in SEA; biometric-dedupe KYC is the PoP class; Raydium CPMM +
+  Burn & Earn at ≥$25K is the POL floor; Colosseum Sep 28–Nov 2 is the timed launch
+  moment; honest success band 100–500 DAU at day 60. Whitepaper roadmap phase-4
+  wording updated + republished. Launch materials remain (event-driven).

@@ -16,7 +16,7 @@ Staking/locking, the progressive carry, the Index, Skulks, Desks, the Commons. E
 
 ## 4. Payments and retention
 
-The real-money on-ramp for convenience purchases, plus the notification and retention stack. On-ramp provider coverage is being re-verified for Solana before integration work.
+The real-money on-ramp for convenience purchases, plus the notification and retention stack. On-ramp provider coverage for Solana has been verified: native USDC is carried broadly, so purchases price in USDC and day-one funding can lean on the ramps built into major Solana wallets, with a dedicated on-ramp widget following once the game's own revenue justifies it. Integration work still comes after the beta gates.
 
 ## 5. Legal review and controlled beta
 

@@ -72,15 +72,57 @@ asserted as fact yet)
   Resolution: the Wallet Standard window-event protocol is implemented directly in
   `apps/web/src/wallet.ts` (zero dependencies; `standard:connect`, `solana:signMessage`,
   `solana:signAndSendTransaction`), which every major Solana wallet registers into.
-- On-ramp rails for F3 on Solana (the load-bearing faucet): providers, geo coverage,
-  conversion friction. `ONRAMP-COVERAGE.md` was Robinhood/USDG-specific and is
-  superseded; redo the coverage study for Solana.
-- PoP/R3 options in the Solana context (World ID chain-agnostic server-side verify
-  still holds by architecture; provider choice remains the standing owner decision).
-- DEX/liquidity venue for $ALPHA (POL depth is a standing owner decision).
-- Fee/compute-unit budget for the settlement flows; priority-fee posture.
-- Grant/builder programs: current terms and eligibility.
-- Distribution plan: revise for the Solana posture (Phase C; internal document).
+- ~~On-ramp rails for F3 on Solana (the load-bearing faucet).~~ **Verified
+  2026-08-28** (internal coverage study, provider-page/API-checked). Headline:
+  native USDC-SPL is carried by every major on-ramp, so F3 pricing is USDC-first
+  and the EVM-era bridge-fallback architecture is unnecessary; wallet built-in
+  ramps cover day 0 at zero fixed cost; regional local-payment rails exist but
+  concentrate in aggregator-only providers and must be re-verified against live
+  quotes before launch-market commitments. The F3 rail choice remains coupled to
+  the geofence/counsel decision.
+- ~~PoP/R3 options in the Solana context.~~ **Verified 2026-08-28.** World ID is not
+  viable as primary for our launch geography (suspended/halted in several SEA
+  markets through 2025–26; its non-Orb credential path does not claim
+  human-uniqueness), and Solana-native PoP no longer exists (Civic's uniqueness
+  product sunset July 2025). The viable class is biometric-dedupe verification at
+  cash-out, with zk-passport schemes as a possible privacy lane. Provider choice
+  remains the standing owner decision (couple with geofence + counsel); decision
+  brief is internal.
+- ~~DEX/liquidity venue for $ALPHA.~~ **Verified 2026-08-28.** Launch norm for a
+  fixed-supply token with team-seeded liquidity: a standard constant-product USDC
+  pool on a major venue, full-range, with the LP permanently locked via the venue's
+  native lock (verifiable on-chain, fee stream retained); no bonding-curve
+  launchpads. Jupiter routes new pools automatically and applies a liquidity
+  round-trip check after a grace period — the depth floor that passes it with margin
+  starts around $25K. POL depth at launch remains the standing owner decision;
+  venue/sizing brief is internal.
+- ~~Fee/compute-unit budget for the settlement flows; priority-fee posture.~~
+  **Measured 2026-08-28 on the live devnet deployment** (finalized txs, program
+  `FFNw…n9o1`):
+
+  | Flow | CU consumed | Base fee | Note |
+  |---|---|---|---|
+  | Deposit | 12,617 | 5,000 lamports | 1 tx signature |
+  | Withdraw (redeem) | 27,432 | 10,000 lamports | the ed25519 precompile verify is charged AS a signature (5,000 + 5,000) |
+  | Pause / Unpause | ~4,140 | 10,000 lamports | payer + admin signatures |
+  | Initialize (genesis, once) | 54,892 | 20,000 lamports | 4 signatures |
+
+  Posture: settlement traffic is low-frequency by design (deposits + vested
+  redemptions only), so even a generous priority fee is economically noise — at
+  50k CU × 100k microlamports/CU the tip is 5,000 lamports (< $0.002). Follow-up
+  (engineering, review-gated): `prepareRedeemTx` requests a 400k CU limit vs
+  27.4k measured — drop to ~60k (2x headroom) and add a
+  `setComputeUnitPrice` tip before mainnet, since fee markets price on the
+  REQUESTED limit. Fees are a non-issue for the F3/F4 economics.
+- ~~Grant/builder programs: current terms and eligibility.~~ **Verified 2026-08-28.**
+  Current-term summaries collected (Superteam grants, Solana Foundation
+  milestone/convertible tracks, Colosseum hackathon + accelerator, gaming-specific
+  programs); no published exclusion language catches the game's mechanics. The
+  application plan is internal.
+- ~~Distribution plan: revise for the Solana posture.~~ **Done 2026-08-28** (internal
+  document, per the standing practice): re-based on measured Solana gaming actuals
+  and current channel research; the condition-2 kill machinery carries over
+  unchanged.
 
 ## 5. Conditions inherited from the Robinhood framework
 
