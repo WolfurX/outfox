@@ -56,9 +56,10 @@ completed AUDIT-2 campaign:
 | Proof-of-reserves | Contract balance vs ledger | Escrow token-account balance vs ledger (same invariant) |
 | M4 harness | anvil + viem loop | local validator (`solana-test-validator`) + the same priced scenarios |
 
-`contracts/` stays in-tree as the behavioral spec for the port and is deleted once M4
-passes on Solana. Deploy target order: localnet (M4) → devnet → mainnet only behind the
-§5 gates.
+`contracts/` stayed in-tree as the behavioral spec for the port and was **deleted
+2026-08-28** when the devnet end-to-end verification passed (git history keeps it).
+Deploy target order: localnet (M4 ✅) → devnet (✅ `programs/deployments/devnet.md`) →
+mainnet only behind the §5 gates.
 
 ## 4. Verification queue (claims to check before they are relied on — none are
 asserted as fact yet)

@@ -94,3 +94,15 @@ not carried into this repository.)*
   solana-test-validator (agave 3.1.10) with the real deployed .so. No custody code
   changed (scripts only) — no adversarial pass required by the posture. Devnet run
   pending faucet SOL only; keys staged in ~/.config/outfox/devnet (throwaway).
+- 2026-08-28 · INGEST · **Migration step 5 DONE — devnet deployed + e2e GREEN. Steps
+  1–5 complete; the chain edge is done.** Deployer funded (owner, GitHub faucet),
+  program deployed to devnet (`FFNw…n9o1`), atomic genesis executed (mint
+  `EGm6…Zpaa`, 2M fixed, authority revoked in the same tx as initialize; window cap
+  500), full e2e ALL CHECKS PASSED against live devnet: deposit → indexer credit
+  (idempotent) → §9 gates → vest → voucher sign → forged sig rejected → redeem exact
+  → replay rejected → pause blocks deposits → unpause → confirm → PoR holds. Record:
+  `programs/deployments/devnet.md`. Canon-mandated retirement executed at the gate:
+  `contracts/` (frozen EVM reference incl. testnet-46630 record) + `e2e-testnet.ts`
+  deleted (git history keeps them), viem dependency dropped; suite 115/115 after.
+  Whitepaper status page updated (devnet verified; mainnet stays behind audit +
+  counsel) + published. Remaining: Phase C (step 6) only.

@@ -13,8 +13,7 @@
     "@solana/web3.js": "^1.98.4",
     "bs58": "^6.0.0",
     "fastify": "^5.0.0",
-    "tweetnacl": "^1.0.3",
-    "viem": "^2.55.0"
+    "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
     "@solana/kit": "^8.0.0",

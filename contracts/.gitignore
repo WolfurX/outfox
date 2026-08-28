@@ -1,3 +1,0 @@
-cache/
-# broadcast logs contain deployer addresses — never commit (OPSEC)
-broadcast/

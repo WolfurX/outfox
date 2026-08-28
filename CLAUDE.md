@@ -40,13 +40,13 @@ This repo is the Solana continuation of a private development repository; the ec
 design, its simulation campaign (AUDIT-2 rounds 2–6c), and the server/web build carry
 over unchanged, with the model, calibration, and committed scorecards intact.
 
-- **Chain: Solana.** `contracts/` holds the frozen EVM reference implementation
-  (Alpha.sol + Settlement.sol + tests, plus the testnet deployment record) — it is the
-  behavioral spec for the Anchor port and gets deleted once M4 passes against the
-  Solana programs. New on-chain work lives in `programs/` (Anchor/Rust): $ALPHA as an
+- **Chain: Solana.** The chain edge lives in `programs/` (Anchor/Rust): $ALPHA as an
   SPL mint with the mint authority revoked (fixed 2,000,000 — the no-mint guarantee),
   Settlement as a program (PDA escrow, deposits, ed25519-signed voucher redemption,
-  global rolling withdrawal cap, pause).
+  global rolling withdrawal cap, pause). **Live on devnet, verified end-to-end**
+  (`programs/deployments/devnet.md`). The EVM-era reference implementation
+  (`contracts/`) served as the behavioral spec for the port and was deleted when the
+  devnet e2e passed (2026-08-28); it remains in git history.
 - **M4 discipline carries over:** the Solana Settlement program is not "done" until the
   contract-in-the-loop harness reruns against it on a local validator and prices match
   the model. Devnet first; mainnet only behind the launch gates.
@@ -85,6 +85,6 @@ exchange.ts`), and the auth adapters as security-critical.
   beyond the stubs already in `docs/`. Business, funding, and identity matters stay
   out of the public tree entirely.
 - **Legal counsel remains a hard pre-launch gate** (`VALIDATION-BENCHMARKS.md` §4);
-  nothing real-money goes live before it. Deployer/treasury key custody follows
-  `contracts/README.md` key hygiene: fresh keys per environment, hot/cold split and a
-  multisig owner for anything real.
+  nothing real-money goes live before it. Deployer/treasury key hygiene: fresh keys
+  per environment, hot/cold split (voucher signer is never the admin), and a multisig
+  admin for anything real.

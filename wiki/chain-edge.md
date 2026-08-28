@@ -3,9 +3,9 @@
 **Canon:** `docs/SOLANA-FEASIBILITY.md` (migration contract), `programs/settlement/`
 (the program), `apps/server/src/chain.ts` + `settlement.ts` + `auth-siws.ts`,
 `DESIGN-SYSTEM-WEB.md` §10 (identity ladder, read through the Solana migration note),
-`ECONOMY.md` §9 (the valve). The EVM-era edge lives on as the frozen behavioral
-reference in `contracts/` (testnet 46630 record: `contracts/deployments/
-testnet-46630.md`) and is deleted once devnet e2e passes.
+`ECONOMY.md` §9 (the valve). **Live on devnet, verified end-to-end 2026-08-28** —
+`programs/deployments/devnet.md`. The EVM-era reference (`contracts/`, testnet 46630)
+was deleted at that gate; git history keeps it.
 
 ## Architecture in one line
 
@@ -65,8 +65,10 @@ Every §9 gate runs server-side **before** a voucher is signed: **V1** R3 rung g
 **V3** 5% fee · **V4** 14-day vesting · **V5** rolling weekly cap · **V6** solvency
 (never owe more than the escrow reserve, counting unconfirmed vouchers). Ledger is
 BigInt base units at SPL 9dp (`ALPHA_BASE_UNITS`), seasoning clocks keyed by
-blockTime. M4 contract-in-the-loop is GREEN against the real program (LiteSVM);
-devnet e2e is the remaining gate.
+blockTime. M4 contract-in-the-loop is GREEN against the real program (LiteSVM), and
+the devnet e2e gate is PASSED (2026-08-28): deposit, forgery/replay rejection, pause,
+and PoR verified against the live devnet deployment. Mainnet remains behind the
+audit + counsel gates.
 
 **The $ALPHA carry — IMPLEMENTED** (`applyAlphaCarry`; ECONOMY §13.A + §13.D): idle
 decay 0.45%/day, 4.5%/day above the 250-$ALPHA shelter, lazy catch-up, capture →
@@ -80,4 +82,4 @@ yet. Deposit-fed selling is throttled by the exchange flow cap + volatility fee
 Fresh throwaway keys per environment, never reused; production custody = hot/cold
 split + multisig admin; the voucher signer key is NOT the admin key.
 
-as-of: step-4 client commit (2026-08-28)
+as-of: step-5 devnet commit (2026-08-28)

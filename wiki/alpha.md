@@ -1,7 +1,9 @@
 # $ALPHA — the token
 
-> **2026-08-25:** chain facts below are EVM-era; $ALPHA becomes an SPL mint with
-> revoked mint authority (`docs/SOLANA-FEASIBILITY.md` §3). Economics unchanged.
+> **2026-08-28:** $ALPHA is live on devnet as an SPL mint (9dp, fixed 2,000,000,
+> mint authority revoked at genesis) — `programs/deployments/devnet.md`. The EVM-era
+> chain facts below are historical (the `contracts/` reference was deleted at the
+> devnet gate; git history keeps it). Economics unchanged.
 
 **One entity, two names:** $ALPHA is the shipped token (contracts, UI, chain);
 **$ALPHA** is the same thing inside the frozen mechanics layer (`docs/ECONOMY*`, `sim/`).
@@ -27,4 +29,4 @@ Mapping: `THEME-OUTFOX.md` §2; rule: repo `CLAUDE.md`; enforcement: vocab-guard
 - **On-chain facts:** Robinhood Chain — testnet 46630, mainnet 4663, ETH gas
   (`contracts/README.md`, verified 2026-07-11).
 
-as-of: 4a88fd8
+as-of: step-5 devnet commit (2026-08-28)

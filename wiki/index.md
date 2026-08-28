@@ -18,7 +18,7 @@ Non-normative derived layer; canon always wins (`wiki/CLAUDE.md`). Start at `sta
 · `docs/THEME-OUTFOX.md` (vocabulary) · `docs/SOLANA-FEASIBILITY.md` (chain pivot; `ROBINHOOD-FEASIBILITY.md` = superseded record) ·
 `docs/DATA-ARCHITECTURE.md` (data contract) · `docs/DISTRIBUTION-PLAN.md` ·
 `docs/ONRAMP-COVERAGE.md` · `docs/VALIDATION-BENCHMARKS.md` · `sim/` (proof + artifacts)
-· `contracts/` (frozen EVM reference; `programs/` = Solana chain edge, Phase B) · `apps/` + `packages/` (the slice) · `PLAN.md` (kickoff,
+· `programs/` (the Solana chain edge — live on devnet, `programs/deployments/devnet.md`; EVM reference removed 2026-08-28, in git history) · `apps/` + `packages/` (the slice) · `PLAN.md` (kickoff,
 read through its pivot notice) · repo `CLAUDE.md` (rules of the repo).
 
 as-of: solana-migration commit (2026-08-25)

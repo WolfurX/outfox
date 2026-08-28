@@ -10,9 +10,10 @@ economy-first GameFi web PWA, **migrating to Solana** (decision 2026-08-25,
 `docs/SOLANA-FEASIBILITY.md`) from Robinhood Chain. The economy is sim-validated (standard gate **6/6 at 500 seeds**, red-team
 **6/7** — only the product-level PoP-quality item remains) and carries over unchanged;
 the Phase-1 slice is playable (Calls/Gigs/sinks/Open Market, R0→R1 identity ladder,
-PWA); the EVM-era chain edge (proven end-to-end on testnet 46630, **M4 complete, both
-halves**) is now the frozen reference in `contracts/` for the Anchor rewrite in
-`programs/`. Operator revenue is formalized and sim-proven.
+PWA); the Solana chain edge is **live on devnet and verified end-to-end**
+(`programs/deployments/devnet.md`; migration steps 1–5 ALL DONE 2026-08-28 — the
+EVM reference `contracts/` was deleted at that gate, git history keeps it).
+Operator revenue is formalized and sim-proven. Remaining: Phase C (step 6).
 
 ## Whitepaper (public site)
 
@@ -35,7 +36,7 @@ to the public repo `outfox-whitepaper` and GitBook re-imports it —
 | 2 | Anchor programs ($ALPHA mint + Settlement) to `contracts/` reference semantics | ✅ built + tested (`programs/`): 28 LiteSVM integration tests (per-case port of `Settlement.t.sol`, N/A cases documented) + 6 unit tests on the window math; ed25519 voucher w/ program-id+chain-id domain; nonce PDAs; leaky bucket exact incl. drain-at-old-rate on cap change |
 | 3 | Server: Solana adapter + SIWS auth at the Privy seam | ✅ `chain.ts` rewritten (ed25519 vouchers, signature-cursor indexer w/ blockTime seasoning clocks, server-built base64 wallet txs replacing calldata, escrow-ATA reserve); ledger units flipped 18dp→9dp via shared `ALPHA_BASE_UNITS`; `auth-siws.ts` + `/api/register/siws` at the §10.1 seam (subjects namespaced `siws:`); suite 115/115 |
 | 4 | Client: wallet layer + SIWS login sheet | ✅ 2026-08-28 — Wallet Standard relay implemented DIRECTLY (`wallet.ts` rewrite, zero deps; Jupiter kit verified and REJECTED — ships anchor/emotion/react-query + own modal UI, see SOLANA-FEASIBILITY §4); SIWS register/adopt sheet at the same collision semantics; Clearinghouse ported to single-tx deposit + base64 `redeemTx` (fee-payer + linked-wallet fail-closed guards); 18dp→9dp input/format fix; adversarial review (fresh agent) found 2 gating defects (deposit-strand path, id-ID locale 1000× round-trip) — fixed + regression-probed. Live harness `apps/web/scripts/verify-live.cjs` **14/14** (Brave headless, stub wallet-standard wallet, world A under id-ID); suite 115/115; build 62.4 KB gz |
-| 5 | M4 rerun → devnet end-to-end | 🟡 **M4 harness GREEN** (LiteSVM, all checks — see 2026-08-25 log). **2026-08-28: genesis + e2e scripts BUILT and GREEN on a real local validator over RPC** — `scripts/genesis.ts` (ONE atomic tx: mint 2M → revoke authority → initialize; refuses a second run) and `scripts/e2e-devnet.ts` (port of e2e-testnet.ts through the same server-built txs the client relays: deposit → index → §9 gates → vest → sign → **forgery rejected** → redeem → **replay rejected** → **pause honored** → confirm → PoR holds; ALL CHECKS PASSED). Remaining: the devnet run itself — blocked only on faucet SOL (~4 SOL for program deploy; CLI faucet rate-limited, PoW faucet has no registered faucets; retry loop running). Devnet keys staged at `~/.config/outfox/devnet/` (throwaway, per key hygiene) |
+| 5 | M4 rerun → devnet end-to-end | ✅ 2026-08-28 — **M4 harness GREEN** (LiteSVM, all checks, 2026-08-25 log) → genesis + e2e scripts green on a local validator → **DEVNET DEPLOYED + E2E GREEN**: `scripts/genesis.ts` (ONE atomic tx: mint 2M, revoke authority, initialize) and `scripts/e2e-devnet.ts` (through the same server-built txs the client relays: deposit → index (idempotent) → §9 gates → vest → sign → **forgery rejected** → redeem → **replay rejected** → **pause honored** → confirm → PoR holds; ALL CHECKS PASSED on devnet). Record: `programs/deployments/devnet.md`. `contracts/` + `e2e-testnet.ts` + viem dep deleted at the gate per canon. Keys: `~/.config/outfox/devnet/` (throwaway) |
 | 6 | Phase C: whitepaper/distribution updates, §4 verifications, launch materials | ⬜ |
 
 Toolchain note: the dev box needs nodejs/npm, rustup, solana CLI, anchor installed
