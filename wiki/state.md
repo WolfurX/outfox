@@ -66,7 +66,9 @@ regardless of grant outcome (the 200-USDG tooling-grant move gates nothing; nudg
 Superteam ~Sep 2 if silent; instagrant + Colosseum proceed) · PoP delegation
 question answered (wallet/platform sign-in is never PoP; SAS-attestation fast lane
 = backlog beside the Didit recommendation).
-**Still open:** R3 PoP provider final call (waits on counsel; Didit recommended),
+**Still open:** R3 PoP provider final call (waits on counsel; **Sumsub primary**
+per owner data 2026-08-28 — Rizki's own Superteam payout experience; Didit = cost
+fallback),
 POL depth at launch, op_take rates, grant-money boundary confirmation, counsel
 engagement (the hard gate; sharpest question: does cash-out make us a VASP → KYC
 mandatory anyway?).

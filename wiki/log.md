@@ -128,3 +128,14 @@ not carried into this repository.)*
   personhood — never R3; a Solana Attestation Service fast lane (approved KYC
   issuers) filed as backlog beside the Didit recommendation. Detail: internal
   PHASE-C-DECISIONS.md / decisions trail.
+- 2026-08-28 · INGEST · **PoP rec revised on owner data + beta-deploy readiness.**
+  Sumsub → primary (Rizki's own Superteam payout experience: good and easy; SAS
+  issuer alignment; $149/mo min lifts the floor to ~$250/mo — acceptable post-launch;
+  Didit = cost fallback). Fundamental-KYC question answered for the record: nobody
+  verifies to PLAY — R3 exists at the cash-out door only, once, and v6c proved PoP
+  quality is the ONLY binding sybil lever. New: `deploy/` (Caddyfile, systemd unit
+  w/ hardening, production env template, runbook + pre-beta checklist); known gaps
+  filed (rate limiting = review-gated engineering item, healthz, TWA assetlinks).
+  Instagrant application drafted (internal APPLICATIONS.md; link + milestones ready
+  for owner submission). Domain check: outfox.game unregistered as of today (owner
+  purchase, ~$30/yr).

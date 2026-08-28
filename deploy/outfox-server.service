@@ -1,0 +1,36 @@
+# systemd unit for the Outfox game server (beta, one box).
+# Install: copy to /etc/systemd/system/, create the outfox user, place the env
+# file at /etc/outfox/server.env (root:outfox 0640 — it holds the voucher key).
+
+[Unit]
+Description=Outfox game server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=outfox
+Group=outfox
+EnvironmentFile=/etc/outfox/server.env
+WorkingDirectory=/srv/outfox/app
+ExecStart=/srv/outfox/app/node_modules/.bin/tsx apps/server/src/index.ts
+Restart=always
+RestartSec=3
+
+# state: the SQLite ledger lives under /var/lib/outfox (see OUTFOX_DB in the env)
+StateDirectory=outfox
+StateDirectoryMode=0750
+
+# hardening — the server needs: loopback listen, outbound RPC, its state dir
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/outfox
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+MemoryDenyWriteExecute=false
+
+[Install]
+WantedBy=multi-user.target
