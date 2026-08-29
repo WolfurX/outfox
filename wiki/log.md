@@ -155,3 +155,9 @@ not carried into this repository.)*
   age > 60s). Verified live both ways: chain off → `{ok,chain:false,null}`, devnet
   chain on → `indexerAgeMs≈6s`. Suite 115/115. Same day: repo went PUBLIC
   (github.com/WolfurX/outfox) after a clean full-history hygiene scan.
+- 2026-08-29 · BUILD · **Root README written** (the repo is public now; reviewers
+  land on it): what/how-built/chain-edge/status/layout/quickstart, honesty markers
+  kept (devnet verified, mainnet behind audit + counsel), redaction rules and the
+  TAPE vocabulary blacklist applied (caught "roll" in a draft line). No license
+  file on purpose — visibility without an open-source grant; owner's call if that
+  changes.
