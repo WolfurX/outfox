@@ -73,3 +73,9 @@ program. Building `programs/` needs Rust and Anchor; the apps need only Node.
 The whitepaper carries the full economy design, the published parameters, and the
 honest built-versus-designed status of each part:
 https://outfox.gitbook.io/whitepaper/
+
+## License
+
+Business Source License 1.1 (`LICENSE`). Read, modify, and use the code freely
+for anything non-production; production or commercial use needs a license from
+the Licensor until the Change Date (2030-01-01), when the work converts to MIT.

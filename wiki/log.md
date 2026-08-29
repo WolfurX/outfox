@@ -161,3 +161,10 @@ not carried into this repository.)*
   TAPE vocabulary blacklist applied (caught "roll" in a draft line). No license
   file on purpose — visibility without an open-source grant; owner's call if that
   changes.
+- 2026-08-29 · DECISION · **License: BUSL-1.1** (Rizki's call after the repo went
+  public): source-visible, non-production use free, production/commercial use
+  reserved until Change Date 2030-01-01, then converts to MIT. Licensor recorded
+  as WolfurX (pseudonymous, matches repo identity posture; swap in a legal entity
+  later if one exists). Canonical SPDX terms + Parameters block; README License
+  section added. Rationale: clone-with-own-token is the threat model; BUSL blocks
+  production use outright where AGPL only forces source publication.
