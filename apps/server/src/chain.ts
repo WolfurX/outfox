@@ -430,12 +430,14 @@ export async function indexOnce(
 export function startIndexer(
   db: DB, cfg: ChainConfig, intervalMs = 5_000,
   log: (msg: string) => void = () => {},
+  onOk: () => void = () => {},
 ): () => void {
   let stopped = false;
   const tick = async () => {
     if (stopped) return;
     try {
       const r = await indexOnce(db, cfg);
+      onOk();
       if (r.deposits || r.withdrawals) {
         log(`indexed ${r.txs} tx(s): ${r.deposits} deposit(s), ${r.withdrawals} withdrawal(s)`);
       }

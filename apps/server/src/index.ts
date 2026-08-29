@@ -39,6 +39,19 @@ await app.register(cookie);
 
 const hash = (t: string) => createHash('sha256').update(t).digest('hex');
 
+// --- liveness probe (deploy/README.md gap #2): the ONLY unauthenticated route.
+// Reveals liveness only — no config, versions, or balances.
+let lastIndexOk: number | null = null;
+app.get('/healthz', async () => {
+  db.prepare(`SELECT 1`).get(); // DB gone -> throws -> 500 via the error handler
+  return {
+    ok: true,
+    chain: !!chain,
+    // ms since the last successful indexer pass; null when chain is off or no pass yet
+    indexerAgeMs: lastIndexOk === null ? null : Date.now() - lastIndexOk,
+  };
+});
+
 function sessionPlayer(req: { cookies: Record<string, string | undefined> }): number | null {
   const token = req.cookies[COOKIE];
   if (!token) return null;
@@ -449,7 +462,7 @@ await app.listen({ port: PORT, host: '127.0.0.1' });
 console.log(`outfox slice server on :${PORT} (db: ${DB_PATH})`);
 
 if (chain) {
-  startIndexer(db, chain, 5_000, (m) => console.log(`[indexer] ${m}`));
+  startIndexer(db, chain, 5_000, (m) => console.log(`[indexer] ${m}`), () => { lastIndexOk = Date.now(); });
   console.log(`[indexer] watching program ${chain.programId.toBase58()} on chain ${chain.chainId}`);
 } else {
   console.log('[indexer] chain edge not configured (set OUTFOX_RPC_URL / _CHAIN_ID / _PROGRAM_ID)');

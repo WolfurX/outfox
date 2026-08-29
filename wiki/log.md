@@ -147,3 +147,11 @@ not carried into this repository.)*
   framing kept); roadmap phase 6 + the-token now carry the public commitment that
   launch liquidity is permanently locked at creation, verifiable on-chain (venue
   itself stays internal). Redaction-safe: no vendor or market names.
+- 2026-08-29 · BUILD · **`/healthz` liveness probe** (deploy gap #2 closed): only
+  unauthenticated route — DB touch (500 when the ledger is unreachable) + ms since
+  the last successful indexer pass (`startIndexer` gained an `onOk` heartbeat
+  callback; null when the chain edge is off). Caddyfile proxies `/healthz`;
+  deploy/README gap list updated with the monitoring rule (alert on non-200 or
+  age > 60s). Verified live both ways: chain off → `{ok,chain:false,null}`, devnet
+  chain on → `indexerAgeMs≈6s`. Suite 115/115. Same day: repo went PUBLIC
+  (github.com/WolfurX/outfox) after a clean full-history hygiene scan.

@@ -63,8 +63,11 @@ file — WAL makes that a torn read.)
    `/api/wallet/*`, and `/api/session/bootstrap` need per-IP limits
    (`@fastify/rate-limit`) — bootstrap mints rows, nonce endpoints mint DB
    entries. Touches the server → adversarial review per the security posture.
-2. **Health endpoint**: nothing unauthenticated returns 200; add `/healthz`
-   (DB touch + indexer age) for uptime monitoring.
+2. **Health endpoint**: DONE — `GET /healthz` (unauthenticated, proxied by the
+   Caddyfile) returns `{ ok, chain, indexerAgeMs }`: a DB touch (500 if the ledger
+   is unreachable) + ms since the last successful indexer pass (null = chain off
+   or no pass yet). Point the uptime monitor at it and alert on non-200 or
+   `indexerAgeMs` > 60000.
 3. **Log target**: Fastify logs at warn to stdout/journal — decide retention.
 4. **TWA assetlinks**: generated with the APK (bubblewrap) → place in
    `/srv/outfox/well-known/` — required for the Solana dApp Store listing.
