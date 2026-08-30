@@ -168,3 +168,10 @@ not carried into this repository.)*
   later if one exists). Canonical SPDX terms + Parameters block; README License
   section added. Rationale: clone-with-own-token is the threat model; BUSL blocks
   production use outright where AGPL only forces source publication.
+- 2026-08-30 · SYNTH · **todo-mvp page created** (`wiki/todo-mvp.md`, owner ask):
+  the checklist between here and MVP, defined as the first public beta on devnet
+  economics. Tiered: engineering blockers (rate limiting = the one open code
+  blocker, log retention), the one-box deploy run, Phase-C launch materials,
+  non-blocking polish, open owner decisions, and the hard pre-mainnet gates kept
+  explicitly outside MVP. Derived from deploy/README, SOLANA-FEASIBILITY §5–6,
+  state.md queues; indexed in index.md.

@@ -4,6 +4,7 @@ Non-normative derived layer; canon always wins (`wiki/CLAUDE.md`). Start at `sta
 
 ## Orientation
 - [state.md](state.md) — where the project is right now: phase checklist, open queues, git state. **Read first.**
+- [todo-mvp.md](todo-mvp.md) — the checklist between here and MVP (public beta on devnet economics), tiered by what blocks what.
 - [decisions.md](decisions.md) — owner-decision chronology with dates and canon refs.
 - [log.md](log.md) — append-only wiki activity record.
 
