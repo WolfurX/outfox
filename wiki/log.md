@@ -194,3 +194,11 @@ not carried into this repository.)*
   browser online event (canon §1.2 reconnect-refetches). ApiError carries
   retryAfterSec. Web build green (62.61 KB gz), verify-live 14/14. Remaining beta
   tuning item: 30/min bootstrap ceiling vs CGNAT.
+- 2026-08-31 · ROUND · **Layered SVG fox derived** (the open art task from 2026-08-15):
+  apps/web/public/art/mascot.svg, 4.3 KB (canon cap 8 KB), hand-traced geometric
+  derivation of art/mascot.webp. Layered groups (tail/legs/feet/jacket/shirt/tie/
+  head); the jacket layers read fill from --ofx-jacket / --ofx-jacket-2 with
+  charcoal defaults — the jacket cosmetic line recolors by setting the vars on an
+  INLINE instance (CSS vars do not cross an <img> boundary; verified with a
+  three-variant render: charcoal / ember / hollow-green). Not yet wired to a UI
+  slot — canon's sanctioned mascot slots stand.
