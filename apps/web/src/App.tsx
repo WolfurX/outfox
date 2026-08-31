@@ -89,10 +89,36 @@ export default function App() {
     setPlayer(p);
   }, []);
 
+  // Boot with retry: a failed bootstrap halts the tape but keeps trying (backoff,
+  // capped; a 429's retry-after wins when longer) — never a permanent dead end.
+  // The browser's online event short-circuits the wait. (§1.2: reconnect refetches.)
   useEffect(() => {
-    api.bootstrap()
-      .then((b) => { setBoot(b); absorb(b.player); setListings(b.listings); })
-      .catch(() => setHalted(true));
+    let dead = false;
+    let timer: number | undefined;
+    let attempt = 0;
+    const tryBoot = () => {
+      timer = undefined;
+      api.bootstrap()
+        .then((b) => {
+          if (dead) return;
+          setHalted(false); setBoot(b); absorb(b.player); setListings(b.listings);
+        })
+        .catch((e) => {
+          if (dead) return;
+          setHalted(true);
+          const backoff = Math.min(30_000, 2_000 * 2 ** attempt++);
+          const ra = (e as { retryAfterSec?: number }).retryAfterSec;
+          timer = window.setTimeout(tryBoot, Math.max(backoff, (ra ?? 0) * 1000));
+        });
+    };
+    const onOnline = () => {
+      if (timer === undefined) return; // only while a retry is pending
+      clearTimeout(timer);
+      tryBoot();
+    };
+    window.addEventListener('online', onOnline);
+    tryBoot();
+    return () => { dead = true; clearTimeout(timer); window.removeEventListener('online', onOnline); };
   }, [absorb]);
 
   // the printed result reverts to the row's normal line after a beat

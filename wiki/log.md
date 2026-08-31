@@ -188,3 +188,9 @@ not carried into this repository.)*
   coverage. Suite 135/135; red-proofs run for both the missing-limits and
   spoofable-trust defects. Client follow-up noted: honor retry-after instead of
   hard HALT on bootstrap failure; bootstrap ceiling vs CGNAT is a beta tuning item.
+- 2026-08-31 · ROUND · **Client boot backoff** (rate-limit round follow-up): the
+  one-shot bootstrap that hard-halted forever now retries with capped exponential
+  backoff, honors a 429's retry-after when longer, and retries immediately on the
+  browser online event (canon §1.2 reconnect-refetches). ApiError carries
+  retryAfterSec. Web build green (62.61 KB gz), verify-live 14/14. Remaining beta
+  tuning item: 30/min bootstrap ceiling vs CGNAT.

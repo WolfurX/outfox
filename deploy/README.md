@@ -96,9 +96,10 @@ file — WAL makes that a torn read.)
    bucket (the review's headline finding; fixed + regression-pinned).
    Regressions: `test/rate-limit.test.ts` (route table, spoof-in-direct-mode),
    `test/rate-limit-proxy.test.ts` (forged-XFF-behind-Caddy, fails on `true`).
-   Known tuning item for beta: 30/min bootstrap can pinch CGNAT/office NATs, and
-   the client currently halts hard on a failed bootstrap instead of honoring
-   `retry-after` — client backoff is a follow-up before wide distribution.
+   Client backoff: DONE — a failed bootstrap halts the tape but retries with capped
+   exponential backoff (a 429's `retry-after` wins when longer) and the browser's
+   online event short-circuits the wait. Remaining tuning item for beta: the 30/min
+   bootstrap ceiling can pinch CGNAT/office NATs — revisit with real traffic.
 2. **Health endpoint**: DONE — `GET /healthz` (unauthenticated, proxied by the
    Caddyfile) returns `{ ok, chain, indexerAgeMs }`: a DB touch (500 if the ledger
    is unreachable) + ms since the last successful indexer pass (null = chain off

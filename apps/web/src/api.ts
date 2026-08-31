@@ -9,7 +9,7 @@ import type {
  * NETWORK-class failure — surface it as TypeError so the app shows TAPE HALTED, not a
  * raw JSON parse error in the banner. */
 export class ApiError extends Error {
-  constructor(message: string, public code?: string) { super(message); }
+  constructor(message: string, public code?: string, public retryAfterSec?: number) { super(message); }
 }
 
 async function parse<T>(res: Response): Promise<T> {
@@ -19,7 +19,12 @@ async function parse<T>(res: Response): Promise<T> {
   } catch {
     throw new TypeError(`upstream returned non-JSON (${res.status})`);
   }
-  if (!res.ok) throw new ApiError(data.error ?? `request failed (${res.status})`, data.code);
+  if (!res.ok) {
+    // 429s carry retry-after (seconds); callers use it to pace their retry.
+    const ra = Number(res.headers.get('retry-after'));
+    throw new ApiError(data.error ?? `request failed (${res.status})`, data.code,
+      Number.isFinite(ra) && ra > 0 ? ra : undefined);
+  }
   return data as T;
 }
 
