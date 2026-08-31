@@ -175,3 +175,16 @@ not carried into this repository.)*
   by the owner; public beta waits for it, dev instance does not. Recorded in
   deploy/README.md §Environments. Open owner call: whether beta takes the
   outfox.game apex first.
+- 2026-08-31 · ROUND · **Per-IP rate limiting shipped** (deploy gap #1): route-scoped
+  @fastify/rate-limit — bootstrap 30/min, auth + chain-edge routes 10/min per route;
+  429s in the client error shape; healthz unlimited. Adversarial review (fresh agent)
+  found the headline defect: `trustProxy: true` keys on the client-controlled
+  leftmost XFF and Caddy appends rather than strips, so every limit was bypassable
+  in the deployed topology — fixed to hop-count 1 and pinned by
+  test/rate-limit-proxy.test.ts (fails on boolean true; verified red). Also from
+  review: chain-edge routes (withdraw/*, deposit/prepare) limited as RPC-amplifier
+  guards, listen guard moved to NODE_ENV, rate-limit error discriminated by marker
+  not bare 429, per-route (not per-class) semantics documented, table-driven route
+  coverage. Suite 135/135; red-proofs run for both the missing-limits and
+  spoofable-trust defects. Client follow-up noted: honor retry-after instead of
+  hard HALT on bootstrap failure; bootstrap ceiling vs CGNAT is a beta tuning item.

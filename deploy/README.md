@@ -68,19 +68,37 @@ file — WAL makes that a torn read.)
 
 - [ ] `OUTFOX_DEV_AUTH`, `OUTFOX_DEBUG`, `OUTFOX_DEV_SEED_EXCHANGE` all unset —
       verify with `systemctl show outfox-server -p Environment` after start.
+- [ ] `NODE_ENV=production` exactly — it gates the `Secure` cookie AND the listen
+      guard (`NODE_ENV=test` starts the process without ever binding: healthy-looking
+      unit, 502 from Caddy).
 - [ ] Env file 0640 root:outfox; signer seed generated on-box, nowhere else.
 - [ ] Server listens 127.0.0.1 only (it does by code); firewall allows 80/443/ssh
       only.
 - [ ] Cookie shows `Secure` in the smoke test.
+- [ ] `OUTFOX_TRUST_PROXY=1` set (behind Caddy only) — verify a burst of 31
+      unauthenticated bootstraps from one client returns 429, and that two
+      different clients get separate budgets.
 - [ ] Backups verified restorable once (open the copy, run a query).
 - [ ] Exchange pool NOT seeded until the operator seeding step is deliberate.
 
 ## Known gaps — engineering items BEFORE public beta (review-gated round)
 
-1. **Rate limiting**: none exists. `/api/register/siws/nonce`, `/api/register/*`,
-   `/api/wallet/*`, and `/api/session/bootstrap` need per-IP limits
-   (`@fastify/rate-limit`) — bootstrap mints rows, nonce endpoints mint DB
-   entries. Touches the server → adversarial review per the security posture.
+1. **Rate limiting**: DONE (adversarially reviewed 2026-08-31) — per-IP limits via
+   `@fastify/rate-limit` (route-scoped, nothing global): `/api/session/bootstrap`
+   30/min; `/api/register/*`, `/api/wallet/*`, `/api/verify/dev`, and the chain-edge
+   routes (`/api/withdraw/*`, `/api/deposit/prepare` — each fires an outbound RPC
+   call) 10/min **per route** (independent counters; the surface as a whole allows
+   n_routes × 10/min — the hard brute-force bounds stay engine-side). 429s return
+   the client error shape (`code: rate_limited`) with `retry-after`; `/healthz`
+   stays unlimited. Keying uses `X-Forwarded-For` ONLY when `OUTFOX_TRUST_PROXY=1`,
+   and trust is a HOP COUNT of 1 (the Caddy hop), never boolean-all — Caddy appends
+   to client-supplied XFF, so trusting every hop would let clients pick their own
+   bucket (the review's headline finding; fixed + regression-pinned).
+   Regressions: `test/rate-limit.test.ts` (route table, spoof-in-direct-mode),
+   `test/rate-limit-proxy.test.ts` (forged-XFF-behind-Caddy, fails on `true`).
+   Known tuning item for beta: 30/min bootstrap can pinch CGNAT/office NATs, and
+   the client currently halts hard on a failed bootstrap instead of honoring
+   `retry-after` — client backoff is a follow-up before wide distribution.
 2. **Health endpoint**: DONE — `GET /healthz` (unauthenticated, proxied by the
    Caddyfile) returns `{ ok, chain, indexerAgeMs }`: a DB touch (500 if the ledger
    is unreachable) + ms since the last successful indexer pass (null = chain off

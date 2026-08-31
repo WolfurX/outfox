@@ -4,6 +4,7 @@
  */
 import Fastify from 'fastify';
 import cookie from '@fastify/cookie';
+import rateLimit from '@fastify/rate-limit';
 import { createHash, randomBytes } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { openDb } from './db.js';
@@ -34,8 +35,44 @@ const PORT = Number(process.env.PORT ?? 8787);
 const COOKIE = 'fox_session';
 
 const db = openDb(DB_PATH);
-const app = Fastify({ logger: { level: 'warn' } });
+// trustProxy makes req.ip come from X-Forwarded-For. Set OUTFOX_TRUST_PROXY=1 ONLY
+// behind Caddy (deploy/Caddyfile) — trusted on a directly-exposed server, the header
+// becomes a rate-limit bypass. Off (dev/tests), the socket address is the key and
+// forged XFF headers are ignored.
+// The value is a HOP COUNT of 1 (trust exactly the Caddy hop), never boolean true:
+// with `true` Fastify trusts every hop and req.ip becomes the LEFTMOST XFF entry,
+// which the client controls — Caddy appends to client-supplied XFF rather than
+// stripping it, so `true` would let an attacker pick their own rate-limit bucket
+// per request (adversarial review 2026-08-31; regression: rate-limit-proxy.test.ts).
+const app = Fastify({
+  logger: { level: 'warn' },
+  trustProxy: process.env.OUTFOX_TRUST_PROXY === '1' ? 1 : false,
+});
 await app.register(cookie);
+
+// Per-IP limits on the row-minting / brute-forceable surfaces only (deploy/README
+// gap #1): bootstrap mints player+session rows, the register/nonce/link routes mint
+// nonce rows or take guessable secrets. Gameplay routes are session-gated and priced
+// in Focus/Risk Appetite; /healthz stays unlimited for the uptime monitor.
+await app.register(rateLimit, {
+  global: false,
+  // Thrown through setErrorHandler; the marker (not the generic statusCode) is what
+  // the handler keys on, so an upstream 429 can never be mislabeled rate_limited.
+  errorResponseBuilder: (_req, context) => {
+    const err = new Error(`rate limit exceeded, retry in ${context.after}`) as Error & {
+      statusCode: number; rateLimited: true;
+    };
+    err.statusCode = context.statusCode;
+    err.rateLimited = true;
+    return err;
+  },
+});
+// Limits are PER ROUTE per IP (each route config gets its own counter store) — the
+// auth surface as a whole allows n_routes × 10/min from one IP, which is fine: the
+// real brute-force bounds are engine-side (e.g. 5 attempts per email code).
+const RL_WINDOW_MS = 60_000;
+const RL_BOOTSTRAP = { rateLimit: { max: 30, timeWindow: RL_WINDOW_MS } };
+const RL_AUTH = { rateLimit: { max: 10, timeWindow: RL_WINDOW_MS } };
 
 const hash = (t: string) => createHash('sha256').update(t).digest('hex');
 
@@ -60,7 +97,7 @@ function sessionPlayer(req: { cookies: Record<string, string | undefined> }): nu
   return row?.player_id ?? null;
 }
 
-app.post('/api/session/bootstrap', async (req, reply) => {
+app.post('/api/session/bootstrap', { config: RL_BOOTSTRAP }, async (req, reply) => {
   let playerId = sessionPlayer(req);
   if (playerId === null) {
     playerId = createPlayer(db);
@@ -100,14 +137,14 @@ const DEV_AUTH = !!process.env.OUTFOX_DEV_AUTH;
 const PRIVY = privyConfigFromEnv();
 
 // --- R1 registration (§10.1). Dev auth adapter: code is returned, not emailed. ---
-app.post('/api/register/start', async (req) => {
+app.post('/api/register/start', { config: RL_AUTH }, async (req) => {
   requirePlayer(req);
   const { email } = (req.body ?? {}) as { email?: string };
   const code = startRegister(db, String(email ?? ''));
   return DEV_AUTH ? { ok: true, devCode: code } : { ok: true };
 });
 
-app.post('/api/register/verify', async (req) => {
+app.post('/api/register/verify', { config: RL_AUTH }, async (req) => {
   const playerId = requirePlayer(req);
   const { email, code } = (req.body ?? {}) as { email?: string; code?: string };
   const r = verifyRegister(db, playerId, String(email ?? ''), String(code ?? ''));
@@ -116,7 +153,7 @@ app.post('/api/register/verify', async (req) => {
 });
 
 // Collision resolution: rebind this session to the existing account (guest retired).
-app.post('/api/register/adopt', async (req) => {
+app.post('/api/register/adopt', { config: RL_AUTH }, async (req) => {
   const guestId = requirePlayer(req);
   const token = req.cookies[COOKIE]!;
   const { email } = (req.body ?? {}) as { email?: string };
@@ -128,7 +165,7 @@ app.post('/api/register/adopt', async (req) => {
 // --- R1 production adapter (Privy, §10.2). One route, both steps: the verified
 // identity token both registers and — on `adopt` — resolves a collision, so there is
 // no separate code exchange to replay. The token is re-verified on every call. ---
-app.post('/api/register/privy', async (req) => {
+app.post('/api/register/privy', { config: RL_AUTH }, async (req) => {
   const playerId = requirePlayer(req);
   if (!PRIVY) throw new EngineError('not_configured', 'this server does not use Privy sign-in');
   const { token, adopt } = (req.body ?? {}) as { token?: string; adopt?: boolean };
@@ -147,13 +184,13 @@ app.post('/api/register/privy', async (req) => {
 // --- R1 production adapter (SIWS). Two steps: a nonce challenge, then the signed
 // message both registers and — on `adopt` — resolves a collision. The signature is
 // verified on every call; the message is purpose-bound (never the R2 link message). ---
-app.post('/api/register/siws/nonce', async (req) => {
+app.post('/api/register/siws/nonce', { config: RL_AUTH }, async (req) => {
   const playerId = requirePlayer(req);
   const nonce = issueLinkNonce(db, playerId);
   return { nonce, message: signInMessage(nonce, ORIGIN) };
 });
 
-app.post('/api/register/siws', async (req) => {
+app.post('/api/register/siws', { config: RL_AUTH }, async (req) => {
   const playerId = requirePlayer(req);
   const { address, nonce, signature, adopt } = (req.body ?? {}) as
     { address?: string; nonce?: string; signature?: string; adopt?: boolean };
@@ -251,13 +288,13 @@ app.get('/api/alpha', async (req) => {
 });
 
 // --- R2: link a wallet by proving control (SIWE-lite) ---
-app.post('/api/wallet/nonce', async (req) => {
+app.post('/api/wallet/nonce', { config: RL_AUTH }, async (req) => {
   const playerId = requirePlayer(req);
   const nonce = issueLinkNonce(db, playerId);
   return { nonce, message: linkMessage(nonce, ORIGIN) };
 });
 
-app.post('/api/wallet/link', async (req) => {
+app.post('/api/wallet/link', { config: RL_AUTH }, async (req) => {
   const playerId = requirePlayer(req);
   const { address, nonce, signature } = (req.body ?? {}) as
     { address?: string; nonce?: string; signature?: string };
@@ -277,7 +314,7 @@ app.post('/api/wallet/link', async (req) => {
 // --- R3 verification. Stub adapter: the real one is World ID at cash-out only
 //     (ROBINHOOD-FEASIBILITY migration step 8). Enabled only under OUTFOX_DEV_AUTH so a
 //     real deploy cannot mint verified identities. ---
-app.post('/api/verify/dev', async (req) => {
+app.post('/api/verify/dev', { config: RL_AUTH }, async (req) => {
   if (!DEV_AUTH) throw new EngineError('not_available', 'unavailable');
   const playerId = requirePlayer(req);
   db.prepare(`UPDATE players SET rung = 3 WHERE id = ? AND rung >= 2`).run(playerId);
@@ -285,7 +322,9 @@ app.post('/api/verify/dev', async (req) => {
 });
 
 // --- cash-out: request (runs every §9 gate) ---
-app.post('/api/withdraw/request', async (req) => {
+// Chain-edge routes fire an outbound Solana RPC call per request (reserve reads,
+// tx builds) — limited so one session can't turn the server into an RPC amplifier.
+app.post('/api/withdraw/request', { config: RL_AUTH }, async (req) => {
   const playerId = requirePlayer(req);
   requireChain();
   const { amountWei } = (req.body ?? {}) as { amountWei?: string };
@@ -300,7 +339,7 @@ app.post('/api/withdraw/request', async (req) => {
 });
 
 // --- cash-out: claim the voucher once vested (the ONLY place the hot key signs) ---
-app.post('/api/withdraw/claim', async (req) => {
+app.post('/api/withdraw/claim', { config: RL_AUTH }, async (req) => {
   const playerId = requirePlayer(req);
   const cfg = requireChain();
   const { id } = (req.body ?? {}) as { id?: number };
@@ -329,7 +368,7 @@ app.post('/api/withdraw/claim', async (req) => {
 });
 
 // --- deposits: two wallet transactions, both encoded here (client has no ABI code) ---
-app.post('/api/deposit/prepare', async (req) => {
+app.post('/api/deposit/prepare', { config: RL_AUTH }, async (req) => {
   const playerId = requirePlayer(req);
   const cfg = requireChain();
   const { amountWei, from } = (req.body ?? {}) as { amountWei?: string; from?: string };
@@ -452,18 +491,29 @@ if (process.env.OUTFOX_DEBUG) {
 app.setErrorHandler((err, _req, reply) => {
   if (err instanceof EngineError) {
     reply.code(err.code === 'no_session' ? 401 : 400).send({ error: err.message, code: err.code });
+  } else if ((err as { rateLimited?: boolean }).rateLimited) {
+    // @fastify/rate-limit (our errorResponseBuilder) throws through here; keep the
+    // client-facing error shape. retry-after/x-ratelimit headers are already set.
+    reply.code(429).send({ error: 'too many requests, give it a minute', code: 'rate_limited' });
   } else {
     app.log.error(err);
     reply.code(500).send({ error: 'internal error' });
   }
 });
 
-await app.listen({ port: PORT, host: '127.0.0.1' });
-console.log(`outfox slice server on :${PORT} (db: ${DB_PATH})`);
+// Tests import the app and drive it with inject(); only a real run listens.
+// Gate on NODE_ENV (vitest sets it to 'test') rather than a custom flag a deploy
+// env could carry by accident — production sets NODE_ENV=production explicitly.
+export { app };
 
-if (chain) {
-  startIndexer(db, chain, 5_000, (m) => console.log(`[indexer] ${m}`), () => { lastIndexOk = Date.now(); });
-  console.log(`[indexer] watching program ${chain.programId.toBase58()} on chain ${chain.chainId}`);
-} else {
-  console.log('[indexer] chain edge not configured (set OUTFOX_RPC_URL / _CHAIN_ID / _PROGRAM_ID)');
+if (process.env.NODE_ENV !== 'test') {
+  await app.listen({ port: PORT, host: '127.0.0.1' });
+  console.log(`outfox slice server on :${PORT} (db: ${DB_PATH})`);
+
+  if (chain) {
+    startIndexer(db, chain, 5_000, (m) => console.log(`[indexer] ${m}`), () => { lastIndexOk = Date.now(); });
+    console.log(`[indexer] watching program ${chain.programId.toBase58()} on chain ${chain.chainId}`);
+  } else {
+    console.log('[indexer] chain edge not configured (set OUTFOX_RPC_URL / _CHAIN_ID / _PROGRAM_ID)');
+  }
 }
