@@ -168,3 +168,10 @@ not carried into this repository.)*
   later if one exists). Canonical SPDX terms + Parameters block; README License
   section added. Rationale: clone-with-own-token is the threat model; BUSL blocks
   production use outright where AGPL only forces source publication.
+- 2026-08-31 · DECISION · **Two environments** (Rizki): dev+beta on one small
+  VPS (1 vCPU/1 GB, devnet, SQLite) and production on a separate larger box
+  (mainnet, behind the audit + counsel gates, Postgres). Never co-hosted, fresh
+  keys per env, web bundle built locally and rsynced. Domain purchase deferred
+  by the owner; public beta waits for it, dev instance does not. Recorded in
+  deploy/README.md §Environments. Open owner call: whether beta takes the
+  outfox.game apex first.

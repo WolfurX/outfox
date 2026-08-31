@@ -4,6 +4,24 @@ The slice architecture is deliberately one-box: Caddy (TLS + static PWA + /api
 proxy) in front of the Node server on loopback, SQLite as the ledger. This
 directory holds the production artifacts; nothing here runs in dev.
 
+## Environments (decision 2026-08-31)
+
+Two environments, two boxes, never shared and never co-hosted with unrelated
+services:
+
+| Env | Box | Chain | DB | Domain |
+|---|---|---|---|---|
+| **dev+beta** | small VPS (1 vCPU / 1 GB, add swap) | devnet | SQLite | real domain pending (owner purchase); until then dev-only access via a temporary DNS name or SSH tunnel |
+| **production** | separate, larger box (2 GB+) | mainnet — exists only after the audit + counsel gates | PostgreSQL (migration queued) | `outfox.game` (whether beta takes the apex first is an open owner call) |
+
+Rules:
+
+- The web bundle is built locally and rsynced; the 1 GB box never builds.
+- Fresh keys per environment (prerequisite 3 below); nothing from the dev+beta
+  box is ever reused on production.
+- Public beta surfaces (dApp Store TWA, shared links) start only once the real
+  domain exists; the dev instance may run on the box before that.
+
 ## Prerequisites (owner)
 
 1. **Domain** — `outfox.game` (checked available 2026-08-28; ~$30/yr). DNS A/AAAA
