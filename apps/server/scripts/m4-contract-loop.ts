@@ -28,21 +28,26 @@ import {
 } from '@solana/web3.js';
 import { createHash } from 'node:crypto';
 import bs58 from 'bs58';
-import { openDb } from '../src/db.js';
-import { createPlayer, postTx, applyCarry, conservationAudit, EngineError } from '../src/engine.js';
+import { openDb } from '../src/core/db.js';
+import { EngineError } from '../src/core/errors.js';
+import { createPlayer } from '../src/identity/players.js';
+import { postTx, conservationAudit } from '../src/ledger/scrip.js';
+import { alphaBalance, unseasonedBalance } from '../src/ledger/alpha.js';
+import { applyCarry, applyAlphaCarry } from '../src/economy/carry.js';
 import {
   signVoucher, voucherMessage, voucherSignerPubkey, parseSettlementState,
-  depositIx, withdrawIx, foldTransaction, ataFor, statePda,
+  depositIx, withdrawIx, ataFor, statePda,
   TOKEN_PROGRAM, ATA_PROGRAM, type ChainConfig,
-} from '../src/chain.js';
+} from '../src/chain/adapter.js';
+import { foldTransaction } from '../src/chain/indexer.js';
+import { linkWallet } from '../src/identity/wallets.js';
 import {
-  linkWallet, alphaBalance, unseasonedBalance, requestWithdrawal, prepareClaim,
-  recordSignedVoucher, solvencyAudit, applyAlphaCarry,
-} from '../src/settlement.js';
+  requestWithdrawal, prepareClaim, recordSignedVoucher, solvencyAudit,
+} from '../src/economy/valve.js';
 import {
   getPool, poolSeedFromDeposit, buyAlpha, sellAlpha, buyCapacityCents, sellCapacityWei,
   effectiveFeeBps, exchangeAudit,
-} from '../src/exchange.js';
+} from '../src/economy/exchange.js';
 import { ALPHA_BASE_UNITS, VALVE, EXCHANGE } from '@outfox/shared';
 
 const DAY = 86_400_000;

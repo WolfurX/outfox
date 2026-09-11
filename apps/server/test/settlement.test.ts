@@ -1,11 +1,14 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { openDb, type DB } from '../src/db.js';
-import { createPlayer, EngineError } from '../src/engine.js';
+import { openDb, type DB } from '../src/core/db.js';
+import { EngineError } from '../src/core/errors.js';
+import { createPlayer } from '../src/identity/players.js';
+import { alphaBalance, unseasonedBalance } from '../src/ledger/alpha.js';
+import { linkWallet } from '../src/identity/wallets.js';
 import {
-  creditDeposit, linkWallet, alphaBalance, unseasonedBalance, requestWithdrawal,
-  priceWithdrawal, prepareClaim, recordSignedVoucher, markWithdrawalConfirmed,
-  weeklyRemaining, solvencyAudit, outstandingNet, alphaView, refreshVesting,
-} from '../src/settlement.js';
+  creditDeposit, requestWithdrawal, priceWithdrawal, prepareClaim, recordSignedVoucher,
+  markWithdrawalConfirmed, weeklyRemaining, solvencyAudit, outstandingNet, alphaView,
+  refreshVesting,
+} from '../src/economy/valve.js';
 import { ALPHA_BASE_UNITS, VALVE } from '@outfox/shared';
 
 const DAY = 86_400_000;

@@ -1,10 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import nacl from 'tweetnacl';
 import bs58 from 'bs58';
-import { openDb, type DB } from '../src/db.js';
-import { createPlayer, registerVerified, adoptVerified, EngineError } from '../src/engine.js';
-import { signInMessage, siwsSubject, verifySignIn } from '../src/auth-siws.js';
-import { linkMessage } from '../src/chain.js';
+import { openDb, type DB } from '../src/core/db.js';
+import { EngineError } from '../src/core/errors.js';
+import { createPlayer } from '../src/identity/players.js';
+import { registerVerified, adoptVerified } from '../src/identity/rungs.js';
+import { signInMessage, siwsSubject, verifySignIn } from '../src/identity/siws.js';
+import { linkMessage } from '../src/chain/adapter.js';
 
 // The SIWS R1 adapter's security boundary: a wallet signature over a purpose-bound,
 // nonce-bound message. Every rejection path is attacked explicitly, and the verified

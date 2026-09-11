@@ -67,9 +67,10 @@ over unchanged, with the model, calibration, and committed scorecards intact.
 ## Security posture (standing — this project handles user funds)
 
 This is custody code: real people's money crosses the chain edge. Treat every change to
-the settlement program (`programs/`), the chain adapter (`apps/server/src/chain.ts`),
-the §9 gates (`apps/server/src/settlement.ts`), the exchange (`apps/server/src/
-exchange.ts`), and the auth adapters as security-critical.
+the settlement program (`programs/`), the chain adapter and indexer
+(`apps/server/src/chain/`), the ledgers and their gates (`apps/server/src/ledger/`), the
+§9 gates and the carry (`apps/server/src/economy/`), and the identity adapters
+(`apps/server/src/identity/`) as security-critical.
 
 - **Model floor: no downgrades.** Every subagent spawned for work on this project runs
   on the main-loop model or higher — never a cheaper tier, and never a `model` override

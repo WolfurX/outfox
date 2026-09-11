@@ -22,14 +22,18 @@
  *        and the ALPHA treasury as liabilities. Rounding always favors the pool, so
  *        the product k never decreases and the pool cannot be drained by dust.
  *
- * Rate convention: e = Scrip ¢ per whole ALPHA = credit_cents / (alpha_wei / 1e18).
+ * Rate convention: e = Scrip ¢ per whole ALPHA = credit_cents / (alpha_wei / 1e9).
  */
-import type { DB } from './db.js';
-import { withTx, EngineError, postTx, treasuryAdd, requireRung, applyCarry } from './engine.js';
-import { postAlpha, applyAlphaCarry } from './settlement.js';
+import type { DB } from '../core/db.js';
+import { EngineError } from '../core/errors.js';
+import { withTx } from '../core/tx.js';
+import { DAY_MS } from '../core/time.js';
+import { postTx, treasuryAdd } from '../ledger/scrip.js';
+import { postAlpha, treasuryAlphaAdd } from '../ledger/alpha.js';
+import { requireRung } from '../identity/players.js';
+import { applyCarry, applyAlphaCarry } from './carry.js';
 import { ALPHA_BASE_UNITS, EXCHANGE, type ExchangeView, type ExchangeQuote } from '@outfox/shared';
 
-const DAY_MS = 86_400_000;
 const WEI_PER_ALPHA = ALPHA_BASE_UNITS;
 
 const ceilDiv = (a: bigint, b: bigint) => (a + b - 1n) / b;
@@ -240,11 +244,9 @@ export function buyAlpha(
     treasuryAdd(db, toSafeCents(fee, 'fee'));
     writePool(db, { creditCents: pool.creditCents + dc, alphaWei: pool.alphaWei - out });
     // §13.C: bought ALPHA is a NEW acquisition — the lot starts unseasoned.
-    db.prepare(
-      `INSERT INTO alpha_lots (player_id, remaining_wei, acquired_at, source)
-       VALUES (?, ?, ?, 'exchange')`
-    ).run(playerId, out.toString(), now);
-    postAlpha(db, playerId, out, 'exchange_buy', `ex:${amountCents}c`, now);
+    postAlpha(db, playerId, out, 'exchange_buy', `ex:${amountCents}c`, now, {
+      credit: { wei: out, acquiredAt: now, source: 'exchange' },
+    });
     const after = { creditCents: pool.creditCents + dc, alphaWei: pool.alphaWei - out };
     db.prepare(
       `INSERT INTO exchange_events
@@ -297,17 +299,9 @@ export function sellAlpha(
       throw new EngineError('rate_moved', 'the rate moved — refresh the quote');
     }
 
-    for (const step of plan) {
-      const lot = db.prepare(`SELECT remaining_wei FROM alpha_lots WHERE id = ?`).get(step.id) as
-        { remaining_wei: string };
-      const rest = BigInt(lot.remaining_wei) - step.take;
-      if (rest === 0n) db.prepare(`DELETE FROM alpha_lots WHERE id = ?`).run(step.id);
-      else db.prepare(`UPDATE alpha_lots SET remaining_wei = ? WHERE id = ?`).run(rest.toString(), step.id);
-    }
-    postAlpha(db, playerId, -amountWei, 'exchange_sell', `ex:${amountWei}w`, now);
-    const t = db.prepare(`SELECT wei FROM treasury_alpha WHERE id = 1`).get() as { wei: string };
-    db.prepare(`UPDATE treasury_alpha SET wei = ? WHERE id = 1`)
-      .run((BigInt(t.wei) + fee).toString());
+    // the sold lots leave the position through the gate, on the youngest-first plan
+    postAlpha(db, playerId, -amountWei, 'exchange_sell', `ex:${amountWei}w`, now, { consume: plan });
+    treasuryAlphaAdd(db, fee);
     writePool(db, { creditCents: pool.creditCents - out, alphaWei: pool.alphaWei + dv });
     postTx(db, playerId, outCents, 0, 'exchange_sell', `ex:${amountWei}w`, now);
     const after = { creditCents: pool.creditCents - out, alphaWei: pool.alphaWei + dv };

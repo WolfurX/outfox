@@ -24,8 +24,21 @@ contract every new game system follows, time/money/storage/API/identity models, 
 model, verification pyramid, scaling triggers, decisions A1–A15),
 `docs/INFRASTRUCTURE.md` (environments, pipeline, keys, backups, alerts, runbooks,
 cost), and `docs/GDD.md` rewritten in the unified vocabulary with a bridge table to the
-mechanics terms `ECONOMY.md` still uses. `PLAN.md` is the kickoff record. Code untouched:
-the module map is the target and the file move is a review-gated round.
+mechanics terms `ECONOMY.md` still uses. `PLAN.md` is the kickoff record.
+
+**Module move + A15 DONE (2026-09-12, same day, review-gated):** `apps/server/src` is now
+`core/ ledger/ identity/ systems/<name>/ economy/ chain/` per ARCHITECTURE §3 (git
+renames; `engine.ts` split into ledger/scrip, identity/players+rungs, systems/*,
+economy/carry). `ledger/alpha.ts::postAlpha` is the single $ALPHA gate (credit / consume /
+rebalance lot ops that must balance the ledger delta; rebalance may only shrink) plus
+`alphaDriftAudit` and `GET /api/debug/alpha-drift`. Adversarial review (fresh agent) found
+two gaps, both fixed with regressions: the rebalance branch could create value (guard +
+test), and the swap route read `minOut: null` as a zero floor (HEAD parity restored +
+route test). One deliberate behavior change: the dev adapter's `verifyRegister` keeps
+R2 (`MAX(rung, 1)`). Verified: suite 149/149, `tsc -p apps/server` clean (the old LotRow
+cast is gone), M4 harness ALL CHECKS PASSED, devnet e2e ALL CHECKS PASSED, verify-live
+20/20. Not inside the gate: `treasuryAlphaAdd` (paired by hand; `exchangeAudit` is the
+check). `settlement.test.ts` still writes one lot fixture directly (a test world, not code).
 
 Owner rulings the same day: (1) the Street mapping follows the published whitepaper;
 the shipped tab was corrected (`Street.tsx`: The Floor = Gigs and Options Alley = Calls
@@ -188,7 +201,7 @@ Earlier in session 5 — **Art is IN the UI** (`d569c5c`) — the staged batch i
 **Earlier in session 5 — the $ALPHA carry is LIVE** (`7c54bc3`), the M4 build-vs-model
 gap closed:
 
-- `applyAlphaCarry` (`apps/server/src/settlement.ts`; ECONOMY.md §13.A + §13.D): idle
+- `applyAlphaCarry` (`apps/server/src/economy/carry.ts` since the 2026-09-12 module move; ECONOMY.md §13.A + §13.D): idle
   in-game $ALPHA decays 0.45%/day (no floor, proportional across lots — the seasoning
   mix is preserved); the total position above the published 250-$ALPHA per-identity
   shelter pays 4.5%/day on the excess. Capture → ALPHA treasury. Lazy like the Scrip
@@ -202,9 +215,8 @@ gap closed:
   published on the Clearinghouse Rules sheet. Suite **83/83** (13 new tests pinned to
   an independent reference schedule); web build green (60.6 KB gz); dev-DB migration
   verified (`alpha_carry_at` backfills to upgrade time — never retroactive).
-- Known pre-existing (not from this round): `tsc -p apps/server` flags the old
-  `LotRow[]` cast at `settlement.ts` (interface vs `Record` overlap) — present at
-  `f598987` too; the web build's tsc is the green gate.
+- The old `tsc -p apps/server` `LotRow[]` cast error (present since `f598987`) went
+  with the 2026-09-12 module move; both packages' tsc are clean.
 
 ## Previous session (2026-08-11, end of session 4)
 

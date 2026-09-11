@@ -1,7 +1,7 @@
 # chain edge — Settlement, identity, and the valve (Solana)
 
 **Canon:** `docs/SOLANA-FEASIBILITY.md` (migration contract), `programs/settlement/`
-(the program), `apps/server/src/chain.ts` + `settlement.ts` + `auth-siws.ts`,
+(the program), `apps/server/src/chain/` + `economy/valve.ts` + `identity/siws.ts`,
 `DESIGN-SYSTEM-WEB.md` §10 (identity ladder, read through the Solana migration note),
 `ECONOMY.md` §9 (the valve). **Live on devnet, verified end-to-end 2026-08-28** —
 `programs/deployments/devnet.md`. The EVM-era reference (`contracts/`, testnet 46630)
@@ -58,7 +58,7 @@ Max-fill round-trips 1000×; found by the step-4 adversarial review, both gating
 findings fixed + regression-probed). Live harness:
 `apps/web/scripts/verify-live.cjs` (14/14).
 
-## The valve — IMPLEMENTED (`apps/server/src/settlement.ts`, `chain.ts`)
+## The valve — IMPLEMENTED (`apps/server/src/economy/valve.ts`, `chain/adapter.ts`)
 
 Every §9 gate runs server-side **before** a voucher is signed: **V1** R3 rung gate ·
 **V2** seasoning lots (seasoned spent first; unseasoned pays the 40% surcharge) ·

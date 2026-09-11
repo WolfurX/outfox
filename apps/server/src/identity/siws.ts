@@ -3,10 +3,10 @@
  * at the same seam (§10.2). The wallet proves control of its key by signing a
  * server-issued nonce; the proven pubkey becomes the verified subject
  * (`siws:<base58>`), flowing through the exact §10.1 collision semantics in
- * `engine.ts` — upgrade in place, never merge, never demote a rung.
+ * `identity/rungs.ts` — upgrade in place, never merge, never demote a rung.
  *
  * The sign-in message is deliberately DIFFERENT from the R2 wallet-link message
- * (`chain.ts::linkMessage`): a signature harvested for one purpose can never be
+ * (`chain/adapter.ts::linkMessage`): a signature harvested for one purpose can never be
  * replayed for the other. Both are domain-bound and nonce-bound.
  */
 import nacl from 'tweetnacl';

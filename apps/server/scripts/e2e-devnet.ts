@@ -21,16 +21,18 @@ import {
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import bs58 from 'bs58';
-import { openDb } from '../src/db.js';
-import { createPlayer } from '../src/engine.js';
+import { openDb } from '../src/core/db.js';
+import { createPlayer } from '../src/identity/players.js';
 import {
-  chainConfigFromEnv, indexOnce, signVoucher, alphaMintFor, reserveFor,
+  chainConfigFromEnv, signVoucher, alphaMintFor, reserveFor,
   prepareDepositTx, prepareRedeemTx, ataFor, statePda, TOKEN_PROGRAM, ATA_PROGRAM,
-} from '../src/chain.js';
+} from '../src/chain/adapter.js';
+import { indexOnce } from '../src/chain/indexer.js';
+import { linkWallet } from '../src/identity/wallets.js';
+import { alphaBalance, unseasonedBalance } from '../src/ledger/alpha.js';
 import {
-  linkWallet, alphaBalance, unseasonedBalance, requestWithdrawal, prepareClaim,
-  recordSignedVoucher, alphaView, solvencyAudit,
-} from '../src/settlement.js';
+  requestWithdrawal, prepareClaim, recordSignedVoucher, alphaView, solvencyAudit,
+} from '../src/economy/valve.js';
 import { ALPHA_BASE_UNITS, VALVE } from '@outfox/shared';
 
 const DAY = 86_400_000;

@@ -27,7 +27,7 @@ import { readFileSync } from 'node:fs';
 import {
   ataFor, statePda, voucherSignerPubkey, chainConfigFromEnv,
   TOKEN_PROGRAM, ATA_PROGRAM,
-} from '../src/chain.js';
+} from '../src/chain/adapter.js';
 import { ALPHA_BASE_UNITS } from '@outfox/shared';
 
 const cfg = chainConfigFromEnv();

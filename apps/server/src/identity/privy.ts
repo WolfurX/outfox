@@ -21,7 +21,7 @@
  * against the live app as part of that go-live pass.
  */
 import { createPublicKey, verify as cryptoVerify, type KeyObject } from 'node:crypto';
-import { EngineError } from './engine.js';
+import { EngineError } from '../core/errors.js';
 
 export interface PrivyConfig {
   appId: string;

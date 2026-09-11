@@ -45,10 +45,9 @@ Each principle traces to canon; none is new here.
    (`SOLANA-FEASIBILITY.md` §3, `wiki/chain-edge.md`).
 3. **Every economic mutation is an append-only event.** State is a fold over events; raw
    events are never aggregated away (`DATA-ARCHITECTURE.md` §1).
-4. **One mutation gate for Scrip; one is owed for $ALPHA.** Scrip moves only through
-   `postTx` inside `withTx`, and overdrafts reject atomically. $ALPHA has an append-only
-   ledger writer (`postAlpha`) but its lots are written directly by five call sites and
-   overdrafts are refused by the pricing functions, not by a gate (§6, decision A15).
+4. **One mutation gate per currency.** Scrip moves only through `postTx`, $ALPHA only
+   through `postAlpha`, each inside `withTx`. `postAlpha` writes the ledger row and the
+   matching lot operation together and refuses anything that does not balance (A15).
 5. **The firewall is structural.** Unsettled Scrip has an allow-list of destinations
    (sinks). No code path moves it to another player, the Open Market, or the exchange
    (`ECONOMY.md` §7, sim criterion G10).
@@ -80,36 +79,32 @@ Each principle traces to canon; none is new here.
 Beta runs without a message queue, a cache tier, or a separate worker; §17 says what
 would trigger each of those.
 
-## 3. Module map: current files and target layout
+## 3. Module map
 
-The server today is five modules plus two auth adapters (about 2,700 lines, routes
-included) and the seams
-between them are already the right ones. The target layout below is where new code lands
-from now on; moving the existing files into it is a separate, review-gated round (it
-touches custody code and earns an adversarial pass of its own).
+The layout below is the server as of the module-move round (2026-09-12, review-gated;
+the five original modules and two auth adapters were split along the seams they already
+had). New code lands here from now on.
 
 ```
 apps/server/src/
-  index.ts          composition root: env, plugins, route registration, startup guards
-  core/             db + migrations, withTx, EngineError, clock helpers
-  ledger/           postTx, postAlpha, treasury buckets, conservation + solvency audits
-  identity/         sessions, rungs + collision semantics, siws, privy (dormant), pop (R3, later)
-  systems/<name>/   one directory per game system: rules.ts, routes.ts, <name>.test.ts
-  economy/          exchange, carry, valve (the §9 gates), policy (parameter registry + change events)
-  chain/            adapter (tx building, vouchers, state reads), indexer
-  jobs/             scheduler + jobs (indexer, metrics, treasury ops, digests)
-  telemetry/        event writers per stream, the ported sim estimators
+  index.ts            composition root: env, plugins, Ctx, route registration, error handler, listen
+  core/               db (schema), tx (withTx), errors (EngineError), time, ctx (Ctx + requireChain)
+  ledger/             scrip (getPlayer, postTx, treasuryAdd, ledgerView, conservationAudit),
+                      alpha (postAlpha gate, balances, lotsOf, treasuryAlphaAdd, alphaDriftAudit), routes (ledger + debug audits)
+  identity/           sessions, players (createPlayer, requireRung, playerView), rungs (R1 adapters' shared
+                      semantics), wallets (R2 nonce + link + held-deposit claim), siws, privy (dormant), routes
+  systems/pacing.ts   the two bars and cooldowns (shared by calls, gigs, refills)
+  systems/<name>/     calls, gigs, refills, market: rules.ts + routes.ts
+  economy/            carry (Scrip + $ALPHA), valve (the §9 gates), exchange, routes
+  chain/              adapter (config, PDAs, state reads, vouchers, tx builders, link message), indexer
+  jobs/               (later) scheduler + jobs: metrics, treasury ops, digests
+  telemetry/          (later) event writers per stream, the ported sim estimators
 ```
 
-| Today | Target | Notes |
-|---|---|---|
-| `engine.ts` | `ledger/` (postTx, treasuryAdd, conservationAudit), `systems/calls`, `systems/gigs`, `systems/market`, `systems/refills`, `identity/rungs` | the class-of-work split the file already has in comments |
-| `settlement.ts` | `economy/valve`, `economy/carry`, `ledger/` (postAlpha, solvencyAudit) | `applyAlphaCarry` is economy, not valve |
-| `exchange.ts` | `economy/exchange` | unchanged shape |
-| `chain.ts` | `chain/adapter`, `chain/indexer` | the two halves are already separable at `indexOnce` |
-| `auth-siws.ts`, `auth-privy.ts` | `identity/siws`, `identity/privy` | Privy stays dormant server-side; no client flow on Solana |
-| `db.ts` | `core/db` + `core/migrations/` | migrations become numbered files at the Postgres move (§17) |
-| `index.ts` routes | `systems/*/routes.ts`, `identity/routes.ts`, `economy/*/routes.ts` | `index.ts` keeps only composition |
+Tests live in `apps/server/test/`, one file per module or invariant (`alpha-gate.test.ts`
+covers the A15 gate). Route groups take a `Ctx` (db, origin, adapters, chain config,
+rate-limit configs) from the composition root and register their own paths. Migrations
+become numbered files under `core/` at the Postgres move (§17).
 
 Shared package (`packages/shared`): the API contract and content catalog. It exports wire
 types, published constants, and content definitions. It never exports a function that
@@ -177,14 +172,19 @@ Two currencies, two representations, one gate each.
 | unit | integer cents (¢) in `INTEGER` columns | base units at 9 dp, `BigInt` in code, `TEXT` decimal in columns (kept from the 18-dp era; exact and bit-for-bit with the chain) |
 | balances | `players.scrip_settled`, `players.scrip_unsettled` | sum of `alpha_lots.remaining_wei` per player |
 | event table | `ledger` (signed `d_settled`, `d_unsettled`, `kind`, `ref`, `at`) | `alpha_ledger` (signed `delta_wei`, `kind`, `ref`, `at`) |
-| gate | `postTx` | none yet: `postAlpha` writes the ledger row only; `alpha_lots` is written directly by `creditDeposit`, `linkWallet`, `applyAlphaCarry`, `requestWithdrawal`, `buyAlpha`, and `sellAlpha` (A15) |
+| gate | `postTx` | `postAlpha` (A15): the only writer of `alpha_lots` and `alpha_ledger`; takes a credit, consume, or rebalance lot operation that must balance the ledger delta; refuses over-takes, foreign lots, and negative lots |
 | treasury | `treasury.scrip` (CAPTURE bucket) | `treasury_alpha.wei` (policy ammunition, never operator revenue) |
-| audit | `conservationAudit` (per-player ledger versus balance drift) | `solvencyAudit` (against the live escrow reserve, counting unconfirmed vouchers) and `exchangeAudit`; no per-player ledger-versus-lots drift audit yet (A15) |
+| audit | `conservationAudit` (per-player ledger versus balance drift) | `alphaDriftAudit` (per-player ledger fold versus lots fold, BigInt in JS), `solvencyAudit` (against the live escrow reserve, counting unconfirmed vouchers), `exchangeAudit` |
 
 Settled and Unsettled are columns, not tags on rows, because the firewall is a rule about
 destinations: Unsettled may be spent on refills, fees, upkeep, house goods, and the
 Commons, and nowhere else. `postTx` callers choose the column; the allow-list lives in the
 rules that call it, and `vocab-guard` plus the engine tests pin it.
+
+The treasury capture (`treasuryAlphaAdd`) sits beside the gate, not inside it: a carry or
+sell-leg fee is a gate call paired by hand with a capture, and only `exchangeAudit`
+would notice a dropped or doubled capture (the drift and solvency audits stay green). A
+capture-aware gate is the natural next tightening if that pairing ever multiplies.
 
 Lots exist because seasoning is per acquisition: every deposit, exchange buy, and (later)
 primary purchase is a lot with its own clock, withdrawals consume seasoned lots first, and
@@ -226,7 +226,7 @@ The surface today, grouped (all under `/api`, JSON, cookie session):
 | ledger | `GET ledger` |
 | exchange | `GET exchange`, `exchange/history`; `POST exchange/quote`, `exchange/swap` |
 | clearinghouse | `GET alpha`; `POST deposit/prepare`, `withdraw/request`, `withdraw/claim` |
-| ops | `GET healthz` (unauthenticated, liveness only); `GET debug/conservation`, `debug/exchange`, `debug/solvency` (only with `OUTFOX_DEBUG`) |
+| ops | `GET healthz` (unauthenticated, liveness only); `GET debug/conservation`, `debug/alpha-drift`, `debug/exchange`, `debug/solvency` (only with `OUTFOX_DEBUG`) |
 
 Rules that hold across the surface:
 
@@ -405,7 +405,7 @@ third-party audit of the program and the economy is a hard pre-mainnet gate.
 
 | Layer | Tool | What it proves | Count / record |
 |---|---|---|---|
-| rules and money | vitest (`apps/server/test`) | engine, valve, carry, exchange, auth adapters, rate limits, vocab guard | 135 cases across 9 files; suite green at `6839309` |
+| rules and money | vitest (`apps/server/test`) | engine, the A15 gate, valve, carry, exchange, auth adapters, rate limits, route parsing, vocab guard | 149 cases across 11 files |
 | program | LiteSVM (`programs/settlement/tests`) | per-case port of the EVM reference suite, window math | 28 integration + 5 unit |
 | contract in the loop | `apps/server/scripts/m4-contract-loop.ts` | priced scenarios match the model against the real program | GREEN 2026-08-25 |
 | chain end to end | `apps/server/scripts/e2e-devnet.ts` | deposit, index, gates, vest, sign, forgery rejected, redeem, replay rejected, pause, PoR | ALL CHECKS PASSED 2026-08-28 |
@@ -414,8 +414,8 @@ third-party audit of the program and the economy is a hard pre-mainnet gate.
 | economy | `sim/run.py`, `sim/gate.py` | G1–G12 at 500 seeds, red-team at 100 | 6/6 standard, 6/7 red-team |
 | type | `tsc --noEmit` in the web build | the client compiles clean | green |
 
-Known pre-existing: `tsc -p apps/server` flags one `LotRow[]` cast in `settlement.ts`;
-the web build's tsc is the green gate. Fixing it belongs to the module-move round.
+`tsc --noEmit -p apps/server` is clean since the module-move round (the old `LotRow[]`
+cast went with it); both packages' tsc are gates.
 
 ## 16. Environments and deployment
 
@@ -454,7 +454,7 @@ Each step has a trigger, so nothing is built ahead of need.
 | A12 | npm workspaces monorepo: `packages/shared`, `apps/server`, `apps/web`, `programs/`, `sim/` | adopted (kickoff) |
 | A13 | No CI exists yet; the pipeline is defined in `INFRASTRUCTURE.md` §4 and is a pre-beta item | adopted 2026-09-12 (owner) |
 | A14 | Parameter changes go through a policy registry with change events before any live tuning; constants in code remain the published defaults | adopted 2026-09-12 (owner) |
-| A15 | $ALPHA gets a single mutation gate (`postAlpha` becomes the only writer of `alpha_lots` and `alpha_ledger`, together, inside `withTx`) and a per-player ledger-versus-lots drift audit beside `conservationAudit` | adopted 2026-09-12 (owner); lands with the module-move round, own adversarial review |
+| A15 | $ALPHA gets a single mutation gate (`postAlpha` becomes the only writer of `alpha_lots` and `alpha_ledger`, together, inside `withTx`) and a per-player ledger-versus-lots drift audit beside `conservationAudit` | adopted 2026-09-12 (owner); built the same day with the module move, adversarially reviewed |
 
 ## 19. Open questions
 

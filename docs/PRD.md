@@ -111,7 +111,7 @@ point at the rule; this table does not restate rules.
 | FR-ID-2 | Registration (R1) is triggered by the first demanding surface, with the action queued and resumed | `verify-live` world A | Built (SIWS) |
 | FR-ID-3 | A credential that already belongs to another Fox opens a choose sheet; never a silent merge or overwrite | world B; engine tests | Built |
 | FR-ID-4 | Linking a wallet (R2) uses a purpose-bound message distinct from sign-in | `auth-siws` and `settlement` tests | Built |
-| FR-ID-5 | Rungs never downgrade; verification travels across devices | never-demote case in `auth-privy.test.ts`; known gap: the dev adapter's `verifyRegister` sets rung 1 unconditionally (dev worlds only, never in production) | Built (R0–R2) |
+| FR-ID-5 | Rungs never downgrade; verification travels across devices | never-demote cases in `auth-privy.test.ts` and `alpha-gate.test.ts` (the dev adapter's re-registration keeps R2 since 2026-09-12) | Built (R0–R2) |
 | FR-ID-6 | Cash-out demands R3 verification, once, and nowhere else | valve gate V1; PoP provider integration | Owner (provider), then build |
 | FR-ID-7 | Money actions require fresh authentication within 10 minutes | withdrawal request and wallet link refuse without step-up | Specified, pre-beta |
 | FR-ID-8 | Sessions are listable and revocable per device; handoff by QR | `DESIGN-SYSTEM-WEB.md` §10.3 | Specified |

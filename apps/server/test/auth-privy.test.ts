@@ -1,8 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { generateKeyPairSync, sign as cryptoSign, type KeyObject } from 'node:crypto';
-import { openDb, type DB } from '../src/db.js';
-import { createPlayer, postTx, registerVerified, adoptVerified, EngineError } from '../src/engine.js';
-import { verifyPrivyToken, privyConfigFromEnv, type PrivyConfig } from '../src/auth-privy.js';
+import { openDb, type DB } from '../src/core/db.js';
+import { EngineError } from '../src/core/errors.js';
+import { createPlayer } from '../src/identity/players.js';
+import { postTx } from '../src/ledger/scrip.js';
+import { registerVerified, adoptVerified } from '../src/identity/rungs.js';
+import { verifyPrivyToken, privyConfigFromEnv, type PrivyConfig } from '../src/identity/privy.js';
 
 // The Privy R1 adapter's security boundary: offline ES256 identity-token verification.
 // Tokens are minted here with a local keypair — the exact shape the server expects —

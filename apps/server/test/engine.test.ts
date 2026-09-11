@@ -4,12 +4,16 @@
  * VALIDATION-BENCHMARKS critical finding (chance value must never reach a P2P surface).
  */
 import { describe, it, expect, beforeEach } from 'vitest';
-import { openDb, type DB } from '../src/db.js';
-import {
-  createPlayer, postTx, runCall, runGig, refill, listItem, buyListing, cancelListing,
-  playerView, listingsView, conservationAudit, applyCarry, EngineError,
-  startRegister, verifyRegister, adoptExistingAccount, requireRung,
-} from '../src/engine.js';
+import { openDb, type DB } from '../src/core/db.js';
+import { EngineError } from '../src/core/errors.js';
+import { createPlayer, playerView, requireRung } from '../src/identity/players.js';
+import { startRegister, verifyRegister, adoptExistingAccount } from '../src/identity/rungs.js';
+import { postTx, conservationAudit } from '../src/ledger/scrip.js';
+import { applyCarry } from '../src/economy/carry.js';
+import { runCall } from '../src/systems/calls/rules.js';
+import { runGig } from '../src/systems/gigs/rules.js';
+import { refill } from '../src/systems/refills/rules.js';
+import { listItem, buyListing, cancelListing, listingsView } from '../src/systems/market/rules.js';
 import { CALLS, GIG, REFILL, MARKET_FEE_BPS, DEMURRAGE } from '@outfox/shared';
 
 let db: DB;

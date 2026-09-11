@@ -1,11 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { openDb, type DB } from '../src/db.js';
-import { createPlayer, postTx } from '../src/engine.js';
-import {
-  creditDeposit, linkWallet, alphaBalance, unseasonedBalance, requestWithdrawal,
-  alphaView, applyAlphaCarry, idleDecayCompound, solvencyAudit,
-} from '../src/settlement.js';
-import { seedExchange, buyAlpha } from '../src/exchange.js';
+import { openDb, type DB } from '../src/core/db.js';
+import { createPlayer } from '../src/identity/players.js';
+import { postTx } from '../src/ledger/scrip.js';
+import { alphaBalance, unseasonedBalance } from '../src/ledger/alpha.js';
+import { linkWallet } from '../src/identity/wallets.js';
+import { applyAlphaCarry, idleDecayCompound } from '../src/economy/carry.js';
+import { creditDeposit, requestWithdrawal, alphaView, solvencyAudit } from '../src/economy/valve.js';
+import { seedExchange, buyAlpha } from '../src/economy/exchange.js';
 import { ALPHA_BASE_UNITS, ALPHA_CARRY, VALVE } from '@outfox/shared';
 
 // The ALPHA carry (ECONOMY.md §13.A idle decay + §13.D progressive carry) — the

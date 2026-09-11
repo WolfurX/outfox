@@ -17,7 +17,7 @@ Mapping: `THEME-OUTFOX.md` §2; rule: repo `CLAUDE.md`; enforcement: vocab-guard
   keeps the game playable under any token-price regime (probes: `sim/v6_extdump_probe.txt`).
 - **Acquisition:** F4 primary purchase (USD in; **wealth-indexed pricing** — allocation
   = base·(1+H/href)^−γ, `ECONOMY.md` §13.D) · the internal exchange (Scrip⇄$ALPHA,
-  game-ledger AMM — **BUILT** `apps/server/src/exchange.ts`, M4-verified 2026-08-09;
+  game-ledger AMM — **BUILT** `apps/server/src/economy/exchange.ts`, M4-verified 2026-08-09;
   Settled Scrip only, bought lots land unseasoned) · external DEX (permissionless,
   post-withdrawal).
 - **Holding costs:** idle liquid decays ≈ the Scrip demurrage rate (§13.A); staked is
