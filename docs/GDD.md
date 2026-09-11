@@ -1,288 +1,408 @@
-# Game Design Document — "Outfox" (working title)
+# Outfox game design document
 
-> **Status:** Phase 0 draft. This is the top-level design contract. The economy is
-> specified in depth in [`ECONOMY.md`](./ECONOMY.md); the UI/visual language in
-> [`DESIGN-SYSTEM-WEB.md`](./DESIGN-SYSTEM-WEB.md) (the standalone-client v2;
-> [`DESIGN-SYSTEM.md`](./DESIGN-SYSTEM.md) is the archived Telegram-track v1). Where this
-> doc and `ECONOMY.md` disagree on an economic rule, **`ECONOMY.md` wins** (it is the
-> priority-#1 contract).
->
-> **PIVOT (2026-07-02, recorded in `PLAN.md`):** the delivery platform is now a
-> **standalone web PWA on Robinhood Chain**, and the adopted player-facing theme is
-> **Outfox** ($ALPHA) per [`THEME-OUTFOX.md`](./THEME-OUTFOX.md). **Mechanics, systems,
-> and economy in this document are unchanged and remain canonical.** The Outfox
-> vocabulary below stays the internal mechanics-layer naming; `THEME-OUTFOX.md` §2 is the
-> authoritative translation to player-facing copy. Telegram-specific platform passages
-> below (§5, §6, §7, §10.4) are superseded as marked.
+> **Status:** rewritten 2026-09-12 in the unified vocabulary, replacing the Phase-0
+> draft (git history keeps it). Mechanics, systems, and economy are unchanged; the
+> pivot notices are folded in and the Telegram-era platform passages are gone. Where
+> this doc and `ECONOMY.md` disagree on an economic rule, **`ECONOMY.md` wins**. UI is
+> `DESIGN-SYSTEM-WEB.md`; vocabulary is `THEME-OUTFOX.md`; scope and acceptance are
+> `PRD.md`; engineering is `ARCHITECTURE.md`. Status labels as in `PRD.md`: **Built**,
+> **Designed** (in the validated model, not coded), **Specified** (written, not modeled),
+> **Owner** (waits on an owner decision).
 
----
+## 1. Vision and pillars
 
-## 1. Vision & Pillars
+**One line:** a persistent, player-run trading floor where every Scrip you earn was
+lost by another Fox or spent by one, never minted by a faucet. Outfox the Houses.
 
-**One-line hook:** *A persistent, player-run economy — where every dollar you earn was
-lost by another player, not minted by a faucet.* *(Post-pivot fiction: outlaw traders vs
-the Houses — `THEME-OUTFOX.md` §1.)*
+Outfox is a mobile-first, text and stat based MMO in the lineage of Torn, the crime MMO
+whose identity is its player-driven economy. Torn's skeleton stays; the fiction is a 24/7
+trading floor run by outlaw traders against rigged institutions. It ships as a web PWA on
+Solana. The two driving requirements, in priority order: an economy that survives an
+earning-first player base, then UI quality.
 
-We are building a **mobile-first, text/menu/stat-based MMO** in the lineage of **Torn** —
-the 20-year-old crime MMO whose entire identity is a deep, player-driven economy —
-delivered as a **standalone web PWA on Robinhood Chain** *(pivot 2026-07-02; originally a
-Telegram Mini App on TON)*. We keep Torn's structure; the fiction layer is **Outfox**
-(`THEME-OUTFOX.md`), with the crypto-underworld reskin below retained as internal
-mechanics vocabulary.
+Pillars:
 
-The two driving requirements, in priority order:
-1. **A robust, sustainable economy** that survives an earning-first ("P2E") player motivation.
-2. **UI quality** — the single most important deliverable after the economy holds.
+1. **The economy is the game.** Markets, scarcity, trade, and player-to-player value
+   transfer are the content. Calls and Raids exist to feed the economy, not the reverse.
+2. **Transfer-funded, never emission-funded.** Earning comes from other players and from
+   real-money convenience spend. There is no "log in, mint tokens" faucet.
+3. **Deep systems, light to render.** Menus and numbers, a tiny bundle, instant load,
+   with an $80 Android in a plain browser as the floor and years of progression
+   underneath.
+4. **Server-authoritative truth.** The client renders; the server owns every outcome,
+   price, faucet, and sink. A Fox can never compute their own take.
+5. **Convenience, never power.** Money buys time, slots, and cosmetics, and never stats
+   or an outcome. This is both an economy invariant and the spine of the legal posture.
 
-**Design pillars:**
-1. **The economy is the game.** Markets, scarcity, trade, and player-vs-player value
-   transfer are the content. Combat and "missions" exist to feed the economy, not vice-versa.
-2. **Transfer-funded, never emission-funded.** You earn from *other players* and from
-   real-money convenience spend — not from a token printer. This is the de-risk that lets an
-   earning-first game last (see `ECONOMY.md`). No "log in, mint free tokens" faucet.
-3. **Deep systems, light to render.** Torn-style menus and stats: tiny bundle, instant load,
-   60 fps on a $80 Android — but years of progression depth underneath.
-4. **Server-authoritative truth.** The client renders; the server owns every value decision,
-   faucet, and sink. The player can never compute their own reward.
-5. **Convenience, never power.** Real money (Telegram Stars / the premium token) buys time,
-   slots, and cosmetics — never stats, never an in-fiction win. Pay-to-win breaks both the
-   economy and the regulatory posture.
+Why play: a fast "one more Call" loop with real stakes and stated probabilities. Why
+stay: a reputation that persists, a Skulk that needs you, owned assets that appreciate,
+a market you can outsmart, and a second ladder (standing) beside wealth. Mastery is
+economic, not reflexive.
 
-**Why play / why stay:** *Play* — fast, satisfying "one more hack" loop with real stakes.
-*Stay* — a persistent reputation, a syndicate that needs you, owned assets that appreciate,
-and a market you can outsmart. Mastery is economic, not reflexive.
+## 2. The world
 
----
+### 2.1 The Street
 
-## 2. Theme & setting — **crypto-native reskin** (the locked theme)
+The Street is owned by the Houses: bloated, slow, connected institutions that have rigged
+the flow. The player is an outlaw trader, too small to matter and too fast to catch. It is
+a district list, not a map (the word is banned as a description). Districts open when
+their system ships; closed ones show one line of fiction, no gate and no date. No district
+carries a rung gate.
 
-We retain Torn's mechanical skeleton and reskin the fiction to the **crypto underworld**: a
-sprawling digital black market of exchanges, protocols, and rival syndicates. This vocabulary
-is **canonical** and used identically across all docs and the codebase.
+| District | What happens there (published whitepaper) | System | Shipped tab (2026-09-11) |
+|---|---|---|---|
+| The Floor | honest work, reliable pay | Gigs | open; entry to The Tape, fiction line says Calls |
+| Options Alley | Calls against the market and other Foxes | Calls | closed; fiction line says The Sim |
+| The Pit | Raids on the Houses | Raids | closed; fiction line says rumors |
+| The Dark Pool | the quiet end of the market | The Index, Desks | closed; fiction line says Raids |
+| The Vault | the Houses' treasure and the target | The Clearinghouse | open; entry to the Clearinghouse |
+| After Hours | the endgame district; the Street never closes | Seats, late-game systems | closed; fiction line says the Overnight Tape |
+| The Hollow | the crews' hideout quarter | Skulks, the Commons | closed; matches |
 
-### 2.1 Reskin mapping (Torn term → our term)
+**Conflict:** the published whitepaper (`whitepaper/the-game/the-street.md`) and the
+Street tab shipped 2026-09-11 (`apps/web/src/Street.tsx`, asserted by `verify-live`
+check D4 "The Floor lands on the Calls") assign different systems to four districts.
+The table's system column follows the published page; the last column reports the
+shipped fiction lines. The owner rules which side is corrected; until then neither is
+changed here.
 
-| Torn concept | Outfox reskin | Notes |
-|---|---|---|
-| Crimes | **Exploits / Jobs** (hacks, rug-pulls, phishing ops, exchange heists) | Variable-ratio reward source; the core engagement action |
-| City / map | **The Network** — districts are protocols/exchanges (e.g. *The DEX*, *The Bridge*, *The Mixer*, *Cold Storage*) | Navigation surface; gates actions by reputation/level |
-| Factions | **Syndicates** | Player-run guilds; territory, war, shared treasury |
-| Item market / bazaar | **The Market** — a Torn-style order-book **"Points Market"** | Player-to-player price discovery; never fixed prices |
-| Companies / jobs | **Operations** (front companies: mixers, OTC desks, mining pools, validator farms) | Player-owned businesses; employ other players; raise real GDP (Q) |
-| Properties | **Safehouses / Servers** | Status + utility assets; demurrage-shelter and slot bonuses (bounded) |
-| Stock market | **The Exchange** — in-game speculative instruments | An *internal* market in fictional "stocks"; distinct from the real TON token |
-| Hospital / jail | **Quarantine / Traced** (downtime states after losing PvP or a failed job) | Loss-aversion + a time sink |
-| Energy / Nerve | **Compute (E) / Heat-tolerance (Nerve)** | The two throttles that gate actions (see Core Loop) |
+### 2.2 Who is on the Street
 
-> **Two soft "stats-bar" resources, renamed but mechanically Torn's:** **Compute** (≈ Energy,
-> spent on training/work) and **Nerve** (≈ Nerve, spent on Exploits). Both regenerate over
-> real time and are the primary pacing throttle and a natural sink for convenience refills.
+Foxes are the players and Skulks are their crews (the real collective noun). The Houses
+are fictional mega-funds and the Raid targets, never named after or styled like a real
+firm. The Sheriff is the Street's enforcer and antagonist referee: a failed Raid or Call
+gets a Fox Nicked and sitting out a cooldown.
 
-### 2.2 Currencies (names are canonical — see `ECONOMY.md` for full mechanics)
-- **Credits (¢)** — the **soft cash** working medium. Demurrage-bearing (a holding cost),
-  earned and spent in-game, **not** directly cashable. Two provenances: **Clean Credits** (from
-  P2P trade, Operations, the Market) are transferable and swappable to $ALPHA; **Bound Credits**
-  (from chance outcomes — Exploit loot, PvP RNG) are **non-transferable, non-exchangeable,
-  sink-only**, so chance-won value can never reach cash-out (see `ECONOMY.md` §6/§9). The
-  everyday currency.
-- **$ALPHA (Jetton)** — the **premium TON token**: scarce store-of-value + premium-convenience
-  access. Floating exchange vs Credits (**never pegged**). The only cashable asset, behind the
-  cash-out gate. Sells convenience, never power.
+### 2.3 Tone and vocabulary
 
-> Naming note (updated at the pivot): the adopted public names are **Outfox** (game) and
-> **$ALPHA** (token) per `THEME-OUTFOX.md` — **Outfox** and **$ALPHA** remain the internal
-> mechanics-layer vocabulary used across this doc, `ECONOMY.md`, and the sim. Availability
-> checks (trademark / domain / handles on Outfox and the $ALPHA ticker) are **still
-> pending** — do not bake any literal name strings into contracts or on-chain token
-> metadata until they clear. The *roles* (the game; a premium cashable token — now an
-> ERC-20 on Robinhood Chain rather than a TON Jetton) are locked.
+Every line reads as sporting defiance ("the Houses never saw it coming"), never
+criminality ("we broke in"). Banned names, banned framings, and the gambling vocabulary
+blacklist are in `THEME-OUTFOX.md` §3; the tone test there applies to every string in
+the product, including error messages and empty states.
 
----
+### 2.4 Vocabulary bridge
 
-## 3. Core loop
+`ECONOMY.md` (frozen, priority #1), `ECONOMY-SIM-SPEC.md`, and `sim/` still use the
+terms they were validated under. The rows below are the terms that actually appear
+there (counted 2026-09-12), so readers can move between the two without ambiguity:
 
-**Minute-to-minute (the "one more" loop):**
-`Spend Compute/Nerve → take an action (Exploit / train / work an Operation) → variable reward
-(Credits, items, rep, XP) → bank/spend/trade → resources regenerate → repeat.`
+| Canonical (this doc, product, code) | In `ECONOMY.md`, the sim spec, `sim/` |
+|---|---|
+| Scrip | Credits (¢) |
+| Settled Scrip / Unsettled Scrip | Clean Credits / Bound Credits |
+| Calls, Raids | Exploits |
+| Focus / Risk Appetite | Compute / Nerve |
+| Desks | Operations |
+| Seats | Safehouses |
+| Margin Called | Quarantine |
+| Skulks | syndicates (lowercase, in passing) |
+| The Commons | The Commons (same term) |
 
-- **Exploits** consume **Nerve**, pay out on a **variable ratio** (the engagement engine —
-  guard-railed, see Risks & `ECONOMY.md`): Credits, loot items, reputation, and risk of being
-  **Traced** (downtime) on failure.
-- **Training** consumes **Compute** at the **Gym → "Rig"** to raise the four core stats.
-- **Operations work** consumes Compute for steadier, lower-variance Credit income (the "job"
-  counterweight to gambling-flavored Exploits).
+**Conflict:** repo `CLAUDE.md` and `THEME-OUTFOX.md` state one vocabulary everywhere
+including canon docs (2026-08-25), while `ECONOMY.md` and the sim spec carry the left
+column's counterparts (23 uses of Credits, 14 of Bound, and so on) and no use of Scrip.
+The owner resolves it: rename inside the frozen doc, or amend the rule to admit the
+mechanics-layer exception explicitly. This table is the bridge either way. The product
+names retired at the Solana move survive only inside immutable sim records
+(`vocab-guard.test.ts` enforces it).
 
-**Session loop (5–15 min):** burn banked Compute/Nerve, check Market orders, manage syndicate
-duties, react to who attacked you.
+## 3. The Fox
 
-**Daily loop:** regen windows + daily objectives + syndicate war ticks + Market arbitrage;
-designed so a lapsed player loses *relative position*, never absolute assets (loss aversion,
-bounded).
+### 3.1 The two bars
 
-**Long-term (weeks→months):** stat progression, rep tiers unlocking deeper Network districts,
-building/scaling an Operation, climbing syndicate ranks, accumulating appreciating assets, and
-mastering the Market/Exchange. **Progression depth is the retention engine** — there is always
-a next tier, and economic mastery has no ceiling.
+| Bar | Gates | Regen (slice) | Refill |
+|---|---|---|---|
+| Focus | work: Gigs, training, Desks | 0.2 per second to 100 (full in about 8 minutes, demo-paced) | a sink, payable from Unsettled Scrip |
+| Risk Appetite | Calls and Raids | 0.25 per second to 100 | same |
 
----
+The bars pace the game, stop infinite grinding, and are the main thing real money buys.
+The whitepaper says this plainly and so does the product: the pacing gate and the revenue
+model are the same mechanism. Production regen and refill prices come from the sim, not
+from the slice values.
 
-## 4. Systems (the Torn pillars, reskinned)
+### 3.2 Stats (Designed)
 
-1. **Character & stats.** Four core stats (working names): **Strength→Cracking,
-   Speed→Latency, Defense→Hardening, Dexterity→Stealth**. Trained at the **Rig** by spending
-   **Compute** (the resource). *(Note: "Cracking" — brute-force/key-cracking power — replaces the
-   earlier "Compute-power" so the stat name doesn't collide with the Compute resource.)* Stats
-   gate PvP and high-tier Exploits. *Server computes all stat gains.*
-2. **Exploits / Jobs (crime actions).** Tiered action list per Network district; success
-   probability scales with stats + tools; variable-ratio rewards; failure → **Traced** downtime.
-3. **Syndicates (factions).** Player guilds with ranks, a **shared treasury** (Credits +
-   $ALPHA), territory control over Network districts, organized **wars** (loss-aversion: losable
-   territory), and chains/assists. The primary social-retention and end-game driver.
-4. **PvP.** Attack other players for Credits/items/rep; outcome from stats + tools + chance
-   (bounded). Loser enters **Quarantine** downtime, never loses everything (loss-aversion within
-   guardrails). PvP is a **P2P value-transfer faucet**, not a mint.
-5. **The Market (item market).** Order-book P2P exchange for items/tools/loot — true price
-   discovery, never fixed prices. Charges a **transaction fee** (a core sink). The thick,
-   interdependent trade layer that raises real in-game GDP (**Q**).
-6. **Operations (companies).** Player-owned businesses that **employ other players**, convert
-   inputs→outputs, and create specialization & gains from trade (Ricardo). The main engine of
-   *productive* (non-extractive) earning and a major Q contributor.
-7. **Safehouses / Servers (properties).** Status + utility assets (slot bonuses, bounded
-   demurrage shelter, regen perks). Sink for accumulated Credits; some are **Veblen-good**
-   status items.
-8. **The Exchange (stock market).** Internal speculative instruments (fictional "protocol
-   stocks") — an advanced-player money game and Credit sink/cycler. **Strictly separated** from
-   the real $ALPHA token to bound securities-law exposure (see Risks).
+Four stats shape what a Fox can manage: **Conviction, Execution, Discipline, Edge**.
+They are trained in The Sim by spending Focus, gate the higher Call and Raid tiers and
+versus-Fox outcomes, and are computed server-side only. Stat names are frozen
+(`THEME-OUTFOX.md` §2); the count is four.
 
----
+### 3.3 The identity ladder (player-facing)
 
-## 5. UX/UI & art direction
+Rung 0 is a guest who can play the whole loop forever. Rung 1 is registered (wallet
+sign-in on Solana; the demanding surface asks, the action resumes). Rung 2 has a linked
+deposit wallet. Rung 3 is verified, demanded by cash-out and by nothing else. Rungs
+never downgrade. Wallet jargon is banned at rungs 0 and 1: the account is "your Book".
+Full rules: `DESIGN-SYSTEM-WEB.md` §10.1, Solana translation in `ARCHITECTURE.md` §9.
 
-Full spec in [`DESIGN-SYSTEM-WEB.md`](./DESIGN-SYSTEM-WEB.md) *(supersedes the
-Telegram-track summary that stood here)*. Summary constraints:
-- **Standalone installable PWA, owned end to end** — own theme (terminal-noir dark
-  canonical + light), own auth (guest → embedded wallet → SIWE), own install/notification
-  surfaces. One codebase across mobile browser, installed PWA, desktop, and wallet
-  in-app browsers.
-- **Performance budget (non-negotiable, unchanged):** low-end Android in a plain mobile
-  browser is the floor; CI gates on Core Web Vitals (LCP ≤ 2.5 s, INP ≤ 200 ms, ≤ 170 KB
-  critical path); **60 fps with an animation-disable toggle**.
-- **Desktop is now a first-class surface** (three breakpoints; trading-floor Wide layout)
-  — additive, never the baseline.
-- **Core screens:** Home/status, district list, Exploit/action list, training, Market
-  (order book), Syndicate, Operations, value/Ledger screen, Exchange — per-breakpoint
-  specs and player-facing names in `DESIGN-SYSTEM-WEB.md` §2/§7.
-- **Navigation:** bottom tab bar at phone widths, nav rail wider; menu/stat-driven, not
-  scene-rendered (keeps the bundle tiny — pillar #3).
+### 3.4 Downtime
 
----
+Nicked (Built) means the Sheriff caught you: a failed Call ends in a longer cooldown on
+that Call and a flash on the row, with no asset loss. Margin Called (Designed) is busted
+play, the downtime after losing a versus-Fox contest; the loss is bounded and never
+total.
 
-## 6. Social / multiplayer
+Both are loss aversion inside guardrails: a lapsed or beaten Fox loses relative position,
+never absolute assets.
 
-- **Syndicates** (above) are the backbone: shared treasury, wars, chat, ranks.
-- **Trading** via the Market + direct P2P transfers (fee'd).
-- **Leaderboards:** rep, net worth, syndicate power — framed to reward *economic* mastery.
-- **Chat & notifications (post-pivot):** no freeform in-app chat in Phase 1 — Discord is
-  the canonical social layer with structured in-app comms (pinned board, preset tactical
-  pings); retention notifications via Web Push + email + Discord mirror
-  (`DESIGN-SYSTEM-WEB.md` §14/§16 — supersedes the Telegram bot/chat lines that stood
-  here).
-- **Viral / referral loops (post-pivot):** guest-play-first referral links with
-  server-side first-touch attribution (`DESIGN-SYSTEM-WEB.md` §15); referral rewards paid
-  in **convenience** (Compute refills, account-bound cosmetics), **never** in cashable
-  value or Commons standing (sybil-resistance — see §10 and `ECONOMY.md`).
+### 3.5 Standing (Designed)
 
----
+The second long-term ladder beside net worth: reputation tiers, titles, regalia, crew
+prestige, and leaderboard weight, earned by giving to the Commons (§5.15). Standing is
+non-transferable. Rich is one leaderboard; beloved is another.
 
-## 7. Monetization
+## 4. Core loop
 
-- **Two rails (post-pivot):** **USD-priced convenience checkout** settling in stablecoin
-  (USDG/USDC) from the embedded wallet — the F3 rail replacing Telegram Stars — and the
-  **premium $ALPHA/$ALPHA token** (ERC-20 on Robinhood Chain) for the premium tier and the
-  cash-out boundary (F4). Flows specced in `DESIGN-SYSTEM-WEB.md` §11/§12. Measured F3
-  conversion is a feasibility NO-GO trigger (`ROBINHOOD-FEASIBILITY.md` §6 condition 3).
-- **What money buys:** Compute/Nerve refills, extra Operation/Market slots, cosmetic skins,
-  faster regen, name reservations — **time and self-expression**.
-- **What money NEVER buys:** stats, guaranteed Exploit/PvP outcomes, exclusive *power* items.
-  **Sells convenience, never power** — pillar #5. This is both an economy invariant and the
-  spine of the regulatory posture (§10).
-- Convenience spend is also a **real-money-funded faucet** input (it injects external value
-  that other players ultimately earn) — the transfer-funded model, see `ECONOMY.md`.
+**Minute to minute**: spend Risk Appetite on a Call, or Focus on a Gig; take the
+result; bank, spend, or list it; the bars refill; again. Calls state their probability
+before commit, resolve flat and immediate (reveal capped at 320 ms, no near-miss
+theatre), and pay **Unsettled** Scrip on success or Nicked on failure. Gigs pay
+**Settled** Scrip and a tool every fifth completion.
 
----
+**Session (5 to 15 minutes)**: burn the banked bars, check Open Market listings and
+fills, read the Overnight Tape, react to what happened to you.
 
-## 8. Progression & live-ops
+**Daily**: regen windows, the carry assessment on idle Scrip, Skulk ticks and turf,
+Market arbitrage, a Commons gift if standing is the goal.
 
-- **Leveling:** XP from actions → levels → rep tiers → deeper Network districts + new Exploits.
-- **Seasons:** time-boxed competitive cycles (syndicate-war seasons, leaderboard resets of
-  *ranking*, not assets) with cosmetic/title rewards.
-- **Content cadence:** new districts, Operation types, items, and events on a regular schedule;
-  live-ops events double as **fiscal-policy tools** (prize pools = stimulus; entry fees = sinks)
-  per `ECONOMY.md`.
+**Weeks to months**: stats, standing, a Desk that employs other Foxes, a Seat, Skulk
+rank, the Big Score against a named House, the Index for late capital. Progression depth
+is the retention engine: there is always a next tier and economic mastery has no ceiling.
 
----
+The chance mechanics are bounded on purpose: value won by chance is structurally walled
+from real money (§5.7), probabilities are shown, resolution is flat, and gambling
+vocabulary and imagery are banned.
 
-## 9. KPIs & economy-health metrics — **acceptance criteria, not vanity**
+## 5. Systems
 
-These are pass/fail gates, instrumented from day one (dashboards specified in `ECONOMY.md`):
-- **Retention:** D1 / D7 / D30.
-- **Monetization:** ARPU, ARPPU, conversion %.
-- **Engagement:** DAU / MAU, session length.
-- **Economy health (the ones that actually matter):**
-  - **In-game GDP (Q)** — real value of goods/services traded.
-  - **Inflation / CPI & price level (P)** — must stay bounded.
-  - **Money supply (M)** and **velocity (V)** — V must sit inside a target band (no hoard,
-    no dump).
-  - **Sink/faucet ratio** per source and per sink (and **sink efficacy** — does it *capture*
-    value or just burn time?).
-  - **Token velocity** of $ALPHA specifically.
-  - **Wealth concentration (Gini)** — must stay within bounds.
-  - **Sybil / bot rate** — multi-account extraction must stay capped.
+Every system carries an economy classification from `ECONOMY-SIM-SPEC.md` (faucets F1–F5,
+sinks S1–S8, or Transfer) and the Scrip class it produces or consumes. A system that adds
+or changes a faucet, sink, or transfer needs its sim scenario to pass at full seeds
+before it ships (`ARCHITECTURE.md` §4).
 
-> If these fail, the game fails, regardless of DAU. They gate every phase.
+| System | Player action | Economy | Scrip class | Rung | Status |
+|---|---|---|---|---|---|
+| Calls | chance action against the market | F1 faucet; versus-Fox tier is F5 transfer | Unsettled out | R0 | Built (market side) |
+| Gigs | deterministic work | F2 faucet (small, capped) | Settled out | R0 | Built |
+| Raids | chance action against a House, with Heat | F1 faucet | Unsettled out | R0 | Designed |
+| The Sim | train stats; FTUE Call | S2 throttle (Focus) | none | R0 | Specified; FTUE Built |
+| The Open Market | list and buy items at player prices | Transfer with S3 fee | Settled only | R1 to write | Built |
+| Refills | buy back a bar | S2 throttle | Unsettled first, then Settled | R0 | Built |
+| Carry | idle holding cost on Scrip and $ALPHA | S1 capture | both | all | Built |
+| The Exchange | swap Scrip and $ALPHA on the published pool | fee capture; §13.B defenses | Settled only | R1 | Built |
+| The Clearinghouse | deposit; cash out through the valve | S8 capture and throttle | $ALPHA | R2 deposit, R3 cash-out | Built (R3 provider pending) |
+| Staking and locking | lock $ALPHA for the base-rate exemption | §13.C | $ALPHA | R1 | Designed |
+| Desks | run a business, employ Foxes | F2 output; S4 upkeep; Transfer wages | Settled | R1 | Designed |
+| Seats | own a Seat on the Exchange | S5 Veblen capture; bounded shelter | Settled and $ALPHA | R1 | Designed |
+| The Index | trade fictional tickers | S3 fees; Scrip cycler | Settled only | R1 | Designed |
+| Skulks | crew, AUM, turf, the Big Score | Transfers; sinks; Share-Out spending | both; AUM holds $ALPHA | R0 join, R1 roles | Designed |
+| The Commons and the Share-Out | give for standing; treasury spends by rule | S5 capture; fiscal spending | either class in | R1 | Designed |
+| Cosmetics and regalia | jacket colors, titles | S5; Transfer on the Market | Settled | R1 | Specified |
 
----
+### 5.1 Calls (Built)
 
-## 10. Risks & mitigations
+A Call shows its success probability, costs Risk Appetite, and resolves server-side.
+Success pays a range of Unsettled Scrip; failure is Nicked with a longer cooldown. Slice
+catalog (production values come from the sim):
 
-1. **Economy collapse** (the GameFi killer): hyperinflation, Gresham hoard/dump split,
-   velocity death. **Mitigation:** the entire `ECONOMY.md` design (MV=PQ management,
-   demurrage, floating exchange, value-accruing sinks) + a **Machinations Monte-Carlo gate**
-   that must pass before any economy code ships.
-2. **Bots / sybils** draining shared faucets (tragedy of the commons). **Mitigation:**
-   Telegram-native heuristics during play + **one-time proof-of-personhood gate ONLY at
-   cash-out**; rate-limits/quotas on Compute/Nerve; referral rewards in convenience only.
-3. **Regulatory / legal — the sharpest risk.** A **cashable token + earning-as-draw +
-   variable-ratio / loss-aversion mechanics** can simultaneously trigger **gambling**,
-   **securities**, and **money-transmission** law. **Mitigations (design-level):**
-   - **Separate chance from real-money value:** variable-ratio Exploit/PvP outcomes pay *Bound
-     Credits* — a non-transferable, non-exchangeable, sink-only balance — never $ALPHA and never
-     transferable Credits, so **no chance-origin value can reach cash-out** (invariant enforced
-     by server-side provenance/taint tracking; `ECONOMY.md` §6/§9/§11). The cashable boundary is
-     additionally gated, fee'd, vested, and PoP-verified.
-   - **Bound the behavioral mechanics** (caps on loss, no real-money loot boxes).
-   - **Separate the internal Exchange (fictional stocks) from the $ALPHA token** to limit
-     securities exposure.
-   - **Get counsel before launch** (legal review is an explicit Phase-4 gate in `PLAN.md`).
-4. **Platform dependency (rewritten at the pivot):** chain-level deplatforming risk is
-   near zero (Robinhood Chain is permissionless for third-party contracts), but
-   **distribution is now self-funded** — no host-app funnel exists, and curated surfaces
-   (wallet browsers, quest platforms) are soft gates. The Telegram-era mitigation
-   survives as architecture: the economy is server-authoritative, the client is a thin
-   renderer, and all platform capabilities sit behind the PlatformAdapter seam
-   (`DESIGN-SYSTEM-WEB.md` §3) — including a parked Telegram adapter. Discord (the
-   Phase-1 social layer) is a new platform dependency of the old kind; its exit-hatch
-   review is scheduled (`DESIGN-SYSTEM-WEB.md` §16). Residual: sequencer trust and the
-   young chain's operational maturity (`ROBINHOOD-FEASIBILITY.md` §3).
+| Call | Risk Appetite | Probability | Payout (¢, Unsettled) | Cooldown ok / Nicked |
+|---|---|---|---|---|
+| Fade the Open | 10 | 0.75 | 80–140 | 15 s / 45 s |
+| Front the Rumor | 20 | 0.55 | 180–320 | 25 s / 60 s |
+| Squeeze the Basket | 35 | 0.40 | 400–700 | 40 s / 90 s |
 
----
+Versus-Fox Calls (Designed) take the other side against a named Fox: the loser pays the
+winner from Settled Scrip minus a fee, a transfer (F5), never a mint; the loser is Margin
+Called. Stats and tools shift the probability; chance stays bounded.
 
-## 11. Open questions (resolve as design proceeds)
+### 5.2 Gigs (Built)
 
-- Final stat names & count (4 core stats assumed, Torn-style; player-facing names now
-  Conviction / Execution / Discipline / Edge per `THEME-OUTFOX.md` §2).
-- Trademark / domain / handle availability checks on **Outfox** and the **$ALPHA** ticker
-  (see `THEME-OUTFOX.md` §7) before any on-chain lock-in.
-- Exact district roster and unlock order (player-facing district names now fixed by
-  `THEME-OUTFOX.md` §2 — The Street's seven districts).
-- Whether the internal Exchange ships in Phase 1 (likely deferred — advanced-player system).
+Honest work on the Floor. "Run the Tape" costs 15 Focus, pays 90 ¢ Settled, 20 s
+cooldown, and awards a tool every fifth completion (deterministic pity). Gigs are the
+bootstrap liquidity faucet and stay small by design: most Settled Scrip should be
+transfer-driven.
+
+### 5.3 Raids (Designed)
+
+The parallel tier run against the Houses. Same structure as a Call, different opponent,
+and the underdog fantasy gets its teeth. Repeated Raids raise **Heat**, the Sheriff's
+attention: the existing risk and cooldown pacing dressed as fiction. Lie low in the
+Hollow or push your luck. Raids pay Unsettled Scrip and items; the Houses are the NPC
+faucet role that F1 already models.
+
+### 5.4 The Sim (Specified; FTUE Built)
+
+The Street's paper-trading room. Training spends Focus to raise a stat; The Sim also
+hosts the guided first Call a fresh Fox boots into (`DESIGN-SYSTEM-WEB.md` §10.4). No
+value is created in The Sim.
+
+### 5.5 The Open Market (Built)
+
+Player-to-player listings at player prices, never fixed. Items today: terminals and
+signal boosters (tools from Gigs); designed: feeds, models, the jacket cosmetic line. A
+3.5% fee (`MARKET_FEE_BPS`, safe interval 2% to 10%) is captured to the treasury.
+Settled Scrip only; writing needs rung 1. This is the thick trade layer that raises real
+in-game output (Q).
+
+### 5.6 Refills (Built)
+
+Buying a bar back is the first convenience purchase and a sink; it is payable from
+Unsettled Scrip because a sink is an allowed destination. The USD-priced refill (F3)
+lands with payments (`PRD.md` FR-PAY-1).
+
+### 5.7 Scrip and the carry (Built)
+
+Scrip has two settlement states. **Settled** Scrip is transferable, listable, and
+exchangeable. **Unsettled** Scrip comes from chance (Calls, later Raids and versus-Fox
+wins) and can be spent only on the Street's own services: refills, fees, upkeep, house
+goods, the Commons. It cannot be sent to another Fox, listed, exchanged, or cashed out,
+and the one explainer string is fixed (`UNSETTLED_EXPLAINER`). This is the provenance
+firewall: no chance-origin value has a code path to real money.
+
+Idle Scrip pays a carry (demurrage) of 0.45% per day above a 500 ¢ floor, assessed
+lazily on the next touch and captured to the treasury, so hoarding Scrip is never a
+better plan than using it.
+
+### 5.8 The Exchange (Built)
+
+The only bridge between Scrip and $ALPHA: a protocol-owned constant-product pool with a
+1.5% fee per leg, a volatility multiplier that grows when the fast and slow price
+averages diverge (up to 4x; calm trade stays at 1x; rolled once per day so a trade never
+moves its own fee), and a 2% per-side daily flow cap that makes over-cap entry
+impossible rather than expensive. Reserves, rate, fee, and remaining capacity are
+published live. $ALPHA bought here is a fresh unseasoned lot.
+
+### 5.9 The Clearinghouse (Built)
+
+Entered from the Ledger. Deposits are one wallet transaction. Cash-out runs the valve in
+order: rung 3, seasoning (seasoned lots spend first; unseasoned pays a 40% surcharge; any
+new $ALPHA is unseasoned for 60 days), a 5% fee, 14 days of vesting, a 58 $ALPHA rolling
+weekly cap, and a solvency check against the escrow. The quote itemizes every line and
+shows dates, not durations. Idle $ALPHA pays 0.45% per day; the position above a 250
+$ALPHA shelter pays 4.5% per day on the excess, whatever the bucket. All of it is on
+the Rules sheet, read from the same constants the server enforces.
+
+### 5.10 Staking and locking (Designed)
+
+Locked $ALPHA is exempt from the idle carry (never from the progressive carry) and
+unbonds over time, so locking strictly beats idling and a lock cannot be wash-traded
+into an early exit (`ECONOMY.md` §13.C). Until it ships, the whole position is liquid.
+
+### 5.11 Desks (Designed)
+
+Player-run businesses: prop, OTC, research. A Desk converts inputs to outputs, employs
+other Foxes for wages (a transfer), pays upkeep (S4), and is where specialization pays.
+A Fox who is better at one thing than everyone else earns from the difference, which is
+what makes the economy thick instead of a row of parallel grinders.
+
+### 5.12 Seats (Designed)
+
+A Seat on the Exchange, the Street's most conspicuous possession and a deliberate piece
+of machinery: a status good whose demand rises with its price, so it drains large
+fortunes without touching gameplay power. Seats may carry a bounded demurrage shelter
+and slot perks, never stats. Primary sales by auction (sealed-bid to resist sniping).
+
+### 5.13 The Index (Designed)
+
+The Street's internal market with visibly fictional tickers: an advanced-player money
+game, a Scrip cycler and fee sink, and strictly separated from $ALPHA by design rule to
+bound securities exposure. Entry from the Market tab and Tape tickers.
+
+### 5.14 Skulks (Designed)
+
+Crews with ranks, a shared treasury (AUM, holding Scrip and $ALPHA), turf on the Street
+contested by hostile takeover, and seasonal campaigns against a named House: the Big
+Score, ending in a Street-wide Share-Out. Guests may join as members; treasury roles need
+rung 1. The fifth tab (Skulk) and the structured comms surface arrive with it
+(`DESIGN-SYSTEM-WEB.md` §16). Skulks are where most player-to-player transfer happens,
+and transfer is what funds earning.
+
+### 5.15 The Commons and the Share-Out (Designed)
+
+Foxes and Skulks give Scrip (either class) or $ALPHA to the Commons for standing (§3.5).
+Gifts are captured to the treasury and periodically Shared Out as events open to
+everyone: newcomer boosts, tournament pools. Never as direct cashable transfers, and
+standing never transfers. Economically it is a voluntary Veblen sink with prosocial
+framing and the design's Gini lever (`THEME-OUTFOX.md` §4, `ECONOMY.md` §2.3); the sim
+follow-up adds the donation propensity to the sink set with a measurable Gini
+improvement as the acceptance bar. The Share-Out is the treasury's spending arm made
+diegetic, and the whitepaper discloses it as both.
+
+### 5.16 Cosmetics and regalia (Specified)
+
+The fox in a trader's jacket is the mascot and the cosmetic engine: jacket colors are
+the Open Market's cosmetic line (the layered SVG fox exposes the jacket fill), titles and
+regalia come from standing. Status only, never power.
+
+## 6. Progression and live-ops
+
+- Stats via The Sim; standing via the Commons; wealth via the markets; rank inside a
+  Skulk. Districts open by content, not by gate.
+- Seasons: the Big Score cycle; leaderboard resets rank, never assets; rewards are
+  cosmetic and titles.
+- Content cadence: new Calls and Raids, item kinds (eight cards are already
+  staged in `docs/ART-PROMPTS.md` Tier 4), Desk types, events. Live-ops events double
+  as fiscal tools: prize pools are stimulus, entry fees are sinks, all by published rule.
+
+## 7. Social
+
+Skulks are the backbone. Trading runs through the Open Market and, later, direct
+transfers (fee'd, Settled only). Leaderboards reward economic mastery and standing.
+Discord is the social layer in Phase 1; in-app comms are structured (pinned board,
+preset pings). Referral links are guest-play-first with server-side attribution and pay
+in convenience only, never in cashable value or standing.
+
+## 8. Monetization
+
+Two rails. Convenience checkout priced in USD and settled in USDC from the player's
+wallet (F3; day-0 funding through wallet built-in ramps; rail choice couples to the
+geofence and counsel decisions). Primary $ALPHA sales (F4) with wealth-indexed
+allocation. Money buys Focus and Risk Appetite refills, extra Desk and Market slots,
+cosmetics, faster regen, name reservations. Money never buys stats, guaranteed
+outcomes, or power items. Convenience spend is the real-money faucet that other Foxes
+end up earning: the transfer-funded model. Operator revenue comes from the fiat side and
+from boundary fees only (`ECONOMY.md` §3); in-loop captured value is never profit.
+
+## 9. UX summary
+
+Full spec in `DESIGN-SYSTEM-WEB.md`. The shell today: four tabs (The Tape, The Street,
+Market, Ledger) as a bottom bar at compact widths and a rail at wide widths; the
+Clearinghouse from the Ledger; FTUE as a guided first Call; a feedback layer with
+synthesized cues, haptics, and a header mute; terminal-noir dark canonical plus a light
+theme; art in hairline-framed slots and SVG icons in-app. The Skulk tab arrives with
+Skulks. Budgets and the device matrix are in `PRD.md` §4 and §7.
+
+## 10. KPIs and economy health
+
+`PRD.md` §4 holds the table. The economy row is the one that decides: G1–G12 live,
+chance leakage at zero, sybil share under 5%, proof of reserves after every change. If
+those fail the game fails regardless of DAU.
+
+## 11. Risks and mitigations
+
+1. Economy collapse (hyperinflation, a Gresham split, velocity death): the whole of
+   `ECONOMY.md`, the sim gate before any economy code, live G1–G12 with alerting,
+   parameter moves only inside swept intervals.
+2. Bots and sybils: the firewall, the valve (seasoning, vesting, weekly cap), PoP at
+   cash-out as the binding lever (AUDIT-2 measured every throughput cap at zero G11
+   effect), funding-graph clustering, referral rewards in convenience only.
+3. Regulatory exposure (chance plus cashable value plus loss aversion can touch gambling,
+   securities, and money-transmission law): chance value cannot reach cash-out by
+   construction; bounded behavioral mechanics; the Index separated from $ALPHA; no
+   appreciation marketing; PoP and fees at the boundary; counsel as a hard gate before
+   any real money.
+4. Distribution: no host-app funnel on the open web. Founder receipts, the dApp
+   Store TWA, Colosseum, the kill criteria in `PRD.md` §4.
+5. Platform: chain deplatforming risk is near zero; Discord is a dependency of the
+   old kind with an exit review scheduled; the server-authoritative thin client keeps
+   every surface swappable.
+
+## 12. Open design questions
+
+- The Street mapping (§2.1 conflict): does the shipped tab or the published whitepaper
+  get corrected? The whitepaper's assignment is the one the fiction was written to.
+- The Raid tier's Heat curve and whether Heat is per Fox, per Skulk, or both.
+- The item roster for the CPI basket (needs at least a handful of stable kinds).
+- Which of Desks, Seats, and the Index ships first after Skulks; each needs a modeled
+  scenario.
+- Whether The Index ships before launch at all (it is an advanced-player system).

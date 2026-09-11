@@ -1,5 +1,11 @@
 # Plan: "Outfox" — a Telegram-native, economy-first GameFi on TON
 
+> **KICKOFF RECORD (notice 3, 2026-09-12).** This file is the original plan plus its two
+> pivot notices, kept as history. The live roadmap is `docs/PRD.md` §5 (releases and
+> gates), the engineering contract is `docs/ARCHITECTURE.md`, the environments are
+> `docs/INFRASTRUCTURE.md`, and the game design is `docs/GDD.md` (rewritten in the
+> unified vocabulary). Nothing below is normative where those docs speak.
+
 > **PIVOT NOTICE 2 (2026-08-25).** Superseding the 2026-07-02 pivot below: the project
 > migrates to **Solana** (Anchor programs; $ALPHA as an SPL mint with revoked mint
 > authority). Migration contract and inherited conditions:

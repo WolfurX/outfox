@@ -13,14 +13,18 @@ pages and runs `scripts/publish-whitepaper.sh`. Everything under `whitepaper/` i
 public on publish: redaction rules apply, honesty markers ([designed] vs verified)
 stay accurate, and the gambling-vocabulary blacklist holds.
 
-Docs are the source of truth: `PLAN.md` (roadmap), `docs/ECONOMY.md` (priority #1 —
-economy rules win all conflicts), `docs/GDD.md`, `docs/DESIGN-SYSTEM-WEB.md` (active UI
-spec; `docs/DESIGN-SYSTEM.md` is the archived Telegram-track v1), `docs/THEME-OUTFOX.md`
-(canonical vocabulary — all copy uses these terms only), `docs/SOLANA-FEASIBILITY.md`
-(chain migration contract), `docs/DATA-ARCHITECTURE.md` (data-oriented design contract —
-every economic mutation is an append-only event, live metrics use the sim's own
-estimators; all server/indexer modules build against it), `sim/` (economy gate — no
-economy code ships until it passes at full seeds).
+Docs are the source of truth, each owning one domain: `docs/ECONOMY.md` (priority #1,
+economy rules win all conflicts), `docs/GDD.md` (game rules and systems, unified
+vocabulary), `docs/PRD.md` (scope, releases, acceptance; the live roadmap is its §5),
+`docs/ARCHITECTURE.md` (engineering contract: components, module map, the system
+contract every new game system follows, decisions log), `docs/DATA-ARCHITECTURE.md`
+(its data chapter: every economic mutation is an append-only event, live metrics use the
+sim's own estimators), `docs/INFRASTRUCTURE.md` (environments, pipeline, keys, backups,
+runbooks; `deploy/README.md` is the one-box runbook), `docs/DESIGN-SYSTEM-WEB.md` (active
+UI spec; `docs/DESIGN-SYSTEM.md` is the archived Telegram-track v1), `docs/THEME-OUTFOX.md`
+(canonical vocabulary, all copy uses these terms only), `docs/SOLANA-FEASIBILITY.md`
+(chain migration contract), `sim/` (economy gate, no economy code ships until it passes
+at full seeds). `PLAN.md` is the kickoff record, read as history.
 
 **Vocabulary (unified 2026-08-25):** one vocabulary everywhere — **Outfox** the game,
 **$ALPHA** the token, the THEME-OUTFOX.md terms for everything player-facing. The

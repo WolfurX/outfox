@@ -15,6 +15,35 @@ PWA); the Solana chain edge is **live on devnet and verified end-to-end**
 EVM reference `contracts/` was deleted at that gate, git history keeps it).
 Operator revenue is formalized and sim-proven. Remaining: Phase C (step 6).
 
+## Architecture doc set (2026-09-12)
+
+Four canon docs own one domain each: `docs/PRD.md` (scope, releases as gates, FR/NFR
+tables with Built/Designed/Specified/Owner labels; its §5 is the live roadmap),
+`docs/ARCHITECTURE.md` (components, current-to-target module map, the five-part system
+contract every new game system follows, time/money/storage/API/identity models, threat
+model, verification pyramid, scaling triggers, decisions A1–A15),
+`docs/INFRASTRUCTURE.md` (environments, pipeline, keys, backups, alerts, runbooks,
+cost), and `docs/GDD.md` rewritten in the unified vocabulary with a bridge table to the
+mechanics terms `ECONOMY.md` still uses. `PLAN.md` is the kickoff record. Code untouched:
+the module map is the target and the file move is a review-gated round.
+
+Owner rulings the round surfaced: (1) the Street mapping conflict between the shipped
+tab (`Street.tsx`: The Floor = Calls, Options Alley = The Sim, The Dark Pool = Raids,
+After Hours = the Overnight Tape) and the published whitepaper (The Floor = Gigs,
+Options Alley = Calls, The Pit = Raids), recorded in `GDD.md` §2.1; (2) the vocabulary
+rule (`CLAUDE.md`, THEME) versus `ECONOMY.md`'s frozen mechanics terms, recorded in
+`GDD.md` §2.4; (3) the proposed decisions A6–A8, A10, A11, A13–A15 in `ARCHITECTURE.md`
+§18.
+
+Pre-beta engineering list: `INFRASTRUCTURE.md` §11 (CI, `/min-version`, idempotency
+keys, step-up auth, metric jobs + dashboard + alerts, backup timer + restore drill, log
+retention, TWA assetlinks, redeem CU limit + tip, bootstrap ceiling, font budget), plus
+the $ALPHA single mutation gate and drift audit (A15) and the dev adapter's
+unconditional rung 1 in `verifyRegister` (dev worlds only).
+
+Whitepaper: `status/what-exists-today.md` corrected (the progressive carry is built)
+and published the same day.
+
 ## Whitepaper (public site)
 
 `whitepaper/` is a GitBook-ready public whitepaper (17 pages, SUMMARY.md TOC,
@@ -225,4 +254,4 @@ This repo is the **fresh-history Solana continuation** of a private development
 repository; the pre-migration history is not carried over (provenance details:
 founders' private notes). Work happens on `master`.
 
-as-of: step-4 client commit (2026-08-28)
+as-of: architecture doc set commit (2026-09-12)

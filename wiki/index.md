@@ -14,11 +14,11 @@ Non-normative derived layer; canon always wins (`wiki/CLAUDE.md`). Start at `sta
 - [sim.md](sim.md) — the G1–G12 gate, round history v1→v6b, how to run locally, the discipline.
 
 ## Canon map (the source layer this wiki derives from)
-`docs/ECONOMY.md` (priority #1) · `docs/GDD.md` · `docs/DESIGN-SYSTEM-WEB.md` (active UI)
+`docs/ECONOMY.md` (priority #1) · `docs/GDD.md` (unified vocabulary, 2026-09-12) · `docs/PRD.md` (scope, releases, acceptance) · `docs/ARCHITECTURE.md` (engineering contract) · `docs/INFRASTRUCTURE.md` (environments, ops) · `docs/DESIGN-SYSTEM-WEB.md` (active UI)
 · `docs/THEME-OUTFOX.md` (vocabulary) · `docs/SOLANA-FEASIBILITY.md` (chain pivot; `ROBINHOOD-FEASIBILITY.md` = superseded record) ·
 `docs/DATA-ARCHITECTURE.md` (data contract) · `docs/DISTRIBUTION-PLAN.md` ·
 `docs/ONRAMP-COVERAGE.md` · `docs/VALIDATION-BENCHMARKS.md` · `sim/` (proof + artifacts)
 · `programs/` (the Solana chain edge — live on devnet, `programs/deployments/devnet.md`; EVM reference removed 2026-08-28, in git history) · `apps/` + `packages/` (the slice) · `PLAN.md` (kickoff,
 read through its pivot notice) · repo `CLAUDE.md` (rules of the repo).
 
-as-of: solana-migration commit (2026-08-25)
+as-of: architecture doc set commit (2026-09-12)

@@ -51,7 +51,8 @@ review. No real money is live.
 - `programs/`: Anchor programs, LiteSVM tests, deployment records.
 - `sim/`: the economy gate. Simulation model, committed scorecards, red-team
   records. No economy code ships until it passes at full seeds.
-- `docs/`: design canon. Start with `ECONOMY.md` and `GDD.md`.
+- `docs/`: design canon. Start with `ECONOMY.md` and `GDD.md`; `PRD.md` has scope and
+  releases, `ARCHITECTURE.md` the system design, `INFRASTRUCTURE.md` the environments.
 - `whitepaper/`: source of the published whitepaper.
 - `deploy/`: one-box beta artifacts (Caddyfile, systemd unit, runbook).
 
