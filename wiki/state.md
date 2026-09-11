@@ -32,8 +32,9 @@ the shipped tab was corrected (`Street.tsx`: The Floor = Gigs and Options Alley 
 both enter The Tape, The Vault enters the Clearinghouse, four districts closed;
 `verify-live` world D updated, 20/20); (2) the frozen economy canon and `sim/` keep the
 mechanics-layer terms, stated as an explicit exception in repo `CLAUDE.md` and THEME,
-bridge in `GDD.md` §2.4. Still open: the proposed decisions A6–A8, A10, A11, A13–A15 in
-`ARCHITECTURE.md` §18.
+bridge in `GDD.md` §2.4. Decisions A6–A8, A10, A11, A13–A15 in `ARCHITECTURE.md` §18 were adopted the same
+day (owner: go on all eight). Next engineering round available: the module move plus
+A15 (single $ALPHA gate + drift audit), review-gated.
 
 Pre-beta engineering list: `INFRASTRUCTURE.md` §11 (CI, `/min-version`, idempotency
 keys, step-up auth, metric jobs + dashboard + alerts, backup timer + restore drill, log

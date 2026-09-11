@@ -660,7 +660,9 @@ Normative rules:
 ### 10.2 Sessions & SIWE
 
 **Primary session (R0/R1):** server session — 24 h access JWT, 60-day rolling refresh,
-httpOnly, device-bound. Opening the PWA never shows a login wall while the refresh chain
+httpOnly, device-bound. *(Token format superseded 2026-09-12 by `ARCHITECTURE.md` A6:
+an opaque server-side token with rolling expiry and per-device revoke; the no-login-wall
+promise below stands.)* Opening the PWA never shows a login wall while the refresh chain
 holds; Privy re-auth (email OTP / social / passkey) only when it breaks. **SIWE is not the
 login for R0/R1** — a wallet ceremony on every open is exactly the friction the
 embedded-wallet condition bans.

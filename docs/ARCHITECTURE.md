@@ -445,16 +445,16 @@ Each step has a trigger, so nothing is built ahead of need.
 | A3 | Append-only events are the source of truth | adopted 2026-07-11 |
 | A4 | SQLite for the slice and beta, Postgres for production; portable SQL throughout | adopted 2026-08-31 |
 | A5 | No wallet library; Wallet Standard relay implemented directly | adopted 2026-08-28 |
-| A6 | Sessions stay opaque server-side tokens, not JWTs; rolling expiry and per-device revoke are added on the same table | proposed 2026-09-12 (replaces the DSW §10.2 JWT wording; fewer moving parts, instant revoke) |
-| A7 | No live feed until a feature needs it; then a visibility-gated batched poll, then SSE when Skulks or the Index need fan-out | proposed 2026-09-12 |
-| A8 | Jobs run in-process at beta; a separate worker unit at production | proposed 2026-09-12 |
+| A6 | Sessions stay opaque server-side tokens, not JWTs; rolling expiry and per-device revoke are added on the same table | adopted 2026-09-12 (owner; replaces the DSW §10.2 JWT wording: fewer moving parts, instant revoke) |
+| A7 | No live feed until a feature needs it; then a visibility-gated batched poll, then SSE when Skulks or the Index need fan-out | adopted 2026-09-12 (owner) |
+| A8 | Jobs run in-process at beta; a separate worker unit at production | adopted 2026-09-12 (owner) |
 | A9 | Content catalog lives in `@outfox/shared` as code, not in the database, until live-ops needs to change content without a deploy | adopted for the slice; revisit with seasons |
-| A10 | PoP integrates as a server-side verification of the vendor's result, recorded as an `identity.*` event; the vendor's identifier is stored in the identity tables only, never in the ledger | proposed 2026-09-12; provider is the owner's call |
-| A11 | Convenience purchases (F3) are deposit-shaped: USDC arrives on-chain to a purchase address, the indexer credits the SKU; no card processor in the server | proposed 2026-09-12; rail choice couples to geofence and counsel |
+| A10 | PoP integrates as a server-side verification of the vendor's result, recorded as an `identity.*` event; the vendor's identifier is stored in the identity tables only, never in the ledger | adopted 2026-09-12 (owner); provider still the owner's call |
+| A11 | Convenience purchases (F3) are deposit-shaped: USDC arrives on-chain to a purchase address, the indexer credits the SKU; no card processor in the server | adopted 2026-09-12 (owner); rail choice couples to geofence and counsel |
 | A12 | npm workspaces monorepo: `packages/shared`, `apps/server`, `apps/web`, `programs/`, `sim/` | adopted (kickoff) |
-| A13 | No CI exists yet; the pipeline is defined in `INFRASTRUCTURE.md` §4 and is a pre-beta item | proposed 2026-09-12 |
-| A14 | Parameter changes go through a policy registry with change events before any live tuning; constants in code remain the published defaults | proposed 2026-09-12 |
-| A15 | $ALPHA gets a single mutation gate (`postAlpha` becomes the only writer of `alpha_lots` and `alpha_ledger`, together, inside `withTx`) and a per-player ledger-versus-lots drift audit beside `conservationAudit` | proposed 2026-09-12; lands with the module-move round |
+| A13 | No CI exists yet; the pipeline is defined in `INFRASTRUCTURE.md` §4 and is a pre-beta item | adopted 2026-09-12 (owner) |
+| A14 | Parameter changes go through a policy registry with change events before any live tuning; constants in code remain the published defaults | adopted 2026-09-12 (owner) |
+| A15 | $ALPHA gets a single mutation gate (`postAlpha` becomes the only writer of `alpha_lots` and `alpha_ledger`, together, inside `withTx`) and a per-player ledger-versus-lots drift audit beside `conservationAudit` | adopted 2026-09-12 (owner); lands with the module-move round, own adversarial review |
 
 ## 19. Open questions
 
