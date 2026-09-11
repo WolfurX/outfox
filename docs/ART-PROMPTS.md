@@ -146,3 +146,101 @@ minimal shading, subtle neon glow. Palette: deep ink navy-black background
 faint red (#FF5C5C) accents. High contrast, no photorealism, no text, no letters,
 no numbers, no watermark.
 ```
+
+---
+
+## Tier 4 — item set, currency marks, emblems (generated 2026-09-11, Grok Imagine)
+
+Batch-generated headlessly (`grok -p`, one prompt per batch, N numbered subjects +
+the shared style block below). Grok edit-chains from its first result, so a batch
+comes out as one matching set; it also iterates on its own (18 files for 8 items),
+so every raw was viewed and picked by content. Raws: `art/raw/2026-09-11-*/`
+(gitignored). Curated 512² webp in `apps/web/public/art/`.
+
+**Shared style block (append verbatim to every batch — this is what keeps the sets
+consistent with the Tier 2 cards):**
+
+```
+Style for every image, identical across the whole set: flat 2D vector-style
+illustration, bold clean geometric shapes, sharp silhouettes, minimal shading, subtle
+neon glow. Plain flat deep ink navy-black background (#0B0E14), nothing else in the
+background. Object bodies in cool slate blue-greys (#55607A, #ABB4C6) with one vivid
+fox-orange accent (#FF8A3D, #F1731C), a thin soft indigo glow outline (#9DA8F5) around
+the object, a few tiny green (#3DD68C) and red (#FF5C5C) pixel ticker specks floating
+beside it, a soft dark shadow beneath. High contrast, no photorealism, no text, no
+letters, no numbers, no logos, no watermark, no people, no animals.
+```
+
+Batch framing lines: items = "single object, three-quarter view, floating centered
+like a game item card, filling about 70 percent of the canvas"; coins = "single object
+centered, face-on with a slight tilt, filling about 65 percent, readable at 48 px";
+emblems = "flat circular badge: slate disc, thin indigo glow ring, ONE bold fox-orange
+symbol, disc filling about 85 percent of the square, readable at 48 px. Generate
+directly at that framing; do not crop, resize or post-process with code." (Without the
+last sentence grok tried to crop "in code", was denied the tool, and quit after one
+image.)
+
+### 8. Item set (1:1) — `item-<proposed kind>.webp`
+
+Kinds marked *staged* do not exist in `ITEM_KINDS` yet; the file name is the proposed
+slug, so wiring is adding the kind. Subjects, in prompt order:
+
+| File | Subject | Fiction slot |
+|---|---|---|
+| `item-terminal_mk2` | two sleek flat monitors on one stand, orange charts, two orange stripes | upgraded rig (*staged*) |
+| `item-tape_reel` | chunky reel of paper ticker tape, orange rim, tape unspooling | Run the Tape gig tool (*staged*) |
+| `item-rumor_pager` | matte pager, orange waveform screen, green lamp, belt clip | Front the Rumor tool (*staged*) |
+| `item-thin_book` | slim dark ledger, orange page edges, slate clasp | Squeeze the Basket tool (*staged*) |
+| `item-focus_flask` | brushed-steel thermos, orange band, tiny green gauge | Focus refill consumable (*staged*) |
+| `item-exchange_seat` | dark leather stool on slate pedestal, blank orange plaque | Seat on the Exchange (*staged*) |
+| `item-prop_desk` | slate desk, three screens orange + indigo, chair tucked | Desk (*staged*) |
+| `item-trader_jacket` | charcoal-navy jacket on a hanger, orange lining, sleeves pushed up | cosmetic line thumb (*staged*) |
+
+Rejections in the raws: rig v1 rendered number-like glyphs beside the screens (the
+ticker specks drifted into text); jacket v1 lacked the pushed sleeves; pager v1 showed
+a chart instead of a waveform; seat v2 lost the glow outline.
+
+### 9. Currency marks (1:1) — `coin-*.webp`
+
+Reference art for the brand-semantic glyphs (DESIGN-SYSTEM-WEB §6: the in-app Scrip and
+$ALPHA marks are SVG; these rasters are the marketing/reference forms, and
+`coin-alpha` is the candidate token logo for the mint metadata).
+
+| File | Subject |
+|---|---|
+| `coin-scrip-settled` | slate coin, green (#3DD68C) rim glow, embossed ticker-ribbon emblem with an orange tail |
+| `coin-scrip-unsettled` | same coin as a hazy indigo (#9DA8F5, the `--haze` token) ghost with a dashed outline |
+| `coin-alpha` | fox-orange coin, embossed geometric fox head (angular ears, sly eyes) |
+| `coin-scrip-stack` | short stack of the green-rimmed coins, low three-quarter angle (grok could not hold "five"; the stack is ~8) |
+| `coin-scrip-roll` | rolled pale scrip notes, orange band, green wax seal |
+
+### 10. Emblems (1:1) — `emblem-<slug>.webp`
+
+Place and faction badges: slate disc, indigo ring, one fox-orange symbol. Reference
+art for section marks, empty states and the SVG sprite (in-app icons stay inline SVG
+per DESIGN-SYSTEM-WEB §6; these are not to be dropped into `ListRow`s as rasters).
+Grok needed two runs (see the framing note above) and 26 raws for 16 keepers.
+
+| File | Symbol | Slot |
+|---|---|---|
+| `emblem-floor` | opening hand bell | The Floor |
+| `emblem-options_alley` | forked arrow sign | Options Alley |
+| `emblem-pit` | concentric stepped rings | The Pit |
+| `emblem-dark_pool` | still pool with one ripple under a crescent, indigo | The Dark Pool |
+| `emblem-vault` | round vault door with spoked wheel | The Vault |
+| `emblem-after_hours` | crescent over a lit window | After Hours |
+| `emblem-hollow` | burrow under tree roots, warm light inside | The Hollow |
+| `emblem-houses` | bloated monolithic tower on columns | The Houses |
+| `emblem-sheriff` | cold white-blue star badge in a spotlight | The Sheriff |
+| `emblem-skulk` | three fox tails in a ring | Skulks |
+| `emblem-commons` | open hand holding a coin | The Commons |
+| `emblem-clearinghouse` | stamped seal with checkmark and ribbon | The Clearinghouse |
+| `emblem-tape` | curling ribbon of ticker tape | The Tape |
+| `emblem-open_market` | stall awning over a ledger book | The Open Market |
+| `emblem-gigs` | wrench crossed with screwdriver | Gigs |
+| `emblem-index` | rising jagged chart line with arrow head | The Index |
+
+Rejections in the raws: a bell grok pasted onto a white canvas while trying to
+"enlarge" it; a generic bank-temple for the Houses (too Wall-Street-real, the bloated
+tower reads as the fictional mega-fund); a film-strip reading of the tape; a burrow
+without roots; a six-point ice crystal for the Sheriff (the star-in-spotlight kept).

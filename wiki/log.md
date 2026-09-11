@@ -202,3 +202,15 @@ not carried into this repository.)*
   INLINE instance (CSS vars do not cross an <img> boundary; verified with a
   three-variant render: charcoal / ember / hollow-green). Not yet wired to a UI
   slot — canon's sanctioned mascot slots stand.
+- 2026-09-11 · ROUND · **Art batch 2: item set, currency marks, emblems** (Grok
+  Imagine, headless `grok -p`, one prompt per set + the shared style block): 8 item
+  cards for proposed kinds (terminal_mk2, tape_reel, rumor_pager, thin_book,
+  focus_flask, exchange_seat, prop_desk, trader_jacket), 5 currency marks
+  (coin-scrip-settled / -unsettled / -stack / -roll, coin-alpha = candidate token
+  logo), 16 place/faction emblems (districts, Houses, Sheriff, Skulk, Commons,
+  Clearinghouse, Tape, Open Market, Gigs, Index). All 512² webp in
+  apps/web/public/art/, STAGED: none of the new kinds exist in ITEM_KINDS and in-app
+  icons stay inline SVG (DSW §6), so nothing is wired. Prompts, picks, rejections:
+  docs/ART-PROMPTS.md Tier 4; raws art/raw/2026-09-11-* (gitignored). Live check
+  the same session: dev server + vite, Playwright walkthrough FTUE → Tape → Market →
+  Ledger at 390 and 1280, zero console errors, existing art slots render.
