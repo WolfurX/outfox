@@ -8,7 +8,10 @@
 > **Status: ADOPTED (2026-07-02); vocabulary UNIFIED (2026-08-25).** Adoption was
 > recorded in `PLAN.md` at the Robinhood pivot; the Solana migration then retired the
 > two-layer rule: **Outfox / $ALPHA is now the single vocabulary everywhere** — canon
-> docs, sim code, app code, player-facing copy. The retired dev names (MEMPOOL, $VIG)
+> docs, sim code, app code, player-facing copy, with one admitted exception (owner
+> ruling 2026-09-12): the frozen economy canon (`ECONOMY.md`, `ECONOMY-SIM-SPEC.md`,
+> `ECONOMY-ROBUSTNESS.md`) and `sim/` keep the mechanics terms they were validated
+> under; `GDD.md` §2.4 is the bridge. The retired dev names (MEMPOOL, $VIG)
 > survive only inside immutable sim result records and archived docs; the §2 table is
 > the historical mapping for reading those records. The §7 availability checks are
 > **still pending**: no literal name strings go on-chain or into contracts until they

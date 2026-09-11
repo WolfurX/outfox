@@ -220,25 +220,31 @@ async function farmAndOpenExchange(page) {
     ok('C2 zero console errors in world C', C.errors.length === 0);
     await C.ctx.close();
 
-    // ---- world D: The Street — seven districts, two open with entry points, the rest
-    // closed and not pressable (no rung gate on any district; DESIGN-SYSTEM-WEB §2.4) ----
+    // ---- world D: The Street — seven districts, three open with entry points (The Floor
+    // = Gigs and Options Alley = Calls both enter The Tape; The Vault enters the
+    // Clearinghouse), the rest closed and not pressable (no rung gate on any district;
+    // DESIGN-SYSTEM-WEB §2.4; assignment per whitepaper/the-game/the-street.md) ----
     const D = await newWorld(browser);
     await D.page.goto(`http://127.0.0.1:${PORT_WEB}/`);
     await D.page.getByText('Your Book').first().waitFor({ timeout: 10000 });
     await D.page.getByText('The Street', { exact: true }).first().click();
     await D.page.getByText('The Hollow').waitFor({ timeout: 5000 });
     ok('D1 seven districts listed', await D.page.locator('.ofx-emblem').count() === 7);
-    ok('D2 two open districts pressable, five closed and inert',
-      await D.page.locator('.ofx-row--press').count() === 2
-      && await D.page.getByText('Closed', { exact: true }).count() === 5);
+    ok('D2 three open districts pressable, four closed and inert',
+      await D.page.locator('.ofx-row--press').count() === 3
+      && await D.page.getByText('Closed', { exact: true }).count() === 4);
     await D.page.getByRole('button', { name: /The Vault/ }).click();
     await D.page.getByPlaceholder('Scrip to spend').waitFor({ timeout: 5000 });
     ok('D3 The Vault opens the Clearinghouse', true);
     await D.page.getByText('The Street', { exact: true }).first().click();
     await D.page.getByRole('button', { name: /The Floor/ }).click();
+    await D.page.getByText('Gigs — honest work').waitFor({ timeout: 5000 });
+    ok('D4 The Floor lands on The Tape (Gigs)', true);
+    await D.page.getByText('The Street', { exact: true }).first().click();
+    await D.page.getByRole('button', { name: /Options Alley/ }).click();
     await D.page.getByText('Calls — vs the market').waitFor({ timeout: 5000 });
-    ok('D4 The Floor lands on the Calls', true);
-    ok('D5 zero console errors in world D', D.errors.length === 0);
+    ok('D5 Options Alley lands on The Tape (Calls)', true);
+    ok('D6 zero console errors in world D', D.errors.length === 0);
     if (D.errors.length) console.log('   errors:', D.errors.slice(0, 5));
     await D.ctx.close();
 

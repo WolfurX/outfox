@@ -20,5 +20,8 @@ decisions pre-pivot are in `PLAN.md` §Locked/§Confirmed.)
 | 2026-08-25 | **Solana migration** (owner decision): port everything, rewrite only the chain edge as Anchor programs; conditions framework inherited from the prior pivot | `docs/SOLANA-FEASIBILITY.md` |
 | 2026-08-25 | Fresh-history public-facing repo; predecessor development history stays private (provenance: founders' notes) | this file |
 | 2026-08-25 | **Name finalized: Outfox**; vocabulary unified — two-layer rule retired, dev names (MEMPOOL/$VIG) survive only in immutable records; sim rename proven pure by identical-seed A/B diff | `docs/THEME-OUTFOX.md`, `sim/README.md` note, vocab-guard test |
+| 2026-09-12 | **Architecture doc set adopted**: `PRD.md`, `ARCHITECTURE.md`, `INFRASTRUCTURE.md` new, `GDD.md` rewritten; `PLAN.md` = kickoff record; decisions A6–A8, A10, A11, A13–A15 proposed, awaiting the owner | repo `CLAUDE.md`, `docs/ARCHITECTURE.md` §18 |
+| 2026-09-12 | **Street mapping follows the published whitepaper** (owner): The Floor = Gigs, Options Alley = Calls, The Pit = Raids, The Dark Pool = quiet market, After Hours = endgame; the shipped tab corrected, three districts open | `docs/GDD.md` §2.1, `apps/web/src/Street.tsx` |
+| 2026-09-12 | **Mechanics-layer vocabulary exception** (owner): the frozen economy canon and `sim/` keep Credits/Clean/Bound/Exploits/Compute/Nerve/Operations/Safehouses/Quarantine; everything else canonical; `GDD.md` §2.4 is the bridge | repo `CLAUDE.md`, `docs/THEME-OUTFOX.md` status note |
 
 as-of: solana-migration commit (2026-08-25)

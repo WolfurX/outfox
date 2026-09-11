@@ -37,6 +37,12 @@ proven by an identical-seed A/B diff (2026-08-25, note in `sim/README.md`).
 `apps/server/test/vocab-guard.test.ts` enforces that the retired names never re-enter
 living code. In sim code, `tail_alpha` is the Pareto tail index (the G7 metric);
 `alpha`/`ALPHA_*` identifiers are the token.
+**Mechanics-layer exception (owner ruling 2026-09-12):** `docs/ECONOMY.md`,
+`docs/ECONOMY-SIM-SPEC.md`, `docs/ECONOMY-ROBUSTNESS.md`, and `sim/` keep the terms they
+were validated under (Credits, Clean/Bound, Exploits, Compute/Nerve, Operations,
+Safehouses, Quarantine); they are frozen canon and the sim's evidence trail. The bridge
+is `docs/GDD.md` §2.4. Every other doc, all code, and all player-facing copy use the
+canonical terms only.
 
 ## Chain
 

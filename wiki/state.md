@@ -27,13 +27,13 @@ cost), and `docs/GDD.md` rewritten in the unified vocabulary with a bridge table
 mechanics terms `ECONOMY.md` still uses. `PLAN.md` is the kickoff record. Code untouched:
 the module map is the target and the file move is a review-gated round.
 
-Owner rulings the round surfaced: (1) the Street mapping conflict between the shipped
-tab (`Street.tsx`: The Floor = Calls, Options Alley = The Sim, The Dark Pool = Raids,
-After Hours = the Overnight Tape) and the published whitepaper (The Floor = Gigs,
-Options Alley = Calls, The Pit = Raids), recorded in `GDD.md` §2.1; (2) the vocabulary
-rule (`CLAUDE.md`, THEME) versus `ECONOMY.md`'s frozen mechanics terms, recorded in
-`GDD.md` §2.4; (3) the proposed decisions A6–A8, A10, A11, A13–A15 in `ARCHITECTURE.md`
-§18.
+Owner rulings the same day: (1) the Street mapping follows the published whitepaper;
+the shipped tab was corrected (`Street.tsx`: The Floor = Gigs and Options Alley = Calls
+both enter The Tape, The Vault enters the Clearinghouse, four districts closed;
+`verify-live` world D updated, 20/20); (2) the frozen economy canon and `sim/` keep the
+mechanics-layer terms, stated as an explicit exception in repo `CLAUDE.md` and THEME,
+bridge in `GDD.md` §2.4. Still open: the proposed decisions A6–A8, A10, A11, A13–A15 in
+`ARCHITECTURE.md` §18.
 
 Pre-beta engineering list: `INFRASTRUCTURE.md` §11 (CI, `/min-version`, idempotency
 keys, step-up auth, metric jobs + dashboard + alerts, backup timer + restore drill, log
@@ -175,7 +175,7 @@ Earlier in session 5 — **Art is IN the UI** (`d569c5c`) — the staged batch i
   console errors. Build 61.1 KB gz.
 - **Staged 2026-09-11 (art batch 2):** 8 item cards for not-yet-existing kinds, 5 currency marks (`coin-alpha` = candidate token logo), 16 emblems — `apps/web/public/art/{item,coin,emblem}-*.webp`, record `docs/ART-PROMPTS.md` Tier 4. Wiring = adding the kinds / choosing surfaces; in-app icons stay SVG.
 - **Feedback layer LIVE (2026-09-11, DSW §9):** `feedback.ts` dispatcher (synthesized cues, haptics, reduced-motion + per-device toggles), header mute, Nicked flash, Scrip marks on Book/Ledger rows. Next in the game-feel plan was The Street tab; see the next entry.
-- **The Street tab LIVE (2026-09-11, DSW §2.4):** `apps/web/src/Street.tsx`, fourth tab (Tape · Street · Market · Ledger; Skulk waits for Skulks). Seven district rows with the emblem art: The Floor (→ The Tape's Calls) and The Vault (→ the Clearinghouse) are OPEN with a chevron; Options Alley, The Pit, The Dark Pool, After Hours, The Hollow are CLOSED: dimmed emblem, one line of fiction, hollow-mark chip, no tap target, no date. No district carries a rung gate (§10.1 unlocks Raids at R0; the sketch's "R2 to enter" was invented and dropped). Gigs stay on The Tape, not a district. verify-live world D (5 checks) covers it; 19/19.
+- **The Street tab LIVE (2026-09-11, DSW §2.4; mapping corrected 2026-09-12):** `apps/web/src/Street.tsx`, fourth tab (Tape · Street · Market · Ledger; Skulk waits for Skulks). Seven district rows with the emblem art: The Floor (Gigs → The Tape), Options Alley (Calls → The Tape) and The Vault (→ the Clearinghouse) are OPEN with a chevron; The Pit, The Dark Pool, After Hours, The Hollow are CLOSED: dimmed emblem, one line of fiction, hollow-mark chip, no tap target, no date. No district carries a rung gate (§10.1 unlocks Raids at R0; the sketch's "R2 to enter" was invented and dropped). Gigs stay on The Tape, not a district. verify-live world D (6 checks) covers it; 20/20.
 - **Still staged, awaiting a surface:** `state-nicked.webp` (no interstitial surface
   exists — inline row results are the design) and `mascot.webp` (character reference;
   the sub-8-KB **layered SVG fox** traced from it is the open derivation task — canon

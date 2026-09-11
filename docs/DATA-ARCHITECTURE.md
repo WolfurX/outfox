@@ -8,10 +8,10 @@ watch — runs on this telemetry. `ECONOMY.md` §10 already makes the dashboards
 criteria; this doc is the architecture contract that makes them buildable. Every Phase-2+
 server/indexer module builds against it.
 
-*Vocabulary note (two-layer rule, repo `CLAUDE.md`): this doc straddles both layers by
-necessity — on-chain artifacts are named as deployed (**$ALPHA**, `Settlement`), while
-economy internals use the frozen mechanics vocabulary. $ALPHA **is** the mechanics
-layer's $ALPHA (`THEME-OUTFOX.md` §2).*
+*Vocabulary note: this doc names on-chain artifacts as deployed (**$ALPHA**,
+`Settlement`) and cites economy internals in the frozen mechanics vocabulary of
+`ECONOMY.md` (the admitted exception in repo `CLAUDE.md`, 2026-09-12); the bridge is
+`GDD.md` §2.4.*
 
 ## 1. Principles
 

@@ -7,20 +7,22 @@ import { Chip, ListRow, RowGroup } from './ds';
  * its row is the entry point; otherwise it is CLOSED — emblem, name, one line of fiction,
  * no tap target, no date, no promise. No district carries a rung gate: §10.1 unlocks
  * Calls, Raids, Gigs and The Sim at R0; deposits and cash-out gate inside the
- * Clearinghouse itself. Gigs stay on The Tape and are not a district.
+ * Clearinghouse itself. District-to-system assignment follows the published whitepaper
+ * (whitepaper/the-game/the-street.md; owner ruling 2026-09-12): The Floor is Gigs and
+ * Options Alley is Calls, both of which live on The Tape, so both rows enter there.
  */
 export type DistrictEntry = 'tape' | 'clearinghouse';
 
 const DISTRICTS: { id: string; name: string; line: string; entry?: DistrictEntry }[] = [
-  { id: 'floor', name: 'The Floor', line: 'Calls vs the market. Open outcry, all day.', entry: 'tape' },
-  { id: 'options_alley', name: 'Options Alley', line: 'The Sim. Paper trades with nothing at stake.' },
-  { id: 'pit', name: 'The Pit', line: 'Rumors move here before the Tape prints them.' },
-  { id: 'dark_pool', name: 'The Dark Pool', line: 'Raids on the Houses. The Sheriff watches this one.' },
+  { id: 'floor', name: 'The Floor', line: 'Gigs. Honest work, reliable pay.', entry: 'tape' },
+  { id: 'options_alley', name: 'Options Alley', line: 'Calls against the market. Open outcry, all day.', entry: 'tape' },
+  { id: 'pit', name: 'The Pit', line: 'Raids on the Houses. The Sheriff watches this one.' },
+  { id: 'dark_pool', name: 'The Dark Pool', line: 'The quiet end of the market.' },
   {
     id: 'vault', name: 'The Vault', entry: 'clearinghouse',
     line: 'The Clearinghouse. Swap Scrip and $ALPHA, deposit, cash out.',
   },
-  { id: 'after_hours', name: 'After Hours', line: 'The Overnight Tape prints here while the Floor sleeps.' },
+  { id: 'after_hours', name: 'After Hours', line: 'The endgame district. The Street never closes.' },
   { id: 'hollow', name: 'The Hollow', line: 'The crews’ quarter. Skulks and the Commons.' },
 ];
 

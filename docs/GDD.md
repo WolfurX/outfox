@@ -49,22 +49,20 @@ a district list, not a map (the word is banned as a description). Districts open
 their system ships; closed ones show one line of fiction, no gate and no date. No district
 carries a rung gate.
 
-| District | What happens there (published whitepaper) | System | Shipped tab (2026-09-11) |
+| District | What happens there | System | Status |
 |---|---|---|---|
-| The Floor | honest work, reliable pay | Gigs | open; entry to The Tape, fiction line says Calls |
-| Options Alley | Calls against the market and other Foxes | Calls | closed; fiction line says The Sim |
-| The Pit | Raids on the Houses | Raids | closed; fiction line says rumors |
-| The Dark Pool | the quiet end of the market | The Index, Desks | closed; fiction line says Raids |
-| The Vault | the Houses' treasure and the target | The Clearinghouse | open; entry to the Clearinghouse |
-| After Hours | the endgame district; the Street never closes | Seats, late-game systems | closed; fiction line says the Overnight Tape |
-| The Hollow | the crews' hideout quarter | Skulks, the Commons | closed; matches |
+| The Floor | honest work, reliable pay | Gigs (live on The Tape) | Built, open; enters The Tape |
+| Options Alley | Calls against the market and other Foxes | Calls (market side live on The Tape; versus-Fox designed) | Built, open; enters The Tape |
+| The Pit | Raids on the Houses | Raids | Designed, closed |
+| The Dark Pool | the quiet end of the market | The Index, Desks | Designed, closed |
+| The Vault | the Houses' treasure and the target | The Clearinghouse | Built, open; enters the Clearinghouse |
+| After Hours | the endgame district; the Street never closes | Seats, late-game systems | Designed, closed |
+| The Hollow | the crews' hideout quarter | Skulks, the Commons | Designed, closed |
 
-**Conflict:** the published whitepaper (`whitepaper/the-game/the-street.md`) and the
-Street tab shipped 2026-09-11 (`apps/web/src/Street.tsx`, asserted by `verify-live`
-check D4 "The Floor lands on the Calls") assign different systems to four districts.
-The table's system column follows the published page; the last column reports the
-shipped fiction lines. The owner rules which side is corrected; until then neither is
-changed here.
+The assignment is the published whitepaper's (`whitepaper/the-game/the-street.md`).
+The Street tab shipped 2026-09-11 had assigned four districts differently; on the
+owner's ruling of 2026-09-12 the tab was corrected to this table (`apps/web/src/
+Street.tsx`, `verify-live` world D), so three districts are open today.
 
 ### 2.2 Who is on the Street
 
@@ -98,13 +96,11 @@ there (counted 2026-09-12), so readers can move between the two without ambiguit
 | Skulks | syndicates (lowercase, in passing) |
 | The Commons | The Commons (same term) |
 
-**Conflict:** repo `CLAUDE.md` and `THEME-OUTFOX.md` state one vocabulary everywhere
-including canon docs (2026-08-25), while `ECONOMY.md` and the sim spec carry the left
-column's counterparts (23 uses of Credits, 14 of Bound, and so on) and no use of Scrip.
-The owner resolves it: rename inside the frozen doc, or amend the rule to admit the
-mechanics-layer exception explicitly. This table is the bridge either way. The product
-names retired at the Solana move survive only inside immutable sim records
-(`vocab-guard.test.ts` enforces it).
+Owner ruling 2026-09-12: the frozen economy canon and `sim/` keep these terms, and repo
+`CLAUDE.md` and `THEME-OUTFOX.md` now state the exception explicitly; every other doc,
+all code, and all player-facing copy use the left column only. This table is the
+bridge. The product names retired at the Solana move survive only inside immutable sim
+records (`vocab-guard.test.ts` enforces it).
 
 ## 3. The Fox
 
@@ -399,8 +395,6 @@ those fail the game fails regardless of DAU.
 
 ## 12. Open design questions
 
-- The Street mapping (§2.1 conflict): does the shipped tab or the published whitepaper
-  get corrected? The whitepaper's assignment is the one the fiction was written to.
 - The Raid tier's Heat curve and whether Heat is per Fox, per Skulk, or both.
 - The item roster for the CPI basket (needs at least a handful of stable kinds).
 - Which of Desks, Seats, and the Index ships first after Skulks; each needs a modeled
