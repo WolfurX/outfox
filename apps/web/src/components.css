@@ -312,3 +312,18 @@
   .ofx-app__main { padding-bottom: var(--space-7); }
   .ofx-tabbar--fixed { display: none; }
 }
+
+/* ---------- Nicked flash — the Sheriff's spotlight, opacity only (§8 / §9) ----------
+   The visual twin of the Nicked cue: a cold wash from the top that is gone inside the
+   reveal budget. Rides --dur-reveal, so reduced-motion collapses it to nothing. */
+@keyframes ofx-flash { 0% { opacity: 0; } 25% { opacity: 1; } 100% { opacity: 0; } }
+.ofx-flash {
+  position: fixed; inset: 0; z-index: 60; pointer-events: none; opacity: 0;
+  background: radial-gradient(60% 40% at 50% 0%, color-mix(in oklab, var(--c-unsettled) 32%, transparent), transparent 70%);
+}
+.ofx-flash--on { animation: ofx-flash calc(var(--dur-reveal) + 40ms) var(--ease-out) both; }
+
+/* ---------- Scrip marks — the brand-semantic currency glyphs (§6: SVG, filled) ---------- */
+.ofx-mark { display: block; width: 20px; height: 20px; }
+.ofx-mark--settled { color: var(--c-up); }
+.ofx-mark--unsettled { color: var(--c-unsettled); }

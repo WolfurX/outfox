@@ -179,6 +179,18 @@ export function ActionRow({ title, desc, meta, action, result }: {
   );
 }
 
+/** The Scrip mark — a brand-semantic glyph (§6): filled SVG, colored by provenance.
+ * Unsettled carries a dashed ring as the shape-level twin of the hatch chip. */
+export function ScripMark({ provenance }: { provenance: 'settled' | 'unsettled' }) {
+  return (
+    <svg className={cx('ofx-mark', `ofx-mark--${provenance}`)} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="2"
+        strokeDasharray={provenance === 'unsettled' ? '3 2.5' : undefined} />
+      <circle cx="12" cy="12" r="4" fill="currentColor" />
+    </svg>
+  );
+}
+
 /** A Call's stated chance, quoted like market depth — never as "odds". */
 export function SplitBar({ successPct }: { successPct: number }) {
   const p = Math.max(0, Math.min(100, Math.round(successPct)));

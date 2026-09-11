@@ -145,6 +145,7 @@ Earlier in session 5 — **Art is IN the UI** (`d569c5c`) — the staged batch i
   Fox, art loads (no 404s), the flow lands on the Tape, thumbs + empties render, zero
   console errors. Build 61.1 KB gz.
 - **Staged 2026-09-11 (art batch 2):** 8 item cards for not-yet-existing kinds, 5 currency marks (`coin-alpha` = candidate token logo), 16 emblems — `apps/web/public/art/{item,coin,emblem}-*.webp`, record `docs/ART-PROMPTS.md` Tier 4. Wiring = adding the kinds / choosing surfaces; in-app icons stay SVG.
+- **Feedback layer LIVE (2026-09-11, DSW §9):** `feedback.ts` dispatcher (synthesized cues, haptics, reduced-motion + per-device toggles), header mute, Nicked flash, Scrip marks on Book/Ledger rows. Next in the game-feel plan: The Street tab (districts with the emblem art, entry points to what exists).
 - **Still staged, awaiting a surface:** `state-nicked.webp` (no interstitial surface
   exists — inline row results are the design) and `mascot.webp` (character reference;
   the sub-8-KB **layered SVG fox** traced from it is the open derivation task — canon

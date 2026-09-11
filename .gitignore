@@ -36,3 +36,6 @@ private/
 programs/target/
 programs/.anchor/
 test-ledger/
+
+# disposable design sketches (throwaway HTML variants)
+sketches/

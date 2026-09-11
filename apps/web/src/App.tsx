@@ -9,12 +9,13 @@ import {
   Activity, ChevronRight, Crosshair, Gauge, Landmark, Moon, Store, Sun, TriangleAlert, WifiOff,
 } from 'lucide-react';
 import { api } from './api';
+import { fx } from './feedback';
 import { Clearinghouse } from './Clearinghouse';
 import { RegisterSheet } from './RegisterSheet';
 import { registerSW } from './sw-register';
 import {
   ActionResult, ActionRow, Amount, Banner, Button, Chip, EmptyState, ListRow, Meter,
-  ProvenanceChip, RowGroup, Skeleton, SplitBar, TabBar, type TabDef,
+  ProvenanceChip, RowGroup, ScripMark, Skeleton, SplitBar, TabBar, type TabDef,
 } from './ds';
 
 type Tab = 'tape' | 'market' | 'ledger';
@@ -69,6 +70,12 @@ export default function App() {
   const [halted, setHalted] = useState(false);
   const [register, setRegister] = useState<{ reason: string; resume: () => void } | null>(null);
   const [swApply, setSwApply] = useState<(() => void) | null>(null);
+  // §9 feedback: the Nicked flash (visual twin of the buzz) and the header mute state
+  const [flash, setFlash] = useState(0);
+  const [sound, setSound] = useState(() => fx.prefs().sound);
+  const [soundToast, setSoundToast] = useState(() => {
+    try { return localStorage.getItem('outfox.fx.toast') !== 'seen'; } catch { return false; }
+  });
   // FTUE (§10.4): the guided first Call, shown until the first Call RESOLVES (win or
   // Nicked). localStorage persists it per device; the balance check skips it for a
   // returning account on a fresh device. Private mode (throwing storage) skips FTUE
@@ -152,9 +159,18 @@ export default function App() {
 
   /** Shared by the Tape rows and the FTUE beat — the first resolved Call ends FTUE. */
   const doCall = useCallback(async (id: string) => {
+    fx.emit('press');
     const r = await run(() => api.call(id));
     const result = (r as { result?: CallResult } | null)?.result;
     if (!result) return;
+    if (result.ok) {
+      // reward weight by tier = the Call's place in the catalog; scales amplitude, never length
+      const idx = boot?.catalog.calls.findIndex((c) => c.id === id) ?? 0;
+      fx.reveal(Math.min(3, Math.max(1, idx + 1)) as 1 | 2 | 3);
+    } else {
+      fx.emit('nicked');
+      setFlash((n) => n + 1);
+    }
     setFeedback(result.ok
       ? {
           actionId: id, kind: 'clean', seq: ++seq.current,
@@ -169,7 +185,7 @@ export default function App() {
       if (!done) { try { localStorage.setItem('outfox.ftue', 'done'); } catch { /* private mode */ } }
       return true;
     });
-  }, [run]);
+  }, [run, boot]);
 
   // a player with anything on the Book has already had their first Call — record it
   const isFresh = player
@@ -187,6 +203,17 @@ export default function App() {
   const [isLight, setIsLight] = useState(
     () => document.documentElement.getAttribute('data-theme') === 'light',
   );
+  const toggleSound = () => {
+    const next = !sound;
+    fx.set({ sound: next });
+    setSound(next);
+    if (next) fx.emit('press');
+  };
+  const dismissSoundToast = () => {
+    setSoundToast(false);
+    try { localStorage.setItem('outfox.fx.toast', 'seen'); } catch { /* private mode */ }
+  };
+
   const toggleTheme = () => {
     const next = isLight ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', next);
@@ -204,6 +231,12 @@ export default function App() {
       </span>
       <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
         {player && <span className="ofx-statline"><b style={{ marginLeft: 0 }}>{player.handle}</b></span>}
+        <Button
+          variant="ghost" size="sm" iconOnly onClick={toggleSound}
+          aria-label={sound ? 'Mute sound cues' : 'Unmute sound cues'} aria-pressed={!sound}
+        >
+          <SoundIcon on={sound} />
+        </Button>
         <Button variant="ghost" size="sm" iconOnly onClick={toggleTheme} aria-label="Toggle theme">
           {isLight ? <Moon size={16} strokeWidth={1.75} /> : <Sun size={16} strokeWidth={1.75} />}
         </Button>
@@ -238,7 +271,8 @@ export default function App() {
 
   return (
     <div className="ofx-app">
-      {wide && <TabBar rail tabs={TABS} active={tab} onSelect={(t) => { setTab(t as Tab); setClearing(false); }} />}
+      {flash > 0 && <div key={flash} className="ofx-flash ofx-flash--on" aria-hidden="true" />}
+      {wide && <TabBar rail tabs={TABS} active={tab} onSelect={(t) => { fx.emit('select'); setTab(t as Tab); setClearing(false); }} />}
       <div className="ofx-app__col">
         {header}
         <main className="ofx-app__main">
@@ -259,6 +293,11 @@ export default function App() {
                 {error}
               </Banner>
             )}
+            {soundToast && tab === 'tape' && (
+              <Banner title="Sound on" action={<Button size="sm" onClick={dismissSoundToast}>Got it</Button>}>
+                Cues play at low volume. Mute any time with the speaker in the header.
+              </Banner>
+            )}
 
             {tab === 'tape' && showFtue && (
               <Ftue
@@ -271,7 +310,9 @@ export default function App() {
                 player={player} boot={boot} srvNow={srvNow} feedback={feedback}
                 onCall={doCall}
                 onGig={async () => {
+                  fx.emit('press');
                   const r = await run(() => api.gig());
+                  if (r) fx.emit('clean');
                   const tool = (r as { toolAwarded?: ItemKind } | null)?.toolAwarded;
                   setFeedback(tool
                     ? {
@@ -283,16 +324,20 @@ export default function App() {
                         text: `Settled +${GIG.payout.toLocaleString()} Scrip`,
                       });
                 }}
-                onRefill={(bar) => run(() => api.refill(bar))}
+                onRefill={(bar) => { fx.emit('press'); return run(() => api.refill(bar)); }}
               />
             )}
 
             {tab === 'market' && (
               <Market
                 player={player} listings={listings}
-                onBuy={(id) => run(() => api.buy(id), { reason: 'Buying on the Open Market is for registered Foxes.' })}
-                onList={(itemId, price) => run(() => api.list(itemId, price), { reason: 'Listing on the Open Market is for registered Foxes.' })}
-                onCancel={(id) => run(() => api.cancel(id))}
+                onBuy={async (id) => {
+                  fx.emit('press');
+                  const r = await run(() => api.buy(id), { reason: 'Buying on the Open Market is for registered Foxes.' });
+                  if (r) fx.emit('fill');
+                }}
+                onList={(itemId, price) => { fx.emit('press'); return run(() => api.list(itemId, price), { reason: 'Listing on the Open Market is for registered Foxes.' }); }}
+                onCancel={(id) => { fx.emit('press'); return run(() => api.cancel(id)); }}
                 onOpen={() => run(() => api.market())}
               />
             )}
@@ -314,7 +359,7 @@ export default function App() {
         />
       )}
 
-      {!wide && <TabBar tabs={TABS} active={tab} onSelect={(t) => { setTab(t as Tab); setClearing(false); }} />}
+      {!wide && <TabBar tabs={TABS} active={tab} onSelect={(t) => { fx.emit('select'); setTab(t as Tab); setClearing(false); }} />}
     </div>
   );
 }
@@ -396,10 +441,12 @@ function Tape(props: {
 
       <RowGroup title="Your Book">
         <ListRow
+          lead={<ScripMark provenance="settled" />}
           title={<Amount value={p.scripSettled} unit="Scrip" size="xl" />}
           sub={<ProvenanceChip provenance="settled" />}
         />
         <ListRow
+          lead={<ScripMark provenance="unsettled" />}
           title={<Amount value={p.scripUnsettled} unit="Scrip" size="lg" tone="unsettled" />}
           sub={<ProvenanceChip provenance="unsettled" />}
         />
@@ -608,11 +655,13 @@ function Ledger({ player: p, onClearinghouse }: {
           sub="Total on the Book"
         />
         <ListRow
+          lead={<ScripMark provenance="settled" />}
           title={<Amount value={p.scripSettled} unit="Scrip" size="md" />}
           sub={<ProvenanceChip provenance="settled" />}
           trail={<span className="ofx-statline">Tradable · Cashable</span>}
         />
         <ListRow
+          lead={<ScripMark provenance="unsettled" />}
           title={<Amount value={p.scripUnsettled} unit="Scrip" size="md" tone="unsettled" />}
           sub={<ProvenanceChip provenance="unsettled" />}
           trail={<span className="ofx-statline">Spend-only</span>}
@@ -660,5 +709,18 @@ function Ledger({ player: p, onClearinghouse }: {
         })}
       </RowGroup>
     </>
+  );
+}
+
+/** Header mute glyph — inline SVG per §6 (24px grid, 2px stroke, themes through currentColor). */
+function SoundIcon({ on }: { on: boolean }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M11 5 6 9H3v6h3l5 4z" />
+      {on
+        ? <><path d="M15.5 8.5a5 5 0 0 1 0 7" /><path d="M18.5 5.5a9 9 0 0 1 0 13" /></>
+        : <><path d="m22 9-6 6" /><path d="m16 9 6 6" /></>}
+    </svg>
   );
 }
