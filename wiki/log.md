@@ -214,3 +214,4 @@ not carried into this repository.)*
   docs/ART-PROMPTS.md Tier 4; raws art/raw/2026-09-11-* (gitignored). Live check
   the same session: dev server + vite, Playwright walkthrough FTUE → Tape → Market →
   Ledger at 390 and 1280, zero console errors, existing art slots render.
+- 2026-09-11 · DECISION · **Repo private** (owner). `WolfurX/outfox` visibility flipped public → private via gh. Whitepaper site and the `outfox-whitepaper` mirror remain public; the license and public-tree redaction rules are unchanged.
