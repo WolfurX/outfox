@@ -145,7 +145,8 @@ Earlier in session 5 — **Art is IN the UI** (`d569c5c`) — the staged batch i
   Fox, art loads (no 404s), the flow lands on the Tape, thumbs + empties render, zero
   console errors. Build 61.1 KB gz.
 - **Staged 2026-09-11 (art batch 2):** 8 item cards for not-yet-existing kinds, 5 currency marks (`coin-alpha` = candidate token logo), 16 emblems — `apps/web/public/art/{item,coin,emblem}-*.webp`, record `docs/ART-PROMPTS.md` Tier 4. Wiring = adding the kinds / choosing surfaces; in-app icons stay SVG.
-- **Feedback layer LIVE (2026-09-11, DSW §9):** `feedback.ts` dispatcher (synthesized cues, haptics, reduced-motion + per-device toggles), header mute, Nicked flash, Scrip marks on Book/Ledger rows. Next in the game-feel plan: The Street tab (districts with the emblem art, entry points to what exists).
+- **Feedback layer LIVE (2026-09-11, DSW §9):** `feedback.ts` dispatcher (synthesized cues, haptics, reduced-motion + per-device toggles), header mute, Nicked flash, Scrip marks on Book/Ledger rows. Next in the game-feel plan was The Street tab; see the next entry.
+- **The Street tab LIVE (2026-09-11, DSW §2.4):** `apps/web/src/Street.tsx`, fourth tab (Tape · Street · Market · Ledger; Skulk waits for Skulks). Seven district rows with the emblem art: The Floor (→ The Tape's Calls) and The Vault (→ the Clearinghouse) are OPEN with a chevron; Options Alley, The Pit, The Dark Pool, After Hours, The Hollow are CLOSED: dimmed emblem, one line of fiction, hollow-mark chip, no tap target, no date. No district carries a rung gate (§10.1 unlocks Raids at R0; the sketch's "R2 to enter" was invented and dropped). Gigs stay on The Tape, not a district. verify-live world D (5 checks) covers it; 19/19.
 - **Still staged, awaiting a surface:** `state-nicked.webp` (no interstitial surface
   exists — inline row results are the design) and `mascot.webp` (character reference;
   the sub-8-KB **layered SVG fox** traced from it is the open derivation task — canon

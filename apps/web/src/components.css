@@ -247,7 +247,10 @@
 .ofx-ftue__art { aspect-ratio: 4 / 5; max-height: 44vh; }
 .ofx-empty__art { display: block; width: min(180px, 55%); aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-2); border: var(--bw-1) solid var(--c-border); opacity: 0.92; }
 .ofx-thumb { display: block; width: 40px; height: 40px; object-fit: cover; border-radius: var(--radius-1); border: var(--bw-1) solid var(--c-border); }
-.ofx-row__lead:has(> .ofx-thumb) { width: auto; }
+.ofx-row__lead:has(> .ofx-thumb), .ofx-row__lead:has(> .ofx-emblem) { width: auto; }
+/* District emblems on The Street: round, hairline-framed; a closed district dims its emblem. */
+.ofx-emblem { display: block; width: 44px; height: 44px; object-fit: cover; border-radius: 50%; border: var(--bw-1) solid var(--c-border); background: var(--c-raised); }
+.ofx-emblem--closed { opacity: 0.55; }
 .ofx-empty__title { font-family: var(--font-mono); font-size: var(--fs-sm); font-weight: var(--fw-semi); text-transform: uppercase; letter-spacing: var(--track-caps); color: var(--c-text-2); }
 .ofx-empty__hint { font-size: var(--fs-sm); color: var(--c-text-2); max-width: 30em; margin: 0; }
 .ofx-empty > .ofx-btn { margin-top: var(--space-2); }

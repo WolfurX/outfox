@@ -6,22 +6,24 @@ import {
   GIG, ITEM_KINDS, MARKET_FEE_BPS, REFILL, REGEN, UNSETTLED_EXPLAINER,
 } from '@outfox/shared';
 import {
-  Activity, ChevronRight, Crosshair, Gauge, Landmark, Moon, Store, Sun, TriangleAlert, WifiOff,
+  Activity, ChevronRight, Crosshair, Gauge, Landmark, Moon, Signpost, Store, Sun, TriangleAlert, WifiOff,
 } from 'lucide-react';
 import { api } from './api';
 import { fx } from './feedback';
 import { Clearinghouse } from './Clearinghouse';
 import { RegisterSheet } from './RegisterSheet';
 import { registerSW } from './sw-register';
+import { Street } from './Street';
 import {
   ActionResult, ActionRow, Amount, Banner, Button, Chip, EmptyState, ListRow, Meter,
   ProvenanceChip, RowGroup, ScripMark, Skeleton, SplitBar, TabBar, type TabDef,
 } from './ds';
 
-type Tab = 'tape' | 'market' | 'ledger';
+type Tab = 'tape' | 'street' | 'market' | 'ledger';
 
 const TABS: TabDef[] = [
   { id: 'tape', label: 'The Tape', icon: <Activity size={18} strokeWidth={1.75} /> },
+  { id: 'street', label: 'The Street', icon: <Signpost size={18} strokeWidth={1.75} /> },
   { id: 'market', label: 'Market', icon: <Store size={18} strokeWidth={1.75} /> },
   { id: 'ledger', label: 'Ledger', icon: <Landmark size={18} strokeWidth={1.75} /> },
 ];
@@ -325,6 +327,16 @@ export default function App() {
                       });
                 }}
                 onRefill={(bar) => { fx.emit('press'); return run(() => api.refill(bar)); }}
+              />
+            )}
+
+            {tab === 'street' && (
+              <Street
+                onEnter={(e) => {
+                  fx.emit('select');
+                  if (e === 'tape') setTab('tape');
+                  else { setTab('ledger'); setClearing(true); }
+                }}
               />
             )}
 
