@@ -6,7 +6,7 @@
 set -euo pipefail
 
 SRC="$(cd "$(dirname "$0")/.." && pwd)/whitepaper"
-PUB="${OUTFOX_WHITEPAPER_REPO:-$HOME/Projects/outfox-whitepaper}"
+PUB="${OUTFOX_WHITEPAPER_REPO:-$HOME/projects/outfox-whitepaper}"
 TOKEN_FILE="${GITBOOK_TOKEN_FILE:-$HOME/.config/gitbook/token}"
 SPACE_ID="f3b29NcYLjPo3cnhExJ4"   # GitBook space "Whitepaper" (org WolfurX)
 
