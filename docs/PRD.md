@@ -195,6 +195,7 @@ point at the rule; this table does not restate rules.
 | FR-OPS-1 | Liveness probe with DB touch and indexer age | `/healthz` | Built |
 | FR-OPS-2 | Pause, signer rotation, cap change from the cold admin key; multisig at mainnet | program; runbooks in `INFRASTRUCTURE.md` §8 | Built (program), runbooks Specified |
 | FR-OPS-3 | Live dashboards for M, V, P, Q, CPI, Gini, tail, sink efficacy, exit-Gini, sybil proxy, PoR | metric jobs writing `metrics`; self-hosted dashboard | Specified, pre-beta |
+| FR-OPS-7 | A public economy page (`/economy`, `GET /api/economy`): aggregates only (Foxes, Scrip by provenance, treasury, the day's faucets and sinks, $ALPHA owed against the escrow reserve, the exchange rate, the launch) and the verdicts of the four ledger audits; no session, no player named. A summary, not the FR-OPS-3 dashboards | `overview.test.ts` (figures derived by hand); `verify-live` world E; `rate-limit.test.ts` | Built |
 | FR-OPS-4 | Alerts on any G band breach, indexer age, solvency audit failure, disk, and backup age | `INFRASTRUCTURE.md` §7 | Specified, pre-beta |
 | FR-OPS-5 | Every parameter change is a logged policy event within a proven interval | policy registry (A14) | Specified |
 | FR-OPS-6 | Restorable backups every 6 h and before every deploy, one restore drill done | `INFRASTRUCTURE.md` §6 | Specified, pre-beta |

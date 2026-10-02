@@ -226,6 +226,7 @@ The surface today, grouped (all under `/api`, JSON, cookie session):
 | ledger | `GET ledger` |
 | exchange | `GET exchange`, `exchange/history`; `POST exchange/quote`, `exchange/swap` |
 | clearinghouse | `GET alpha`; `POST deposit/prepare`, `withdraw/request`, `withdraw/claim` |
+| economy (public) | `GET economy` (unauthenticated: aggregates and audit verdicts only, never a player row; one computation per 30 s; the escrow reserve is the only upstream read and its absence leaves the ledger side published) |
 | launch | `GET launch` (unauthenticated, public chain data only: the $ALPHA curve and pool on Meteora, `LAUNCH.md` §8; cached 30 s, withdrawn after 10 minutes without a good read) |
 | ops | `GET healthz` (unauthenticated, liveness only); `GET debug/conservation`, `debug/alpha-drift`, `debug/exchange`, `debug/solvency` (only with `OUTFOX_DEBUG`) |
 
@@ -241,8 +242,9 @@ Rules that hold across the surface:
   `insufficient`, `low_bar`, `cooldown`, `rung_required`, `chain_off`, `rate_limited`.
   The client keys on `code`, never on message text.
 - Rate limits are per route per IP: bootstrap 30/min; the row-minting and RPC-firing
-  routes 10/min each; the public launch view 60/min (it reads upstream at most once per
-  30 s whatever the request rate). Gameplay routes are priced in Focus and Risk Appetite instead.
+  routes 10/min each; the two public views (`launch`, `economy`) 60/min each, served through
+  `core/cached` (at most one upstream read or computation per 30 s whatever the request
+  rate). Gameplay routes are priced in Focus and Risk Appetite instead.
   `X-Forwarded-For` is trusted for exactly one hop and only with `OUTFOX_TRUST_PROXY=1`.
 - The session is an opaque random token in an `httpOnly`, `SameSite=Lax` cookie
   (`Secure` in production), hashed at rest, one year, minted at first bootstrap.

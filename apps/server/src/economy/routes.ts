@@ -12,6 +12,8 @@ import {
   alphaView, requestWithdrawal, prepareClaim, recordSignedVoucher, withdrawalView,
 } from './valve.js';
 import { exchangeView, quoteExchange, buyAlpha, sellAlpha } from './exchange.js';
+import { economyOverview } from './overview.js';
+import { cachedRead, withTimeout } from '../core/cached.js';
 import { VALVE } from '@outfox/shared';
 
 function parseWei(v: unknown, what = 'invalid amount'): bigint {
@@ -24,6 +26,26 @@ function parseWei(v: unknown, what = 'invalid amount'): bigint {
 
 export function registerEconomyRoutes(app: FastifyInstance, ctx: Ctx): void {
   const { db } = ctx;
+
+  // --- the public economy overview: aggregates only, no session (economy/overview.ts) ---
+  // One computation per 30 s whatever the request rate. The escrow reserve is the only
+  // upstream read; when the chain is off, slow or unreachable the ledger side is still
+  // published, with the reserve and the solvency verdict left null.
+  const overview = cachedRead(async () => {
+    let reserve: bigint | null = null;
+    if (ctx.chain) {
+      try {
+        reserve = await withTimeout(reserveFor(ctx.chain), 5_000);
+      } catch (e) {
+        app.log.warn({ err: String(e) }, 'economy overview: reserve read failed');
+      }
+    }
+    return economyOverview(db, reserve);
+  }, {
+    windowMs: 30_000, timeoutMs: 8_000, maxAgeMs: 10 * 60_000,
+    onError: (e) => { app.log.warn({ err: String(e) }, 'economy overview failed'); },
+  });
+  app.get('/api/economy', { config: ctx.rl.public }, async () => ({ economy: await overview() }));
 
   app.get('/api/alpha', async (req) => {
     const playerId = requirePlayer(db, req);

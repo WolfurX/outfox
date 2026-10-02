@@ -79,3 +79,9 @@ Chain data is public by nature; game-ledger events are internal. Nothing here cr
 PII store: legal/retention review of the identity tables joins the counsel gate
 (`VALIDATION-BENCHMARKS.md` §4). A pre-publication redaction sweep applies to any published
 dashboard or dataset.
+
+First published slice (2026-10-02): the public economy page (`GET /api/economy`,
+`apps/server/src/economy/overview.ts`). It publishes totals and audit verdicts only; a
+test asserts that no handle or email appears in its output. With very few players a
+total is close to an individual balance; that is accepted for the beta and is the reason
+the page carries no per-player or per-wallet figure of any kind.

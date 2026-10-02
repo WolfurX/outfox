@@ -47,6 +47,14 @@ the beta (settlement state is a singleton bound to one mint), the beta's own lau
 rebroadcast in the script before any mainnet use; how the treasury's curve and pool
 fees are classified under `ECONOMY.md` §3 (owner).
 
+**Public economy page (2026-10-02):** `/economy` (`apps/web/src/Economy.tsx`, its own
+2.8 KB chunk, no session, no wallet code) over `GET /api/economy`
+(`economy/overview.ts`: Foxes, Scrip by provenance, treasury, 24 h faucets and sinks,
+$ALPHA owed against the escrow reserve, the exchange rate, the four audit verdicts) and
+`GET /api/launch`. Both public routes go through `core/cached.ts`. PRD FR-OPS-7. Suite
+188/188; `verify-live` 26/26 with world E. Not the §10 dashboards (FR-OPS-3 stays
+Specified).
+
 Deploy change: the box installs with `npm ci --omit=dev` (`tsx` is now a dependency),
 so no dev tooling lands beside the voucher key (`deploy/README.md`).
 

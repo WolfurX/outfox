@@ -443,4 +443,36 @@ export interface LaunchView {
 }
 export interface LaunchResponse {
   launch: LaunchView | null;
+  /** The cluster the addresses live on: 0 localnet, 1 devnet, 2 mainnet; null with the chain edge off. */
+  chainId: number | null;
+}
+
+/** GET /api/economy: the public economy overview. Aggregates only, never a player. */
+export interface EconomyView {
+  asOf: number;
+  players: { total: number; registered: number; active24h: number };
+  /** Scrip, in cents. */
+  scrip: {
+    /** Held by players, by provenance. */
+    settled: number;
+    unsettled: number;
+    /** Captured by sinks; policy ammunition, never operator revenue. */
+    treasury: number;
+    exchangePool: number;
+    /** Everything ever minted: play, plus the exchange pool's seed. */
+    minted: number;
+    /** Last 24 hours: minted by play, and captured by the sinks. */
+    minted24h: number;
+    captured24h: number;
+  };
+  /** $ALPHA inside the game, in base units (9 dp). `reserve` is the escrow balance on
+   * chain that backs all of it; null when the chain edge is off or unreachable. */
+  alpha: { held: string; exchangePool: string; treasury: string; cashingOut: string; reserve: string | null };
+  /** The in-game Scrip to $ALPHA exchange; null until its pool is seeded. */
+  exchange: { rateCentsPerAlpha: string; points: { at: number; rate: number }[] } | null;
+  /** The ledger's own audits, verdicts only. null: not applicable or not checkable now. */
+  audits: { conservation: boolean; alphaLedger: boolean; exchange: boolean | null; solvency: boolean | null };
+}
+export interface EconomyResponse {
+  economy: EconomyView | null;
 }

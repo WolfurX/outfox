@@ -15,6 +15,7 @@ import { Connection, PublicKey, type AccountInfo } from '@solana/web3.js';
 import type { LaunchView } from '@outfox/shared';
 import { ALPHA_DECIMALS } from '@outfox/shared';
 import type { Ctx } from '../core/ctx.js';
+import { cachedRead } from '../core/cached.js';
 import { parseSettlementState, statePda } from './adapter.js';
 
 export const DBC_PROGRAM = new PublicKey('dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN');
@@ -214,36 +215,20 @@ export function gameLaunchReader(
 
 /**
  * GET /api/launch is public, no session: the same numbers anyone can read from the chain.
- * At most one upstream read per CACHE_MS and never two at once. A request waits for the
- * upstream only when there is no view yet, and then at most READ_TIMEOUT_MS; otherwise
- * the last good view is served at once (its `asOf` says how old it is) until it passes
- * MAX_AGE_MS. `launch: null` means not configured, never read, or too stale to show.
+ * Served through core/cached: one upstream read per CACHE_MS, never two at once, no
+ * waiting on a slow RPC once there is a view (its `asOf` says how old it is), and a view
+ * withdrawn after MAX_AGE_MS without a good read. `launch: null` means not configured,
+ * never read, or too stale to show.
  */
 export function registerLaunchRoutes(
   app: FastifyInstance, ctx: Ctx,
   read: (cfg: LaunchConfig) => Promise<LaunchView> = gameLaunchReader(ctx),
-  now: () => number = () => performance.now(), // monotonic: a wall-clock step cannot stall refresh
+  now?: () => number,
 ): void {
-  let view: LaunchView | null = null;
-  let viewAt = 0;
-  let lastTry = -Infinity;
-  let inflight: Promise<void> | null = null;
-  app.get('/api/launch', { config: ctx.rl.public }, async () => {
-    const cfg = ctx.launch;
-    if (!cfg || !ctx.chain) return { launch: null };
-    if (!inflight && now() - lastTry >= CACHE_MS) {
-      lastTry = now();
-      let timer: NodeJS.Timeout;
-      const timeout = new Promise<never>((_, reject) => {
-        timer = setTimeout(() => reject(new Error('launch view read timed out')), READ_TIMEOUT_MS);
-      });
-      inflight = Promise.race([Promise.resolve().then(() => read(cfg)), timeout])
-        .then((v) => { view = v; viewAt = now(); })
-        .catch((e) => { app.log.warn({ err: String(e) }, 'launch view read failed'); })
-        .finally(() => { clearTimeout(timer); inflight = null; });
-    }
-    if (!view && inflight) await inflight;
-    if (view && now() - viewAt > MAX_AGE_MS) view = null;
-    return { launch: view };
+  const view = cachedRead(() => read(ctx.launch!), {
+    windowMs: CACHE_MS, timeoutMs: READ_TIMEOUT_MS, maxAgeMs: MAX_AGE_MS, now,
+    onError: (e) => { app.log.warn({ err: String(e) }, 'launch view read failed'); },
   });
+  app.get('/api/launch', { config: ctx.rl.public }, async () =>
+    ({ launch: ctx.launch && ctx.chain ? await view() : null, chainId: ctx.chain?.chainId ?? null }));
 }

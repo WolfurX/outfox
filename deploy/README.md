@@ -92,8 +92,8 @@ file — WAL makes that a torn read.)
    call) 10/min **per route** (independent counters; the surface as a whole allows
    n_routes × 10/min — the hard brute-force bounds stay engine-side). 429s return
    the client error shape (`code: rate_limited`) with `retry-after`; `/healthz`
-   stays unlimited. The public `GET /api/launch` is 60/min and reads upstream at
-   most once per 30 s (added 2026-10-02, reviewed with the launch round). Keying uses `X-Forwarded-For` ONLY when `OUTFOX_TRUST_PROXY=1`,
+   stays unlimited. The public `GET /api/launch` and `GET /api/economy` are 60/min
+   each and compute at most once per 30 s (added 2026-10-02). Keying uses `X-Forwarded-For` ONLY when `OUTFOX_TRUST_PROXY=1`,
    and trust is a HOP COUNT of 1 (the Caddy hop), never boolean-all — Caddy appends
    to client-supplied XFF, so trusting every hop would let clients pick their own
    bucket (the review's headline finding; fixed + regression-pinned).

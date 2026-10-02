@@ -248,6 +248,32 @@ async function farmAndOpenExchange(page) {
     if (D.errors.length) console.log('   errors:', D.errors.slice(0, 5));
     await D.ctx.close();
 
+    // ---- world E: the public economy page: no session, aggregates and audits, and a
+    // way into the game (apps/web/src/Economy.tsx; chainless here, so proof of reserves
+    // is honestly "not checked") ----
+    const E = await newWorld(browser);
+    await E.page.goto(`http://127.0.0.1:${PORT_WEB}/economy`);
+    await E.page.getByRole('heading', { name: 'The economy, live' }).waitFor({ timeout: 10000 });
+    await E.page.getByText('Scrip conservation').waitFor({ timeout: 10000 });
+    ok('E1 the page reads the ledger without creating a session',
+      (await E.ctx.cookies()).every((c) => c.name !== 'fox_session'));
+    ok('E2 Scrip is shown by provenance, Settled and Unsettled',
+      await E.page.getByText('Settled', { exact: true }).count() === 1
+      && await E.page.getByText('Unsettled', { exact: true }).count() === 1);
+    ok('E3 three ledger audits hold; proof of reserves is not claimed without a chain',
+      await E.page.getByText('Holds', { exact: true }).count() === 3
+      && await E.page.getByText('Not checked', { exact: true }).count() === 2
+      && await E.page.getByText('Broken', { exact: true }).count() === 0);
+    ok('E4 no launch section without a configured launch',
+      await E.page.getByText('on the open market').count() === 0);
+    await E.page.getByRole('link', { name: 'Play the game' }).click();
+    await E.page.getByText('Your Book').first().waitFor({ timeout: 10000 });
+    ok('E5 "Play the game" opens the game and boots a session',
+      (await E.ctx.cookies()).some((c) => c.name === 'fox_session'));
+    ok('E6 zero console errors in world E', E.errors.length === 0);
+    if (E.errors.length) console.log('   errors:', E.errors.slice(0, 5));
+    await E.ctx.close();
+
     await browser.close();
   } catch (e) {
     fail++;

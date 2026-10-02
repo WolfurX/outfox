@@ -2,7 +2,7 @@ import type {
   BootstrapResponse, ActionResponse, MarketResponse, LedgerResponse,
   RegisterStartResponse, RegisterVerifyResponse, ExchangeResponse,
   ExchangeHistoryResponse, AlphaResponse, ClaimResponse, DepositPrepareResponse,
-  PlayerView, AlphaView, WithdrawalView,
+  PlayerView, AlphaView, WithdrawalView, EconomyResponse, LaunchResponse,
 } from '@outfox/shared';
 
 /** Parse a response defensively: a non-JSON body (gateway 502 HTML, dead proxy) is a
@@ -74,6 +74,9 @@ export const api = {
   exchangeSwap: (side: 'buy' | 'sell', amount: string, minOut: string) =>
     post<ExchangeResponse>('/api/exchange/swap', { side, amount, minOut }),
   alpha: () => get<AlphaResponse>('/api/alpha'),
+  // public, no session: the economy overview and the $ALPHA launch on Meteora
+  economy: () => get<EconomyResponse>('/api/economy'),
+  launch: () => get<LaunchResponse>('/api/launch'),
   walletNonce: () => post<{ nonce: string; message: string }>('/api/wallet/nonce'),
   walletLink: (address: string, nonce: string, signature: string) =>
     post<{ player: PlayerView; alpha: AlphaView }>('/api/wallet/link', { address, nonce, signature }),

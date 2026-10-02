@@ -370,8 +370,18 @@ describe('GET /api/launch', () => {
     registerLaunchRoutes(app, ctx, () => { s.reads++; return read(); }, () => s.t);
     return s;
   }
-  const get = async (app: ReturnType<typeof Fastify>) => (await app.inject({ method: 'GET', url: '/api/launch' })).json();
+  const get = async (app: ReturnType<typeof Fastify>) => {
+    const body = (await app.inject({ method: 'GET', url: '/api/launch' })).json();
+    return { launch: body.launch };
+  };
   const cfg = cfgOf(SPIKE.pool);
+
+  it('names the cluster next to the view', async () => {
+    const s = server(cfg, async () => view(1), { rpcUrl: 'http://unused.invalid', chainId: 1 });
+    expect((await s.app.inject({ method: 'GET', url: '/api/launch' })).json()).toEqual({ launch: view(1), chainId: 1 });
+    const off = server(cfg, async () => view(1), null);
+    expect((await off.app.inject({ method: 'GET', url: '/api/launch' })).json()).toEqual({ launch: null, chainId: null });
+  });
 
   it('answers null and reads nothing without a configured launch, or without a chain', async () => {
     const a = server(null, async () => view(1));

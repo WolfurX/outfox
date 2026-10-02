@@ -93,15 +93,18 @@ describe('per-IP rate limits (deploy gap #1)', () => {
     });
   }
 
-  it('the public launch view 429s past its budget (60/min): it can trigger outbound RPC reads', async () => {
-    const ip = '10.1.0.7';
-    for (let n = 0; n < 60; n++) {
-      const r = await app.inject({ method: 'GET', url: '/api/launch', remoteAddress: ip });
-      expect(r.statusCode, `request ${n + 1} within budget`).toBe(200);
-    }
-    const over = await app.inject({ method: 'GET', url: '/api/launch', remoteAddress: ip });
-    expect(over.statusCode).toBe(429);
-  });
+  // The two public views take no session, so the per-IP budget is their only brake.
+  for (const [i, url] of ['/api/launch', '/api/economy'].entries()) {
+    it(`${url} 429s past the public budget (60/min)`, async () => {
+      const ip = `10.3.0.${i + 1}`;
+      for (let n = 0; n < 60; n++) {
+        const r = await app.inject({ method: 'GET', url, remoteAddress: ip });
+        expect(r.statusCode, `request ${n + 1} within budget`).toBe(200);
+      }
+      const over = await app.inject({ method: 'GET', url, remoteAddress: ip });
+      expect(over.statusCode).toBe(429);
+    });
+  }
 
   it('gameplay routes are not IP-limited (they are session-gated and priced)', async () => {
     const ip = '10.1.0.5';
