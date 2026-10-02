@@ -9,7 +9,10 @@
 **$ALPHA** is the same thing inside the frozen mechanics layer (`docs/ECONOMY*`, `sim/`).
 Mapping: `THEME-OUTFOX.md` §2; rule: repo `CLAUDE.md`; enforcement: vocab-guard test.
 
-- **Supply:** fixed cap **2,000,000** (= sim `alpha_max`), minted once to the treasury at
+- **Supply:** fixed cap **2,000,000** (= sim `alpha_max`). From the launch on the mint is
+  created by the Meteora launch pool, which sells about 7%, pools about 5% into permanently
+  locked liquidity and returns 88% to the treasury (`docs/LAUNCH.md`; rehearsed on devnet
+  2026-10-02). The dev deployment's mint predates that: minted once to the treasury at
   deploy; no mint function, no owner, no pause — the token contract is inert
   (`contracts/src/Alpha.sol`; ERC-20 + ERC-2612 permit for one-tx deposits).
 - **Role:** store-of-value + premium **convenience, never power** (`ECONOMY.md` §7).

@@ -93,6 +93,16 @@ describe('per-IP rate limits (deploy gap #1)', () => {
     });
   }
 
+  it('the public launch view 429s past its budget (60/min): it can trigger outbound RPC reads', async () => {
+    const ip = '10.1.0.7';
+    for (let n = 0; n < 60; n++) {
+      const r = await app.inject({ method: 'GET', url: '/api/launch', remoteAddress: ip });
+      expect(r.statusCode, `request ${n + 1} within budget`).toBe(200);
+    }
+    const over = await app.inject({ method: 'GET', url: '/api/launch', remoteAddress: ip });
+    expect(over.statusCode).toBe(429);
+  });
+
   it('gameplay routes are not IP-limited (they are session-gated and priced)', async () => {
     const ip = '10.1.0.5';
     for (let n = 0; n < AUTH_MAX + 5; n++) {

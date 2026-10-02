@@ -1,6 +1,7 @@
 import type { DB } from './db.js';
 import type { PrivyConfig } from '../identity/privy.js';
 import type { ChainConfig } from '../chain/adapter.js';
+import type { LaunchConfig } from '../chain/launch.js';
 import { EngineError } from './errors.js';
 
 /** Per-route rate-limit config (@fastify/rate-limit, route-scoped). */
@@ -15,7 +16,9 @@ export interface Ctx {
   devAuth: boolean;
   privy: PrivyConfig | null;
   chain: ChainConfig | null;
-  rl: { bootstrap: RouteLimit; auth: RouteLimit };
+  /** The $ALPHA launch pools on Meteora, for the public read-only view. */
+  launch: LaunchConfig | null;
+  rl: { bootstrap: RouteLimit; auth: RouteLimit; public: RouteLimit };
 }
 
 export function requireChain(ctx: Ctx): ChainConfig {

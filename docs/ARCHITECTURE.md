@@ -226,6 +226,7 @@ The surface today, grouped (all under `/api`, JSON, cookie session):
 | ledger | `GET ledger` |
 | exchange | `GET exchange`, `exchange/history`; `POST exchange/quote`, `exchange/swap` |
 | clearinghouse | `GET alpha`; `POST deposit/prepare`, `withdraw/request`, `withdraw/claim` |
+| launch | `GET launch` (unauthenticated, public chain data only: the $ALPHA curve and pool on Meteora, `LAUNCH.md` §8; cached 30 s, withdrawn after 10 minutes without a good read) |
 | ops | `GET healthz` (unauthenticated, liveness only); `GET debug/conservation`, `debug/alpha-drift`, `debug/exchange`, `debug/solvency` (only with `OUTFOX_DEBUG`) |
 
 Rules that hold across the surface:
@@ -240,7 +241,8 @@ Rules that hold across the surface:
   `insufficient`, `low_bar`, `cooldown`, `rung_required`, `chain_off`, `rate_limited`.
   The client keys on `code`, never on message text.
 - Rate limits are per route per IP: bootstrap 30/min; the row-minting and RPC-firing
-  routes 10/min each. Gameplay routes are priced in Focus and Risk Appetite instead.
+  routes 10/min each; the public launch view 60/min (it reads upstream at most once per
+  30 s whatever the request rate). Gameplay routes are priced in Focus and Risk Appetite instead.
   `X-Forwarded-For` is trusted for exactly one hop and only with `OUTFOX_TRUST_PROXY=1`.
 - The session is an opaque random token in an `httpOnly`, `SameSite=Lax` cookie
   (`Secure` in production), hashed at rest, one year, minted at first bootstrap.
@@ -455,6 +457,7 @@ Each step has a trigger, so nothing is built ahead of need.
 | A13 | No CI exists yet; the pipeline is defined in `INFRASTRUCTURE.md` §4 and is a pre-beta item | adopted 2026-09-12 (owner) |
 | A14 | Parameter changes go through a policy registry with change events before any live tuning; constants in code remain the published defaults | adopted 2026-09-12 (owner) |
 | A15 | $ALPHA gets a single mutation gate (`postAlpha` becomes the only writer of `alpha_lots` and `alpha_ledger`, together, inside `withTx`) and a per-player ledger-versus-lots drift audit beside `conservationAudit` | adopted 2026-09-12 (owner); built the same day with the module move, adversarially reviewed |
+| A16 | $ALPHA and its first liquidity are created through Meteora: a Dynamic Bonding Curve pool creates the fixed-supply mint and graduates into a DAMM v2 pool whose launch liquidity is permanently locked (`LAUNCH.md`). The server shows the launch through a read-only public route that decodes the pools by byte offset; the Meteora SDK stays a scripts-only dev dependency and off the production box | adopted 2026-10-02 (owner); launch and view built and rehearsed on devnet, two adversarial review rounds; the join to settlement is not built |
 
 ## 19. Open questions
 

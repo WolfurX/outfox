@@ -13,6 +13,7 @@ import { EngineError } from './core/errors.js';
 import { privyConfigFromEnv } from './identity/privy.js';
 import { chainConfigFromEnv } from './chain/adapter.js';
 import { startIndexer } from './chain/indexer.js';
+import { launchConfigFromEnv, registerLaunchRoutes } from './chain/launch.js';
 import { getPool, seedExchange } from './economy/exchange.js';
 import { registerIdentityRoutes } from './identity/routes.js';
 import { registerLedgerRoutes } from './ledger/routes.js';
@@ -71,14 +72,16 @@ const ctx: Ctx = {
   devAuth: !!process.env.OUTFOX_DEV_AUTH,
   privy: privyConfigFromEnv(),
   chain,
+  launch: launchConfigFromEnv(),
   rl: {
     bootstrap: { rateLimit: { max: 30, timeWindow: RL_WINDOW_MS } },
     auth: { rateLimit: { max: 10, timeWindow: RL_WINDOW_MS } },
+    public: { rateLimit: { max: 60, timeWindow: RL_WINDOW_MS } },
   },
 };
 
-// --- liveness probe (deploy/README.md gap #2): the ONLY unauthenticated route.
-// Reveals liveness only — no config, versions, or balances.
+// --- liveness probe (deploy/README.md gap #2): unauthenticated, like /api/launch (public
+// chain data, chain/launch.ts). Reveals liveness only: no config, versions, or balances.
 let lastIndexOk: number | null = null;
 app.get('/healthz', async () => {
   db.prepare(`SELECT 1`).get(); // DB gone -> throws -> 500 via the error handler
@@ -97,6 +100,7 @@ registerRefillRoutes(app, ctx);
 registerMarketRoutes(app, ctx);
 registerLedgerRoutes(app, ctx, !!process.env.OUTFOX_DEBUG);
 registerEconomyRoutes(app, ctx);
+registerLaunchRoutes(app, ctx);
 
 // Dev worlds seed the exchange pool from env; PRODUCTION seeding is an explicit operator
 // step through poolSeedFromDeposit, after a real treasury deposit backs the inventory

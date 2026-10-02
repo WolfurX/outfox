@@ -102,6 +102,33 @@ export const VALVE = {
   minRung: 3,
 } as const;
 
+/**
+ * The $ALPHA launch (docs/LAUNCH.md): the mint and its fixed supply are created by a
+ * Meteora Dynamic Bonding Curve pool; a small share is sold along one gentle
+ * constant-product segment against USDC, and at the threshold the proceeds and the paired
+ * share graduate into a Meteora DAMM v2 pool whose liquidity is permanently locked. The
+ * rest of the supply returns to the treasury once that pool exists.
+ * These are the PUBLISHED launch rules: `apps/server/scripts/launch.ts` builds the
+ * on-chain config from them and `launch.ts verify` checks the chain against them.
+ * Prices are USDC per whole ALPHA. The price band and depth are rehearsal values on
+ * devnet; the mainnet numbers are an owner decision at launch time.
+ */
+export const LAUNCH = {
+  /** Whole ALPHA created, once, by the pool-creation transaction. Mirrors the fixed supply. */
+  totalSupplyAlpha: 2_000_000,
+  /** Whole ALPHA that never enter the curve or the pool: 88% returns to the treasury. */
+  treasuryAlpha: 1_760_000,
+  /** The curve opens here and graduates at 2x (one constant-product segment). */
+  startPrice: 0.0625,
+  migrationPrice: 0.125,
+  /** Launch protection: the curve fee starts high and decays to its resting rate. */
+  curveFee: { startBps: 5000, endBps: 100, periods: 60, durationSec: 600 },
+  /** Fee of the graduated pool. */
+  poolFeeBps: 25,
+  /** Share of the graduated pool's liquidity that is permanently locked. */
+  lockedLiquidityPct: 100,
+} as const;
+
 /** The one fixed Unsettled explainer — DESIGN-SYSTEM-WEB.md §12, verbatim. Every surface
  * that explains Unsettled Scrip uses this constant; no local variants. */
 export const UNSETTLED_EXPLAINER =
@@ -391,4 +418,29 @@ export interface DepositPrepareResponse {
   state: string;
   amountWei: string;
   depositTx: string;
+}
+
+/** GET /api/launch: the public $ALPHA market on Meteora (docs/LAUNCH.md). Chain data only. */
+export interface LaunchView {
+  /** When this view was read from the chain (ms). */
+  asOf: number;
+  /** curve: the bonding curve is open. graduating: complete, pool not created yet.
+   * pool: trading in the permanently locked DAMM v2 pool. */
+  phase: 'curve' | 'graduating' | 'pool';
+  /** USDC per whole ALPHA: the curve price until graduation, the pool price after. */
+  price: number;
+  startPrice: number;
+  migrationPrice: number;
+  /** USDC base units (6 dp) raised on the curve, and the amount that graduates it. */
+  raised: string;
+  threshold: string;
+  /** Present once graduated: the pool's reserves in base units, and the share of its
+   * liquidity that is permanently locked, in basis points. The launch liquidity itself
+   * is locked for good; the share falls below 10000 only when others add their own
+   * liquidity on top of it. */
+  pool?: { alpha: string; quote: string; lockedBps: number };
+  addresses: { mint: string; quoteMint: string; curve: string; pool: string };
+}
+export interface LaunchResponse {
+  launch: LaunchView | null;
 }

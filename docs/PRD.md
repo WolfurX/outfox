@@ -96,7 +96,7 @@ Releases are gated, not dated; each names its exit condition.
 | **R1 closed beta** | R0 on a real domain and box, devnet economics, real players, the dashboards live for the first time, CI gates, `/min-version`, idempotency keys, step-up auth, metric jobs, backups verified | hardening checklist clear; G1–G12 computed live for two weeks; D1/D7 measured | **blocked on purchases** (domain, VPS wait on the grant decision) |
 | **R2 economy systems** | one at a time behind the sim gate: Raids, staking and unbonding, progressive carry (built) and wealth-indexed issuance, Skulks, Desks, Seats, the Index, the Commons and Share-Out | each system: sim scenarios pass at full seeds, adversarial review if it touches money, a `verify-live` world | designed |
 | **R3 payments and retention** | F3 convenience checkout (USDC-first), PoP at cash-out, notifications (push, email, Discord mirror), referral loop, device handoff, settings IA | conversion and funnel events live; PoP false-reject budget met | owner decisions pending (rail, PoP provider) |
-| **R4 launch** | mainnet deploy under the custody model (multisig admin, fresh keys), published parameters, POL seeded and permanently locked, the valve opening last | third-party audit passed; counsel cleared; beta gates held | gated |
+| **R4 launch** | mainnet deploy under the custody model (multisig admin, fresh keys), published parameters, launch liquidity graduated from the curve and permanently locked (`LAUNCH.md`), the valve opening last | third-party audit passed; counsel cleared; beta gates held | gated |
 
 ## 6. Functional requirements
 
@@ -144,6 +144,7 @@ point at the rule; this table does not restate rules.
 | FR-MKT-8 | Treasury market operations (TWAP legs) run by rule and logged as policy events | `ECONOMY.md` §13.B | Designed |
 | FR-MKT-9 | Desks, Seats, and the Index | `GDD.md` §5 | Designed |
 | FR-MKT-10 | The Commons accepts Scrip (either class) and $ALPHA for non-transferable standing; Share-Outs are published-rule events | `THEME-OUTFOX.md` §4; sim follow-up | Designed |
+| FR-MKT-11 | $ALPHA launches through a Meteora bonding curve that creates the fixed-supply mint and graduates into a permanently locked DAMM v2 pool; the launch rules are published; `GET /api/launch` shows the market's state once the launched mint is the one settlement was initialized with (no deployment yet: the join to settlement is not built, `LAUNCH.md` Status) | `LAUNCH.md`; `launch.ts verify` on devnet (`programs/deployments/devnet-launch.md`); `launch.test.ts` | Built (rehearsed on devnet); mainnet behind the R4 gates |
 
 ### 6.4 The Clearinghouse (deposit and cash-out)
 
@@ -216,11 +217,11 @@ point at the rule; this table does not restate rules.
 
 | Item | Blocks | State |
 |---|---|---|
-| domain (`outfox.game`) and a VPS | R1 beta deploy | parked on an owner decision (reaffirmed 2026-09-11) |
+| domain (`outfox.game`) and a VPS | R1 beta deploy | owner decision 2026-10-02: buy both; purchase pending |
 | R3 PoP provider | FR-ID-6, launch | owner decision pending; the provider brief is internal; couple with counsel and geofence |
 | on-ramp rail | FR-PAY-1 | couple with geofence |
 | `op_take_f3`, `op_take_wdfee` rates | FR-CH-7 | inside proven intervals [0, 0.9] and [0, 1.0] |
-| POL venue and depth at launch | R4 | venue chosen per the internal brief; depth open, $25K floor recommended |
+| launch price band and depth | R4 | mechanism decided 2026-10-02 (`LAUNCH.md`): Meteora bonding curve into a locked DAMM v2 pool; the mainnet band and depth stay open, rehearsal values are in `LAUNCH` |
 | counsel engagement | R4, and architecture of FR-PAY-1 and FR-ID-6 | the hard gate |
 | third-party audit of the program and economy | R4 | not engaged |
 | beta on the apex domain or a subdomain | R1 | recommendation: apex |

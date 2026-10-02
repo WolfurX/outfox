@@ -88,7 +88,10 @@ asserted as fact yet)
   cash-out, with zk-passport schemes as a possible privacy lane. Provider choice
   remains the standing owner decision (couple with geofence + counsel); decision
   brief is internal.
-- ~~DEX/liquidity venue for $ALPHA.~~ **Verified 2026-08-28.** Launch norm for a
+- ~~DEX/liquidity venue for $ALPHA.~~ **Superseded in part 2026-10-02:** the pool is no
+  longer seeded by the team. A Meteora bonding curve creates the mint and funds the
+  permanently locked pool it graduates into (`LAUNCH.md`); the full-range, locked,
+  USDC-paired pool below is still where it ends. **Verified 2026-08-28.** Launch norm for a
   fixed-supply token with team-seeded liquidity: a standard constant-product USDC
   pool on a major venue, full-range, with the LP permanently locked via the venue's
   native lock (verifiable on-chain, fee stream retained); no bonding-curve

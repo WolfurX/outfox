@@ -38,10 +38,12 @@ Rules:
 # on the box (as root)
 useradd -r -s /usr/sbin/nologin outfox
 mkdir -p /srv/outfox/app /srv/outfox/dist /srv/outfox/well-known /etc/outfox
-# rsync the repo to /srv/outfox/app, then in it:
-#   npm ci --include=dev            # tsx is a devDep; don't let NODE_ENV omit it
-#   npm run build --workspace apps/web
-# copy apps/web/dist/* to /srv/outfox/dist
+# on the dev machine: npm run build --workspace apps/web   (the box never builds)
+# rsync the repo to /srv/outfox/app and apps/web/dist/* to /srv/outfox/dist, then in the app dir:
+#   npm ci --omit=dev               # runtime only: tsx is a dependency; the dev tree
+#                                   # (build and test tools, the Meteora SDK for
+#                                   # scripts/launch.ts) never lands on the box that
+#                                   # holds the voucher key
 cp deploy/production.env.example /etc/outfox/server.env   # fill in, then:
 chown root:outfox /etc/outfox/server.env && chmod 0640 /etc/outfox/server.env
 cp deploy/outfox-server.service /etc/systemd/system/
@@ -90,7 +92,8 @@ file — WAL makes that a torn read.)
    call) 10/min **per route** (independent counters; the surface as a whole allows
    n_routes × 10/min — the hard brute-force bounds stay engine-side). 429s return
    the client error shape (`code: rate_limited`) with `retry-after`; `/healthz`
-   stays unlimited. Keying uses `X-Forwarded-For` ONLY when `OUTFOX_TRUST_PROXY=1`,
+   stays unlimited. The public `GET /api/launch` is 60/min and reads upstream at
+   most once per 30 s (added 2026-10-02, reviewed with the launch round). Keying uses `X-Forwarded-For` ONLY when `OUTFOX_TRUST_PROXY=1`,
    and trust is a HOP COUNT of 1 (the Caddy hop), never boolean-all — Caddy appends
    to client-supplied XFF, so trusting every hop would let clients pick their own
    bucket (the review's headline finding; fixed + regression-pinned).

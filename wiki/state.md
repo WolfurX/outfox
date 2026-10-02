@@ -15,6 +15,36 @@ PWA); the Solana chain edge is **live on devnet and verified end-to-end**
 EVM reference `contracts/` was deleted at that gate, git history keeps it).
 Operator revenue is formalized and sim-proven. Remaining: Phase C (step 6).
 
+## Launch through Meteora (2026-10-02)
+
+Owner decision 2026-10-02 (`docs/LAUNCH.md`, ARCHITECTURE A16, PRD FR-MKT-11): $ALPHA and
+its first liquidity are created through Meteora. One Dynamic Bonding Curve pool creates
+the mint (2,000,000, no mint authority, immutable metadata), sells 7.03% on one gentle
+segment (0.0625 to 0.125 USDC), and graduates 4.97% plus the USDC raised (threshold
+12,426.41) into a DAMM v2 pool whose launch liquidity is permanently locked for the
+treasury; 88% returns to the treasury after graduation. This supersedes operator-seeded
+liquidity. Rehearsal values; the mainnet band and depth stay an owner decision.
+
+**Built:** `LAUNCH` constants in `@outfox/shared`; `apps/server/scripts/launch.ts`
+(create, status, complete, migrate, claim, verify, plus rehearsal commands that refuse
+mainnet by genesis hash); `apps/server/src/chain/launch.ts` + public `GET /api/launch`
+(offset decoding, no Meteora SDK in the server process or on the box, served only for
+the settlement mint, bounded reads, 30 s cache, 10 min max age). Rehearsed end to end on
+devnet with throwaway keys: `programs/deployments/devnet-launch.md`. Suite 180/180,
+`tsc` clean. Two adversarial review rounds (fresh agents); findings fixed or recorded in
+`LAUNCH.md` §6 and §7.
+
+**Not built:** the join to settlement. `scripts/genesis.ts` still creates its own mint,
+the devnet deployment (`devnet.md`) still runs on it, and `GET /api/launch` therefore
+answers null on every deployment that exists. Next: a fresh program id for the beta
+(settlement state is a singleton bound to one mint), a genesis mode that takes the
+launched mint, the beta's own launch, the e2e rerun. Also open: priority fees and
+rebroadcast in the script before any mainnet use; how the treasury's curve and pool
+fees are classified under `ECONOMY.md` §3 (owner).
+
+Deploy change: the box installs with `npm ci --omit=dev` (`tsx` is now a dependency),
+so no dev tooling lands beside the voucher key (`deploy/README.md`).
+
 ## Architecture doc set (2026-09-12)
 
 Four canon docs own one domain each: `docs/PRD.md` (scope, releases as gates, FR/NFR
@@ -267,4 +297,4 @@ This repo is the **fresh-history Solana continuation** of a private development
 repository; the pre-migration history is not carried over (provenance details:
 founders' private notes). Work happens on `master`.
 
-as-of: architecture doc set commit (2026-09-12)
+as-of: launch round commit (2026-10-02)

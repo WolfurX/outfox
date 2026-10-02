@@ -10,6 +10,7 @@ Non-normative derived layer; canon always wins (`wiki/CLAUDE.md`). Start at `sta
 ## Entities & systems
 - [economy.md](economy.md) — the two-currency system, the firewall, all levers with proven intervals, known residuals.
 - [alpha.md](alpha.md) — the token: both names, supply, acquisition, holding costs, exit valve, chain facts.
+- Launch: no wiki page yet; canon is short enough to read directly (`docs/LAUNCH.md`), status in [state.md](state.md).
 - [chain-edge.md](chain-edge.md) — Settlement trust model, identity ladder R0–R3, the valve.
 - [sim.md](sim.md) — the G1–G12 gate, round history v1→v6b, how to run locally, the discipline.
 

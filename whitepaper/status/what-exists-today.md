@@ -11,6 +11,7 @@ This matters, and most whitepapers are cagey about it.
 | The Scrip⇄$ALPHA exchange and the Clearinghouse UI | Retention and notification stack |
 | The full cash-out valve: fees, seasoning, vesting, caps | **Mainnet. Real money. Any of this being live.** |
 | The Solana chain edge: $ALPHA mint (fixed supply, mint authority revoked) and the settlement program, **live on devnet and verified end-to-end** — deposit, signed withdrawal, forgery and replay rejection, pause | Mainnet deployment (behind the audit and counsel gates) |
+| The launch path: token creation and a permanently locked trading pool through Meteora, **rehearsed end-to-end on devnet** with a separate test token and checked against the published launch rules | Connecting that launch to the game (the devnet build still uses a token created the earlier way); the mainnet launch itself, with its final price and depth |
 
 The economic design in these pages is **validated in simulation**; most of it is not yet shipped code. The server test suite, the simulation scorecards, and the contract-in-the-loop record all live in the repository, so "verified" always points at something you can re-run.
 

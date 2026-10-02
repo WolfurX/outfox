@@ -23,7 +23,8 @@ sim's own estimators), `docs/INFRASTRUCTURE.md` (environments, pipeline, keys, b
 runbooks; `deploy/README.md` is the one-box runbook), `docs/DESIGN-SYSTEM-WEB.md` (active
 UI spec; `docs/DESIGN-SYSTEM.md` is the archived Telegram-track v1), `docs/THEME-OUTFOX.md`
 (canonical vocabulary, all copy uses these terms only), `docs/SOLANA-FEASIBILITY.md`
-(chain migration contract), `sim/` (economy gate, no economy code ships until it passes
+(chain migration contract), `docs/LAUNCH.md` (how the $ALPHA mint and its first, permanently
+locked liquidity are created through Meteora), `sim/` (economy gate, no economy code ships until it passes
 at full seeds). `PLAN.md` is the kickoff record, read as history.
 
 **Vocabulary (unified 2026-08-25):** one vocabulary everywhere — **Outfox** the game,
@@ -51,7 +52,8 @@ design, its simulation campaign (AUDIT-2 rounds 2–6c), and the server/web buil
 over unchanged, with the model, calibration, and committed scorecards intact.
 
 - **Chain: Solana.** The chain edge lives in `programs/` (Anchor/Rust): $ALPHA as an
-  SPL mint with the mint authority revoked (fixed 2,000,000 — the no-mint guarantee),
+  SPL mint with the mint authority revoked (fixed 2,000,000 — the no-mint guarantee;
+  from the launch on, created by the Meteora launch pool, `docs/LAUNCH.md`),
   Settlement as a program (PDA escrow, deposits, ed25519-signed voucher redemption,
   global rolling withdrawal cap, pause). **Live on devnet, verified end-to-end**
   (`programs/deployments/devnet.md`). The EVM-era reference implementation

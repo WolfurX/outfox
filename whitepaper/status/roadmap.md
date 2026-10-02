@@ -24,7 +24,7 @@ Counsel review of the chance/cashable-value separation, money-transmission expos
 
 ## 6. Launch
 
-Mainnet deploy under the stated custody model (multisig admin, bounded signer risk), published economic parameters and policy rules, launch liquidity seeded by the operator and permanently locked at creation, verifiable on-chain, and the cash-out valve opening last.
+Mainnet deploy under the stated custody model (multisig admin, bounded signer risk), published economic parameters and policy rules, the token launched through a public bonding curve whose proceeds become the launch liquidity, permanently locked and verifiable on-chain (see [$ALPHA](../alpha/the-token.md)), and the cash-out valve opening last.
 
 ***
 
