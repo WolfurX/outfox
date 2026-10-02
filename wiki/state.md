@@ -110,7 +110,7 @@ Superteam ~Sep 2 if silent; instagrant + Colosseum proceed) · PoP delegation
 question answered (wallet/platform sign-in is never PoP; SAS-attestation fast lane
 = backlog beside the Didit recommendation).
 **Still open:** R3 PoP provider final call (waits on counsel; **Sumsub primary**
-per owner data 2026-08-28 — Rizki's own Superteam payout experience; Didit = cost
+per owner data 2026-08-28 — the owner's own Superteam payout experience; Didit = cost
 fallback),
 POL depth at launch, op_take rates, grant-money boundary confirmation, counsel
 engagement (the hard gate; sharpest question: does cash-out make us a VASP → KYC
