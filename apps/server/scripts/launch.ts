@@ -9,8 +9,8 @@
  * back and fails on any difference.
  *
  * For a launch through Meteora this takes the place of the mint half of scripts/genesis.ts
- * (create mint, mint supply, revoke). Joining it to settlement, an `initialize` that takes
- * this existing mint, is NOT built yet: genesis.ts still creates its own mint.
+ * (create mint, mint supply, revoke); settlement is then initialized with this mint by
+ * `GENESIS_MINT=<mint> scripts/genesis.ts`, which checks the mint before it binds to it.
  * Devnet or a local validator; mainnet only behind the launch gates. The server process
  * never imports the Meteora SDK (test/launch-guard.test.ts); only these scripts do.
  *

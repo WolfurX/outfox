@@ -144,7 +144,7 @@ point at the rule; this table does not restate rules.
 | FR-MKT-8 | Treasury market operations (TWAP legs) run by rule and logged as policy events | `ECONOMY.md` §13.B | Designed |
 | FR-MKT-9 | Desks, Seats, and the Index | `GDD.md` §5 | Designed |
 | FR-MKT-10 | The Commons accepts Scrip (either class) and $ALPHA for non-transferable standing; Share-Outs are published-rule events | `THEME-OUTFOX.md` §4; sim follow-up | Designed |
-| FR-MKT-11 | $ALPHA launches through a Meteora bonding curve that creates the fixed-supply mint and graduates into a permanently locked DAMM v2 pool; the launch rules are published; `GET /api/launch` shows the market's state once the launched mint is the one settlement was initialized with (no deployment yet: the join to settlement is not built, `LAUNCH.md` Status) | `LAUNCH.md`; `launch.ts verify` on devnet (`programs/deployments/devnet-launch.md`); `launch.test.ts` | Built (rehearsed on devnet); mainnet behind the R4 gates |
+| FR-MKT-11 | $ALPHA launches through a Meteora bonding curve that creates the fixed-supply mint and graduates into a permanently locked DAMM v2 pool; the launch rules are published; `GET /api/launch` shows the market's state once the launched mint is the one settlement was initialized with (no deployment yet: the join exists as `GENESIS_MINT` in `genesis.ts`, verified on a local validator; the beta deployment will be the first to use it, `LAUNCH.md` Status) | `LAUNCH.md`; `launch.ts verify` on devnet (`programs/deployments/devnet-launch.md`); `launch.test.ts` | Built (rehearsed on devnet); mainnet behind the R4 gates |
 
 ### 6.4 The Clearinghouse (deposit and cash-out)
 

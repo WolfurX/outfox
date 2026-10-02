@@ -5,10 +5,11 @@ Economy rules stay in `ECONOMY.md` (which wins any conflict); the chain edge tha
 $ALPHA in and out of the game stays in `ARCHITECTURE.md` and `programs/`.
 
 **Status:** owner decision 2026-10-02. The launch itself is built and rehearsed end to end
-on devnet (`programs/deployments/devnet-launch.md`). **Not built yet:** the join to
-settlement. `scripts/genesis.ts` still creates its own mint and initializes settlement
-with it, and the devnet settlement deployment still uses that mint; an `initialize` that
-takes the launched mint is the next step. Mainnet only behind the launch gates
+on devnet (`programs/deployments/devnet-launch.md`). The join to settlement exists as a
+genesis mode (`GENESIS_MINT`, below) and is verified on a local validator with the full
+end-to-end run; **no deployment uses it yet**: the devnet settlement deployment still runs
+on the mint the earlier genesis created, and the beta gets its own program id, launch and
+genesis. Mainnet only behind the launch gates
 (third-party audit, counsel). This supersedes the earlier plan in which the operator
 minted the supply to the treasury and seeded a pool with its own money.
 
@@ -30,7 +31,11 @@ We deploy no new program for it.
    operator included; the position still earns trading fees for the treasury.
 4. **Return.** Everything that was neither sold nor pooled goes to the treasury address in
    one permissionless transaction. From here on the token is the inert, fixed-supply mint
-   the rest of the project assumes. Settlement is then initialized with it (see Status).
+   the rest of the project assumes. Settlement is then initialized with it:
+   `GENESIS_MINT=<mint> scripts/genesis.ts` checks that the mint is exactly that (classic
+   SPL, 9 decimals, 2,000,000, no mint authority, no freeze authority) and refuses
+   anything else, so settlement is never bound to a mint that can still be minted or
+   frozen.
 
 ## 2. Published parameters
 
@@ -140,8 +145,9 @@ before it creates the mint, refuses when the settlement program named in the env
 is already initialized, and on mainnet requires USDC as quote and an explicit gates flag.
 The treasury can be given as a public key for everything except `claim`, so a cold or
 multisig treasury never has to be on the operator's machine. Order with the rest of
-genesis: `create` first (the mint must exist), then settlement `initialize` with that
-mint, once that mode exists.
+genesis: `create` first (the mint must exist), then `GENESIS_MINT=<mint> genesis.ts`. The
+treasury key is not needed for that step. Settlement can be initialized while the curve
+is still open; deposits only need the mint.
 
 Before a mainnet run the script still needs priority fees and rebroadcast on send (devnet
 needs neither), and its checks are exercised by the devnet runs only: there is no

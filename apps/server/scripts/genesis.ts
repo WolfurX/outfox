@@ -18,6 +18,13 @@
  *   GENESIS_TREASURY=<treasury keypair.json>
  *   GENESIS_WINDOW_CAP=<whole ALPHA, default 500>
  *   npx tsx scripts/genesis.ts
+ *
+ * With a launch through Meteora (docs/LAUNCH.md) the mint already exists: scripts/launch.ts
+ * created it. Set GENESIS_MINT=<that mint> and step 1 is skipped; the script verifies the
+ * mint is the fixed-supply $ALPHA (classic SPL, 9 decimals, exactly 2,000,000, no mint
+ * authority, no freeze authority) and only then initializes settlement with it. The
+ * treasury key is not needed in that mode. Settlement is never bound to a mint that can
+ * still be minted or frozen.
  */
 import {
   Connection, Keypair, PublicKey, SystemProgram, Transaction, TransactionInstruction,
@@ -37,7 +44,8 @@ const loadKp = (env: string) =>
   Keypair.fromSecretKey(Uint8Array.from(JSON.parse(readFileSync(process.env[env]!, 'utf8'))));
 const PAYER = loadKp('GENESIS_PAYER');
 const ADMIN = loadKp('GENESIS_ADMIN');
-const TREASURY = loadKp('GENESIS_TREASURY');
+const LAUNCHED_MINT = process.env.GENESIS_MINT ? new PublicKey(process.env.GENESIS_MINT) : null;
+const TREASURY = LAUNCHED_MINT ? null : loadKp('GENESIS_TREASURY');
 const WINDOW_CAP = BigInt(process.env.GENESIS_WINDOW_CAP ?? '500') * ALPHA_BASE_UNITS;
 
 const conn = new Connection(cfg.rpcUrl, 'confirmed');
@@ -123,30 +131,35 @@ console.log(`  program   ${cfg.programId.toBase58()}`);
 console.log(`  payer     ${PAYER.publicKey.toBase58()}`);
 console.log(`  admin     ${ADMIN.publicKey.toBase58()} (cold)`);
 console.log(`  signer    ${voucherSignerPubkey(cfg).toBase58()} (hot voucher key)`);
-console.log(`  treasury  ${TREASURY.publicKey.toBase58()}`);
+console.log(TREASURY ? `  treasury  ${TREASURY.publicKey.toBase58()}` : `  mint      ${LAUNCHED_MINT!.toBase58()} (already launched)`);
 
-// ONE atomic transaction: mint genesis + settlement initialize. Either the whole
-// genesis lands or none of it — a partial state (mint without settlement, or a
-// half-funded escrow) can never exist on the cluster.
-const mintKp = Keypair.generate();
-const MINT = mintKp.publicKey;
+const SUPPLY = 2_000_000n * ALPHA_BASE_UNITS;
+
+/** The launched mint must already be everything genesis would have made it. Fail closed. */
+async function requireFixedSupplyMint(mint: PublicKey): Promise<void> {
+  const acc = await conn.getAccountInfo(mint);
+  if (!acc) throw new Error(`GENESIS_MINT ${mint.toBase58()} does not exist on this cluster`);
+  if (!acc.owner.equals(TOKEN_PROGRAM) || acc.data.length !== 82) throw new Error('GENESIS_MINT is not a classic SPL Token mint');
+  // SPL Mint: mint_authority COption(4+32) · supply u64 · decimals u8 · is_initialized u8 · freeze_authority COption(4+32)
+  const d = acc.data;
+  const problems: string[] = [];
+  if (d.readUInt32LE(0) !== 0) problems.push(`it still has a mint authority (${new PublicKey(d.subarray(4, 36)).toBase58()})`);
+  if (d.readBigUInt64LE(36) !== SUPPLY) problems.push(`its supply is ${d.readBigUInt64LE(36)} base units, not ${SUPPLY}`);
+  if (d[44] !== 9) problems.push(`it has ${d[44]} decimals, not 9`);
+  if (d[45] !== 1) problems.push('it is not initialized');
+  if (d.readUInt32LE(46) !== 0) problems.push('it has a freeze authority');
+  if (problems.length) throw new Error(`GENESIS_MINT is not the fixed-supply $ALPHA: ${problems.join('; ')}`);
+}
+
+const mintKp = LAUNCHED_MINT ? null : Keypair.generate();
+const MINT = LAUNCHED_MINT ?? mintKp!.publicKey;
 const ESCROW = ataFor(STATE, MINT);
-const rent = await conn.getMinimumBalanceForRentExemption(82);
 const initData = Buffer.alloc(8 + 32 + 8 + 8);
 createHash('sha256').update('global:initialize').digest().copy(initData, 0, 0, 8);
 voucherSignerPubkey(cfg).toBuffer().copy(initData, 8);
 initData.writeBigUInt64LE(WINDOW_CAP, 40);
 initData.writeBigUInt64LE(BigInt(cfg.chainId), 48);
-
-await send([
-  SystemProgram.createAccount({
-    fromPubkey: PAYER.publicKey, newAccountPubkey: MINT,
-    lamports: rent, space: 82, programId: TOKEN_PROGRAM,
-  }),
-  initMintIx(MINT, TREASURY.publicKey),
-  createAtaIx(TREASURY.publicKey, MINT),
-  mintToIx(MINT, ataFor(TREASURY.publicKey, MINT), TREASURY.publicKey, 2_000_000n * ALPHA_BASE_UNITS),
-  revokeMintIx(MINT, TREASURY.publicKey),
+const initialize = [
   // the Initialize context's rent payer is the ADMIN account — top it up in-tx
   SystemProgram.transfer({
     fromPubkey: PAYER.publicKey, toPubkey: ADMIN.publicKey, lamports: 20_000_000,
@@ -164,9 +177,30 @@ await send([
     ],
     data: initData,
   }),
-], [mintKp, TREASURY, ADMIN]);
+];
 
-console.log(`  minted 2,000,000 $ALPHA to the treasury; mint authority REVOKED`);
+if (LAUNCHED_MINT) {
+  await requireFixedSupplyMint(LAUNCHED_MINT);
+  await send(initialize, [ADMIN]);
+  console.log(`  the launched mint is the fixed-supply $ALPHA (2,000,000, no mint or freeze authority)`);
+} else {
+  // ONE atomic transaction: mint genesis + settlement initialize. Either the whole
+  // genesis lands or none of it — a partial state (mint without settlement, or a
+  // half-funded escrow) can never exist on the cluster.
+  const rent = await conn.getMinimumBalanceForRentExemption(82);
+  await send([
+    SystemProgram.createAccount({
+      fromPubkey: PAYER.publicKey, newAccountPubkey: MINT,
+      lamports: rent, space: 82, programId: TOKEN_PROGRAM,
+    }),
+    initMintIx(MINT, TREASURY!.publicKey),
+    createAtaIx(TREASURY!.publicKey, MINT),
+    mintToIx(MINT, ataFor(TREASURY!.publicKey, MINT), TREASURY!.publicKey, SUPPLY),
+    revokeMintIx(MINT, TREASURY!.publicKey),
+    ...initialize,
+  ], [mintKp!, TREASURY!, ADMIN]);
+  console.log(`  minted 2,000,000 $ALPHA to the treasury; mint authority REVOKED`);
+}
 console.log(`  settlement initialized (window cap ${WINDOW_CAP / ALPHA_BASE_UNITS} ALPHA)`);
 console.log(`\naddresses:`);
 console.log(`  ALPHA mint  ${MINT.toBase58()}`);

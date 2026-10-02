@@ -34,11 +34,16 @@ devnet with throwaway keys: `programs/deployments/devnet-launch.md`. Suite 180/1
 `tsc` clean. Two adversarial review rounds (fresh agents); findings fixed or recorded in
 `LAUNCH.md` §6 and §7.
 
-**Not built:** the join to settlement. `scripts/genesis.ts` still creates its own mint,
-the devnet deployment (`devnet.md`) still runs on it, and `GET /api/launch` therefore
-answers null on every deployment that exists. Next: a fresh program id for the beta
-(settlement state is a singleton bound to one mint), a genesis mode that takes the
-launched mint, the beta's own launch, the e2e rerun. Also open: priority fees and
+**Join to settlement (2026-10-02, later the same day):** `GENESIS_MINT=<mint>
+scripts/genesis.ts` initializes settlement with an already launched mint after checking
+it is the fixed-supply $ALPHA (classic SPL, 9 decimals, exactly 2,000,000, no mint or
+freeze authority; anything else is refused before any transaction). Verified on a local
+validator: four bad mints and a missing one refused, the good one initialized, and
+`e2e-devnet.ts` ALL CHECKS PASSED on it; the original genesis path reran green too.
+**No deployment uses it yet:** the devnet deployment (`devnet.md`) still runs on the
+earlier mint, so `GET /api/launch` answers null everywhere. Next: a fresh program id for
+the beta (settlement state is a singleton bound to one mint), the beta's own launch,
+`GENESIS_MINT` genesis, the e2e rerun on devnet. Also open: priority fees and
 rebroadcast in the script before any mainnet use; how the treasury's curve and pool
 fees are classified under `ECONOMY.md` §3 (owner).
 
