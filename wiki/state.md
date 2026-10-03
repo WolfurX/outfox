@@ -55,6 +55,14 @@ $ALPHA owed against the escrow reserve, the exchange rate, the four audit verdic
 188/188; `verify-live` 26/26 with world E. Not the §10 dashboards (FR-OPS-3 stays
 Specified).
 
+**2026-10-03, after the third review:** `initialize` now takes `init_if_needed` on the
+escrow (a pre-created escrow cannot block genesis; the devnet deployment still runs the
+2026-08-25 build), genesis is tied to the launch pool and reads its state back, the
+server refuses a settlement state whose signer or admin is not its own (`OUTFOX_ADMIN`),
+and the launch verifier survives burns, keeper migrations and griefed treasuries. The
+whole flow ran on a local validator with Meteora's programs cloned from devnet, through
+`e2e-devnet.ts` and the live `GET /api/launch`. Details: `log.md` 2026-10-03.
+
 Deploy change: the box installs with `npm ci --omit=dev` (`tsx` is now a dependency),
 so no dev tooling lands beside the voucher key (`deploy/README.md`).
 

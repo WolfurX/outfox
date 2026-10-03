@@ -69,6 +69,9 @@ file — WAL makes that a torn read.)
 ## Hardening checklist (pre-beta)
 
 - [ ] `OUTFOX_DEV_AUTH`, `OUTFOX_DEBUG`, `OUTFOX_DEV_SEED_EXCHANGE` all unset —
+      (a dev-seeded exchange pool is $ALPHA nobody deposited; the public economy page
+      then shows proof of reserves as broken, correctly; production seeding goes through
+      `poolSeedFromDeposit` after a real treasury deposit)
       verify with `systemctl show outfox-server -p Environment` after start.
 - [ ] `NODE_ENV=production` exactly — it gates the `Secure` cookie AND the listen
       guard (`NODE_ENV=test` starts the process without ever binding: healthy-looking

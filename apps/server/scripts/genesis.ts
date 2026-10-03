@@ -20,11 +20,19 @@
  *   npx tsx scripts/genesis.ts
  *
  * With a launch through Meteora (docs/LAUNCH.md) the mint already exists: scripts/launch.ts
- * created it. Set GENESIS_MINT=<that mint> and step 1 is skipped; the script verifies the
- * mint is the fixed-supply $ALPHA (classic SPL, 9 decimals, exactly 2,000,000, no mint
- * authority, no freeze authority) and only then initializes settlement with it. The
- * treasury key is not needed in that mode. Settlement is never bound to a mint that can
- * still be minted or frozen.
+ * created it. Set GENESIS_MINT=<that mint> and GENESIS_LAUNCH_POOL=<the curve pool from
+ * launch.json> and step 1 is skipped. The script verifies that the mint is the one that
+ * pool launched and that it is the fixed-supply $ALPHA (classic SPL, 9 decimals, no mint
+ * authority, no freeze authority, supply at most 2,000,000: with no mint authority the
+ * supply can only fall, by holders burning), and only then initializes settlement with
+ * it. The treasury key is not needed in that mode. Settlement is never bound to a mint
+ * that can still be minted or frozen, or to a look-alike. Run it right after
+ * `launch.ts create`, in the same sitting: until settlement is initialized, anyone can
+ * initialize this program id first.
+ *
+ * Either way the script reads the state back and compares it with what it sent. If the
+ * state already exists it says whose it is: an initialize by someone else, with their
+ * admin or signer, must never be mistaken for ours.
  */
 import {
   Connection, Keypair, PublicKey, SystemProgram, Transaction, TransactionInstruction,
@@ -32,9 +40,10 @@ import {
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import {
-  ataFor, statePda, voucherSignerPubkey, chainConfigFromEnv,
+  ataFor, statePda, voucherSignerPubkey, chainConfigFromEnv, parseSettlementState,
   TOKEN_PROGRAM, ATA_PROGRAM,
 } from '../src/chain/adapter.js';
+import { decodeCurvePool } from '../src/chain/launch.js';
 import { ALPHA_BASE_UNITS } from '@outfox/shared';
 
 const cfg = chainConfigFromEnv();
@@ -44,6 +53,10 @@ const loadKp = (env: string) =>
   Keypair.fromSecretKey(Uint8Array.from(JSON.parse(readFileSync(process.env[env]!, 'utf8'))));
 const PAYER = loadKp('GENESIS_PAYER');
 const ADMIN = loadKp('GENESIS_ADMIN');
+// set but empty (a shell substitution that came back blank) must never mean "mint a fresh one"
+if (process.env.GENESIS_MINT !== undefined && process.env.GENESIS_MINT.trim() === '') {
+  throw new Error('GENESIS_MINT is set but empty: unset it to mint a fresh supply, or give the launched mint');
+}
 const LAUNCHED_MINT = process.env.GENESIS_MINT ? new PublicKey(process.env.GENESIS_MINT) : null;
 const TREASURY = LAUNCHED_MINT ? null : loadKp('GENESIS_TREASURY');
 const WINDOW_CAP = BigInt(process.env.GENESIS_WINDOW_CAP ?? '500') * ALPHA_BASE_UNITS;
@@ -122,8 +135,26 @@ function revokeMintIx(mint: PublicKey, authority: PublicKey): TransactionInstruc
 // ----- genesis ---------------------------------------------------------------
 
 const STATE = statePda(cfg);
-if (await conn.getAccountInfo(STATE)) {
-  throw new Error(`settlement state ${STATE.toBase58()} already initialized on this cluster — genesis is once`);
+
+/** What must be true of the settlement state for it to be this genesis. */
+function sameAsOurs(data: Uint8Array, mint: PublicKey | null): string[] {
+  const st = parseSettlementState(data);
+  const diff: string[] = [];
+  if (!st.admin.equals(ADMIN.publicKey)) diff.push(`admin is ${st.admin.toBase58()}`);
+  if (!st.signer.equals(voucherSignerPubkey(cfg!))) diff.push(`voucher signer is ${st.signer.toBase58()}`);
+  if (mint && !st.alphaMint.equals(mint)) diff.push(`mint is ${st.alphaMint.toBase58()}`);
+  if (st.chainId !== BigInt(cfg!.chainId)) diff.push(`chain id is ${st.chainId}`);
+  return diff;
+}
+
+// A state account owned by the program is an initialized settlement. Lamports sent to
+// the address by anyone do not make it one (the program can still `init` it).
+const existing = await conn.getAccountInfo(STATE);
+if (existing?.owner.equals(cfg.programId)) {
+  const diff = sameAsOurs(existing.data, LAUNCHED_MINT);
+  throw new Error(diff.length
+    ? `settlement state ${STATE.toBase58()} was initialized by SOMEONE ELSE (${diff.join('; ')}). Do not run the game on this program id.`
+    : `settlement state ${STATE.toBase58()} is already initialized with this admin and signer${LAUNCHED_MINT ? ' and this mint' : ''}: genesis is once`);
 }
 
 console.log(`genesis on ${cfg.rpcUrl} (chain ${cfg.chainId})`);
@@ -144,11 +175,21 @@ async function requireFixedSupplyMint(mint: PublicKey): Promise<void> {
   const d = acc.data;
   const problems: string[] = [];
   if (d.readUInt32LE(0) !== 0) problems.push(`it still has a mint authority (${new PublicKey(d.subarray(4, 36)).toBase58()})`);
-  if (d.readBigUInt64LE(36) !== SUPPLY) problems.push(`its supply is ${d.readBigUInt64LE(36)} base units, not ${SUPPLY}`);
+  // at most, not exactly: any holder can burn, and one burned unit must not strand the game
+  const supply = d.readBigUInt64LE(36);
+  if (supply > SUPPLY || supply === 0n) problems.push(`its supply is ${supply} base units; the fixed supply is ${SUPPLY}`);
   if (d[44] !== 9) problems.push(`it has ${d[44]} decimals, not 9`);
   if (d[45] !== 1) problems.push('it is not initialized');
   if (d.readUInt32LE(46) !== 0) problems.push('it has a freeze authority');
   if (problems.length) throw new Error(`GENESIS_MINT is not the fixed-supply $ALPHA: ${problems.join('; ')}`);
+
+  // ...and it must be the mint OUR launch created, not any mint of the same shape
+  const poolArg = process.env.GENESIS_LAUNCH_POOL;
+  if (!poolArg) throw new Error('set GENESIS_LAUNCH_POOL to the launch curve pool (`pool` in launch.json)');
+  const pool = decodeCurvePool(await conn.getAccountInfo(new PublicKey(poolArg)));
+  if (!pool.baseMint.equals(mint)) {
+    throw new Error(`GENESIS_MINT is not the mint launched by ${poolArg} (that pool launched ${pool.baseMint.toBase58()})`);
+  }
 }
 
 const mintKp = LAUNCHED_MINT ? null : Keypair.generate();
@@ -182,7 +223,7 @@ const initialize = [
 if (LAUNCHED_MINT) {
   await requireFixedSupplyMint(LAUNCHED_MINT);
   await send(initialize, [ADMIN]);
-  console.log(`  the launched mint is the fixed-supply $ALPHA (2,000,000, no mint or freeze authority)`);
+  console.log(`  the launched mint is the fixed-supply $ALPHA (no mint or freeze authority) from the named launch pool`);
 } else {
   // ONE atomic transaction: mint genesis + settlement initialize. Either the whole
   // genesis lands or none of it — a partial state (mint without settlement, or a
@@ -201,7 +242,11 @@ if (LAUNCHED_MINT) {
   ], [mintKp!, TREASURY!, ADMIN]);
   console.log(`  minted 2,000,000 $ALPHA to the treasury; mint authority REVOKED`);
 }
-console.log(`  settlement initialized (window cap ${WINDOW_CAP / ALPHA_BASE_UNITS} ALPHA)`);
+// read it back: what is on chain must be what this run sent
+const after = await conn.getAccountInfo(STATE);
+const diff = after?.owner.equals(cfg.programId) ? sameAsOurs(after.data, MINT) : ['the state account does not exist'];
+if (diff.length) throw new Error(`settlement state does not match this genesis: ${diff.join('; ')}`);
+console.log(`  settlement initialized (window cap ${WINDOW_CAP / ALPHA_BASE_UNITS} ALPHA); state read back and matches`);
 console.log(`\naddresses:`);
 console.log(`  ALPHA mint  ${MINT.toBase58()}`);
 console.log(`  state PDA   ${STATE.toBase58()}`);

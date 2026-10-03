@@ -34,10 +34,13 @@ export interface ChainConfig {
   signerSeed?: Uint8Array;
   /** Max transactions folded per indexOnce batch. */
   batchLimit?: number;
+  /** The cold admin this deployment was initialized with (OUTFOX_ADMIN). When set, a
+   * settlement state with any other admin is refused: see settlementProblems. */
+  admin?: PublicKey;
 }
 
 export function chainConfigFromEnv(): ChainConfig | null {
-  const { OUTFOX_RPC_URL, OUTFOX_CHAIN_ID, OUTFOX_PROGRAM_ID, OUTFOX_SIGNER_KEY } = process.env;
+  const { OUTFOX_RPC_URL, OUTFOX_CHAIN_ID, OUTFOX_PROGRAM_ID, OUTFOX_SIGNER_KEY, OUTFOX_ADMIN } = process.env;
   if (!OUTFOX_RPC_URL || OUTFOX_CHAIN_ID === undefined || !OUTFOX_PROGRAM_ID) return null;
   let seed: Uint8Array | undefined;
   if (OUTFOX_SIGNER_KEY) {
@@ -53,6 +56,7 @@ export function chainConfigFromEnv(): ChainConfig | null {
     programId: new PublicKey(OUTFOX_PROGRAM_ID),
     signerSeed: seed,
     batchLimit: 100,
+    admin: OUTFOX_ADMIN ? new PublicKey(OUTFOX_ADMIN) : undefined,
   };
 }
 
@@ -111,6 +115,24 @@ export function parseSettlementState(data: Uint8Array): SettlementStateView {
   return { admin, pendingAdmin, signer, alphaMint, windowCap, bucket, lastDrain, chainId, paused };
 }
 
+/**
+ * Why the settlement state on chain is not this deployment's, or [] when it is.
+ * `initialize` can be called by anyone who gets there first, and it fixes the admin and
+ * the voucher signer. A state that names another signer cannot honour this server's
+ * vouchers, and one that names another admin can be re-pointed or paused at will: either
+ * way players' deposits would sit in an escrow someone else controls. The server refuses
+ * to build a deposit or serve a reserve for such a state.
+ */
+export function settlementProblems(state: SettlementStateView, cfg: ChainConfig): string[] {
+  const problems: string[] = [];
+  if (cfg.signerSeed && !state.signer.equals(voucherSignerPubkey(cfg))) {
+    problems.push('its voucher signer is not this server\'s key');
+  }
+  if (cfg.admin && !state.admin.equals(cfg.admin)) problems.push('its admin is not the configured admin');
+  if (state.chainId !== BigInt(cfg.chainId)) problems.push(`it was initialized for chain id ${state.chainId}`);
+  return problems;
+}
+
 let mintCache: { state: string; mint: PublicKey } | null = null;
 
 /** The ALPHA mint, read from the on-chain settlement state itself (set at initialize,
@@ -120,9 +142,12 @@ export async function alphaMintFor(cfg: ChainConfig): Promise<PublicKey> {
   if (mintCache && mintCache.state === state.toBase58()) return mintCache.mint;
   const info = await connectionFor(cfg).getAccountInfo(state);
   if (!info) throw new Error('settlement state account not found — program not initialized?');
-  const mint = parseSettlementState(info.data).alphaMint;
-  mintCache = { state: state.toBase58(), mint };
-  return mint;
+  if (!info.owner.equals(cfg.programId)) throw new Error('settlement state account is not owned by the program — not initialized');
+  const parsed = parseSettlementState(info.data);
+  const problems = settlementProblems(parsed, cfg);
+  if (problems.length) throw new Error(`the settlement state on chain is not this deployment's: ${problems.join('; ')}`);
+  mintCache = { state: state.toBase58(), mint: parsed.alphaMint };
+  return parsed.alphaMint;
 }
 
 /** Live reserve — the escrow token-account balance, the solvency ceiling every

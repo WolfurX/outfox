@@ -180,20 +180,19 @@ const MAX_AGE_MS = 10 * 60_000; // a view older than this is withdrawn, not serv
 
 /**
  * The reader the server runs: one read is bounded as a whole, and it is only ever the
- * view of the game's own token. Every HTTP request of a read shares one abort signal that
- * fires READ_TIMEOUT_MS after the read began, and rate-limit retries are off, so a read
- * that the route gave up on is really over and can never run beside the next one.
+ * view of the game's own token. Each read gets its own connection and abort signal, which
+ * fires READ_TIMEOUT_MS after the read began and covers every HTTP request of that read;
+ * rate-limit retries are off. A read that was given up on is therefore really over, on
+ * its own deadline, whatever any other read is doing.
  */
 export function gameLaunchReader(
   ctx: Ctx, readView: typeof readLaunch = readLaunch, timeoutMs = READ_TIMEOUT_MS,
 ): (cfg: LaunchConfig) => Promise<LaunchView> {
-  let conn: Connection | null = null;
-  let signal: AbortSignal;
   let settlementMint: string | null = null; // set at initialize, fixed for the process lifetime
   return async (cfg) => {
     const chain = ctx.chain!;
-    signal = AbortSignal.timeout(timeoutMs);
-    conn ??= new Connection(chain.rpcUrl, {
+    const signal = AbortSignal.timeout(timeoutMs);
+    const conn = new Connection(chain.rpcUrl, {
       commitment: 'confirmed',
       disableRetryOnRateLimit: true,
       fetch: (input, init) => fetch(input, { ...init, signal }),
@@ -203,7 +202,9 @@ export function gameLaunchReader(
     // other token must never be shown as the $ALPHA market
     if (!settlementMint) {
       const state = await conn.getAccountInfo(statePda(chain), 'confirmed');
-      if (!state) throw new Error('settlement state account not found: the game has no token yet');
+      if (!state || !state.owner.equals(chain.programId)) {
+        throw new Error('settlement is not initialized: the game has no token yet');
+      }
       settlementMint = parseSettlementState(state.data).alphaMint.toBase58();
     }
     if (settlementMint !== view.addresses.mint) {

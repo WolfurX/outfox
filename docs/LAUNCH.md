@@ -85,19 +85,27 @@ a 500 USD trade near 4% impact) is where these come from.
 
 `launch.ts verify` fails on any of these:
 
-- The mint is classic SPL Token, 9 decimals, supply exactly 2,000,000, no mint authority,
-  no freeze authority, metadata without an update authority and immutable.
-- The config's quote mint, opening price, graduation price, curve share, fee schedule and
-  pool fee equal the published rules; the treasury is both fee claimer and leftover
+- The mint is classic SPL Token, 9 decimals, no mint authority, no freeze authority,
+  metadata without an update authority and immutable; supply at most 2,000,000 (with no
+  mint authority the supply can only fall, by holders burning, so "exactly" would let one
+  burned unit strand the game).
+- The config's quote mint, opening price, graduation price, the sold and pooled shares,
+  the fee schedule (mode, opening rate, window, resting rate), the pool fee, the
+  threshold, and the absence of any pool-creation fee, first-swap waiver or dynamic pool
+  fee equal the published rules; the treasury is both fee claimer and leftover
   receiver; the pool creator takes no fee and no liquidity; there is no vesting allocation.
 - The pool was built on the recorded config and launched the recorded mint.
 - After graduation: the pool is the DAMM v2 pool whose address derives from the launch
   config and the two mints; every position the migration transaction created is locked in
   full (nothing unlocked, nothing vesting) and belongs to the treasury; the treasury holds
-  at least its 88%. The launch positions are taken from the migration transaction itself
-  (the curve program's own instruction, on this curve pool and this DAMM v2 pool), so
-  nothing a third party later creates in the pool or sends to the treasury can pass for
-  them or hide them.
+  received its 88% at graduation (what it holds later is its own business). The launch
+  positions are taken from the migration transaction itself: a successful transaction
+  carrying the curve program's MigrationDammV2 instruction that created a position in
+  this pool whose NFT mint signed it. Nothing a third party later creates in the pool or
+  sends to the treasury can pass for them or hide them, and another launch's migration
+  that merely names our addresses is skipped. Proving the lock needs an RPC that still
+  serves the migration transaction; `LAUNCH_MIGRATION_TX` names it when the pool's
+  history is long.
 
 What is NOT an invariant: the locked share of the whole pool. DAMM v2 pools are open, so
 anyone may add their own liquidity on top of the launch liquidity, and the share that is
@@ -146,8 +154,16 @@ is already initialized, and on mainnet requires USDC as quote and an explicit ga
 The treasury can be given as a public key for everything except `claim`, so a cold or
 multisig treasury never has to be on the operator's machine. Order with the rest of
 genesis: `create` first (the mint must exist), then `GENESIS_MINT=<mint> genesis.ts`. The
-treasury key is not needed for that step. Settlement can be initialized while the curve
-is still open; deposits only need the mint.
+treasury key is not needed for that step, but `GENESIS_LAUNCH_POOL` must name the curve
+pool so genesis binds only to the mint that pool launched. Settlement can be initialized
+while the curve is still open; deposits only need the mint. **Do both in the same
+sitting**: between `create` and genesis this program id can be initialized by anyone, so
+genesis and the server both compare the state's admin (`OUTFOX_ADMIN`) and voucher signer
+with their own keys and refuse a state somebody else made. The escrow token account
+cannot be used to block genesis: since 2026-10-03 `initialize` accepts one that already
+exists at its address (it is owned by the state PDA either way). The devnet deployment
+of 2026-08-28 still runs the earlier build; the beta deployment is the first with this
+one.
 
 Before a mainnet run the script still needs priority fees and rebroadcast on send (devnet
 needs neither), and its checks are exercised by the devnet runs only: there is no

@@ -20,6 +20,11 @@ proof of reserves holds. ALL CHECKS PASSED, 2026-08-28).
 | Treasury | `8n8rmq86KfiUXo7miNDFYhozFB7kfAyyMoB8sYhT2sgT` |
 | Window cap | 500 ALPHA per rolling 24h (leaky bucket) |
 
+This deployment runs the program as built on 2026-08-25. The source gained one change on
+2026-10-03 (`initialize` accepts an escrow token account that already exists at its
+address, so nobody can block genesis for a launched mint by creating it first); the beta
+deployment is the first to carry it.
+
 Keys are throwaway devnet keys (fresh per environment, per the standing key
 hygiene; they live outside the repo). Mainnet requires fresh keys, a multisig
 admin, the third-party audit, and the counsel gate — see `CLAUDE.md`.

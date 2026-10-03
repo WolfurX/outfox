@@ -331,8 +331,14 @@ pub struct Initialize<'info> {
     )]
     pub state: Account<'info, SettlementState>,
     pub alpha_mint: Account<'info, Mint>,
+    // `init_if_needed`, not `init`: the escrow's address is public once the mint and the
+    // program id are, and anyone can create an associated token account for any owner.
+    // With `init`, a stranger creating it first would block initialize for this mint
+    // forever. Whoever paid for it, the account at this address is owned by the state
+    // PDA and holds this mint (both checked here), so it is the escrow. The state
+    // account above stays `init`: initialize itself still happens exactly once.
     #[account(
-        init,
+        init_if_needed,
         payer = admin,
         associated_token::mint = alpha_mint,
         associated_token::authority = state

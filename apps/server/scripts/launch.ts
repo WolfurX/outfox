@@ -220,6 +220,7 @@ const devOnly = (what: string) => {
 
 type Check = [what: string, ok: boolean, detail?: unknown];
 const near = (a: number, b: number) => Math.abs(a - b) <= 1e-6 * b;
+const near2 = (a: number, b: number, tol: number) => Math.abs(a - b) <= tol * b;
 const SUPPLY = BigInt(LAUNCH.totalSupplyAlpha) * ALPHA_BASE_UNITS;
 
 /** The on-chain launch config against the published rules. Used by `create` before the
@@ -257,6 +258,13 @@ function configChecks(cfg: any, quote: PublicKey): Check[] {
     ['the fee window runs on wall-clock time', cfg.activationType === ActivationType.Timestamp],
     ['fees are collected in USDC, on the curve and in the pool',
       cfg.collectFeeMode === CollectFeeMode.QuoteToken && cfg.migratedCollectFeeMode === MigratedCollectFeeMode.QuoteToken],
+    // one constant-product segment over a 2x range: pooled = sold / sqrt(2) (docs/LAUNCH.md §2)
+    ['sold and pooled shares are the published split',
+      near2(Number(cfg.migrationBaseThreshold.toString()), Number(expected) / (1 + Math.SQRT2), 1e-3)
+      && near2(Number(cfg.swapBaseAmount.toString()), Number(expected) * Math.SQRT2 / (1 + Math.SQRT2), 1e-3),
+      `${fmt(cfg.swapBaseAmount, ALPHA_DECIMALS)} sold, ${fmt(cfg.migrationBaseThreshold, ALPHA_DECIMALS)} pooled`],
+    ['no pool creation fee, no first-swap fee waiver, no dynamic fee in the graduated pool',
+      new BN(cfg.poolCreationFee).isZero() && !cfg.enableFirstSwapWithMinFee && cfg.migratedDynamicFee === DammV2DynamicFeeMode.Disabled],
     ['threshold is the pooled share at the graduation price',
       near(Number(cfg.migrationQuoteThreshold.toString()) / 10 ** QUOTE_DECIMALS,
         Number(cfg.migrationBaseThreshold.toString()) / Number(ALPHA_BASE_UNITS) * LAUNCH.migrationPrice),
@@ -290,47 +298,55 @@ async function swap(step: string, who: Keypair, buy: boolean, amountIn: BN, mode
 /**
  * The positions the launch created, read from the migration transaction itself. Nothing a
  * third party later creates in the pool or sends to the treasury can stand in for them:
- * the transaction must have succeeded, must be the curve program's own MigrationDammV2
- * on this curve pool and this DAMM v2 pool, and the position NFT mints are its signers.
+ * the transaction must have succeeded, must carry the curve program's own MigrationDammV2
+ * (at any call depth: a keeper may migrate through its own program), and must have
+ * created a position in THIS graduated pool whose NFT mint signed it. Another launch's
+ * migration that merely names our addresses creates no position here, so it is skipped.
  */
-async function launchPositions(dammPool: PublicKey): Promise<{ position: PublicKey; nftMint: PublicKey }[]> {
-  const curvePool = need('pool');
-  const isMigration = async (sig: string) => {
+async function launchPositions(damm: any, dammPool: PublicKey): Promise<{ position: PublicKey; nftMint: PublicKey }[]> {
+  const migrationIn = async (sig: string, named: boolean) => {
     const tx = await rpc(() => conn.getTransaction(sig, { commitment: 'confirmed', maxSupportedTransactionVersion: 0 }));
-    if (!tx || tx.meta?.err) return null;
+    if (!tx) {
+      if (named) throw new Error(`this RPC no longer serves transaction ${sig}; proving the lock needs an RPC with full history`);
+      return null;
+    }
+    if (tx.meta?.err) return null;
     const logs = tx.meta?.logMessages ?? [];
-    const i = logs.indexOf(`Program ${DBC_PROGRAM} invoke [1]`);
-    if (i < 0 || logs[i + 1] !== 'Program log: Instruction: MigrationDammV2') return null;
+    const invoke = new RegExp(`^Program ${DBC_PROGRAM} invoke \\[\\d+\\]$`);
+    if (!logs.some((l, i) => invoke.test(l) && logs[i + 1] === 'Program log: Instruction: MigrationDammV2')) return null;
     const keys = tx.transaction.message.getAccountKeys({ accountKeysFromLookups: tx.meta?.loadedAddresses }).keySegments().flat();
     const has = new Set(keys.map((k) => k.toBase58()));
-    if (!has.has(curvePool.toBase58()) || !has.has(dammPool.toBase58())) return null;
-    const signers = keys.slice(0, tx.transaction.message.header.numRequiredSignatures);
-    return signers
-      .filter((k) => has.has(derivePositionAddress(k).toBase58()))
-      .map((nftMint) => ({ position: derivePositionAddress(nftMint), nftMint }));
+    const found: { position: PublicKey; nftMint: PublicKey }[] = [];
+    for (const nftMint of keys.slice(0, tx.transaction.message.header.numRequiredSignatures)) {
+      const position = derivePositionAddress(nftMint);
+      if (!has.has(position.toBase58())) continue;
+      const pos: any = await rpc(() => damm.account.position.fetchNullable(position, 'confirmed'));
+      if (pos?.pool.equals(dammPool)) found.push({ position, nftMint });
+    }
+    return found.length ? found : null;
   };
   const named = process.env.LAUNCH_MIGRATION_TX ?? rec.addresses.migrationTx;
   if (named) {
-    const found = await isMigration(named);
+    const found = await migrationIn(named, true);
     if (!found) throw new Error(`${named} is not this launch's migration transaction`);
     return found;
   }
-  // otherwise search the graduated pool's history from its beginning: creation is the first
-  // successful migration there (an address can be referenced, and so have history, before it exists)
+  // otherwise walk the graduated pool's whole history from its beginning (an address can
+  // be referenced, and so have history, before it exists): the first transaction that
+  // qualifies is the creation, because the pool is created exactly once
   const sigs: string[] = [];
-  for (let before: string | undefined, page = 0; page < 20; page++) {
+  for (let before: string | undefined, page = 0; ; page++) {
+    if (page === 30) throw new Error('the pool has too long a history to search; set LAUNCH_MIGRATION_TX to the migration transaction');
     const batch = await rpc(() => conn.getSignaturesForAddress(dammPool, { before, limit: 1000 }, 'confirmed'));
     sigs.push(...batch.filter((x) => !x.err).map((x) => x.signature));
-    if (batch.length < 1000) {
-      for (const sig of sigs.reverse().slice(0, 50)) {
-        const found = await isMigration(sig);
-        if (found) return found;
-      }
-      break;
-    }
+    if (batch.length < 1000) break;
     before = batch[batch.length - 1].signature;
   }
-  throw new Error('could not find the migration transaction in the pool history; set LAUNCH_MIGRATION_TX');
+  for (const sig of sigs.reverse()) {
+    const found = await migrationIn(sig, false);
+    if (found) return found;
+  }
+  throw new Error('no migration transaction found in the history this RPC serves; use an RPC with full history or set LAUNCH_MIGRATION_TX');
 }
 
 // ----- commands ----------------------------------------------------------------
@@ -374,13 +390,20 @@ const commands: Record<string, (args: string[]) => Promise<void>> = {
     }
     if (process.env.OUTFOX_PROGRAM_ID) {
       const [state] = PublicKey.findProgramAddressSync([Buffer.from('settlement')], new PublicKey(process.env.OUTFOX_PROGRAM_ID));
-      if (await rpc(() => conn.getAccountInfo(state))) {
+      // owned by the program = initialized; lamports someone sent to the address are not a state
+      if ((await rpc(() => conn.getAccountInfo(state)))?.owner.toBase58() === process.env.OUTFOX_PROGRAM_ID) {
         throw new Error(`settlement ${process.env.OUTFOX_PROGRAM_ID} is already initialized on this cluster: the game has its token`);
       }
     }
     // 88% of the supply and the locked position go to this address for good
-    if (!(await rpc(() => conn.getAccountInfo(TREASURY)))) {
+    const treasuryAccount = await rpc(() => conn.getAccountInfo(TREASURY));
+    if (!treasuryAccount) {
       throw new Error(`the treasury ${TREASURY.toBase58()} does not exist on this cluster; fund it first so a mistyped address cannot receive the supply`);
+    }
+    // a wallet or a multisig vault is a System-owned account; a mint, a token account or
+    // a multisig's own settings account could never claim or sign
+    if (!treasuryAccount.owner.equals(SystemProgram.programId)) {
+      throw new Error(`the treasury ${TREASURY.toBase58()} is owned by ${treasuryAccount.owner.toBase58()}, not a wallet: it could never sign a claim`);
     }
     const configKp = launchKey('config');
     const mintKp = launchKey('mint');
@@ -413,6 +436,12 @@ const commands: Record<string, (args: string[]) => Promise<void>> = {
     const pool = deriveDbcPoolAddress(quote, mintKp.publicKey, configKp.publicKey);
     // a pool transaction that landed without being seen confirmed must not be sent twice
     if (await rpc(() => conn.getAccountInfo(pool))) {
+      // only a real pool of this launch counts: decoded by the curve program's own layout
+      const onChainPool: any = await rpc(() => client.state.getPool(pool)).catch(() => null);
+      const st = onChainPool?.poolState;
+      if (!st || !st.baseMint.equals(mintKp.publicKey) || !st.config.equals(configKp.publicKey)) {
+        throw new Error(`an account exists at the pool address ${pool.toBase58()} but it is not this launch's pool; nothing recorded`);
+      }
       console.log('  the pool already exists on chain; recording it');
     } else {
       await send('create pool (creates the mint)', await rpc(() => client.creator.createPool({
@@ -496,7 +525,8 @@ const commands: Record<string, (args: string[]) => Promise<void>> = {
     const mint = await rpc(() => getMint(conn, mintPk, 'confirmed', TOKEN_PROGRAM_ID));
     check('classic SPL Token mint', !!info?.owner.equals(TOKEN_PROGRAM_ID));
     check('decimals', mint.decimals === ALPHA_DECIMALS, mint.decimals);
-    check('supply is exactly the fixed supply', mint.supply === SUPPLY, mint.supply);
+    // with no mint authority the supply can only fall (holders may burn): at most the fixed supply
+    check('supply is the fixed supply, less anything holders burned', mint.supply <= SUPPLY && mint.supply > 0n, mint.supply);
     check('no mint authority', mint.mintAuthority === null);
     check('no freeze authority', mint.freezeAuthority === null);
     const md = await rpc(() => conn.getAccountInfo(deriveMintMetadata(mintPk)));
@@ -535,7 +565,7 @@ const commands: Record<string, (args: string[]) => Promise<void>> = {
       // Anyone may add their own liquidity to the pool, so pool-wide "locked == total" is
       // not an invariant. What must hold is that every position the launch itself created
       // is locked in full, and that the locked launch liquidity belongs to the treasury.
-      const created = await launchPositions(dammPk);
+      const created = await launchPositions(damm, dammPk);
       let locked = new BN(0);
       let allLocked = created.length > 0;
       let treasuryOwns = true;
@@ -554,8 +584,9 @@ const commands: Record<string, (args: string[]) => Promise<void>> = {
       console.log(`  permanently locked share of all pool liquidity: ${share.toFixed(2)}%${share < 100 ? ' (others have added liquidity on top)' : ''}`);
       console.log(`  pool price now ${priceOf(dp.sqrtPrice).toFixed(9)} USDC`);
       check('leftover withdrawn', p.isWithdrawLeftover === 1 || p.isWithdrawLeftover === true);
-      const treasuryAta = await rpc(() => getAccount(conn, ata(mintPk, TREASURY)));
-      check('the treasury holds its share', treasuryAta.amount >= BigInt(LAUNCH.treasuryAlpha) * ALPHA_BASE_UNITS, fmt(treasuryAta.amount, ALPHA_DECIMALS));
+      // what the treasury holds today is its own business once it starts using the tokens
+      const treasuryAta = await rpc(() => getAccount(conn, ata(mintPk, TREASURY))).catch(() => null);
+      console.log(`  treasury holds ${treasuryAta ? fmt(treasuryAta.amount, ALPHA_DECIMALS) : '0'} ALPHA now (received ${LAUNCH.treasuryAlpha.toLocaleString('en-US')} at graduation)`);
       console.log(`  pool reserves ${fmt(dp.tokenAAmount, ALPHA_DECIMALS)} ALPHA and ${fmt(dp.tokenBAmount, QUOTE_DECIMALS)} USDC`);
     }
     console.log(failed ? `\n${failed} check(s) FAILED` : '\nall checks passed');

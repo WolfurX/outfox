@@ -350,6 +350,42 @@ describe('the reader the server runs', () => {
     } finally { await rpc.close(); }
   });
 
+  it('reads a graduated launch through the real connection: pool, config, graduated pool, state', async () => {
+    const rpc = await rpcServer({ ...graduated(), [STATE]: stateWith(REHEARSAL.mint) });
+    try {
+      const v = await gameLaunchReader(ctxFor(rpc.url))(cfgOf(REHEARSAL.pool));
+      expect(v.phase).toBe('pool');
+      expect(v.pool!.lockedBps).toBe(9949);
+      expect(rpc.hits).toBe(4);
+    } finally { await rpc.close(); }
+  });
+
+  it('settlement appearing later is picked up; a refusal is not remembered', async () => {
+    const accounts: Record<string, { owner: PublicKey; data: Buffer }> = { ...open };
+    const rpc = await rpcServer(accounts);
+    try {
+      const read = gameLaunchReader(ctxFor(rpc.url));
+      await expect(read(cfgOf(REHEARSAL.pool))).rejects.toThrow(/no token yet/);
+      accounts[STATE] = { owner: DBC_PROGRAM, data: stateWith(REHEARSAL.mint).data }; // lamports or a foreign account there is not a state
+      await expect(read(cfgOf(REHEARSAL.pool))).rejects.toThrow(/no token yet/);
+      accounts[STATE] = stateWith(REHEARSAL.mint);
+      expect((await read(cfgOf(REHEARSAL.pool))).addresses.mint).toBe(REHEARSAL.mint);
+    } finally { await rpc.close(); }
+  });
+
+  it('each read keeps its own deadline when two overlap', async () => {
+    const rpc = await rpcServer({}, 'hang');
+    try {
+      const read = gameLaunchReader(ctxFor(rpc.url), readLaunch, 300);
+      const t0 = Date.now();
+      const a = read(cfgOf(REHEARSAL.pool)).catch(() => Date.now() - t0);
+      await new Promise((r) => setTimeout(r, 200));
+      const b = read(cfgOf(REHEARSAL.pool)).catch(() => Date.now() - t0);
+      expect(await a).toBeLessThan(450); // not extended by the later read
+      expect(await b).toBeGreaterThanOrEqual(480);
+    } finally { await rpc.close(); }
+  });
+
   it('a rate-limited RPC is not retried inside one read', async () => {
     const rpc = await rpcServer({}, '429');
     try {

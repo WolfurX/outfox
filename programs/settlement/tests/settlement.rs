@@ -603,6 +603,48 @@ fn initialize_rejects_zero_cap() {
 }
 
 #[test]
+fn initialize_survives_a_precreated_escrow() {
+    // The escrow ATA's address is public as soon as the mint and the program id are, and
+    // anyone can create an associated token account for any owner. When genesis binds an
+    // already existing mint, a stranger doing that first must not block `initialize`
+    // forever. The account they made IS the escrow (same address, owned by the state
+    // PDA), and tokens parked in it are just reserve nobody is owed.
+    let mut w = setup_uninitialized();
+    let payer = w.payer.insecure_clone();
+    let escrow = CreateAssociatedTokenAccount::new(&mut w.svm, &payer, &w.mint)
+        .owner(&w.state)
+        .send()
+        .unwrap();
+    assert_eq!(escrow, w.escrow);
+    MintTo::new(&mut w.svm, &payer, &w.mint, &escrow, 5).send().unwrap();
+
+    let admin = w.admin.insecure_clone();
+    let ix = w.initialize_ix(w.signer_pubkey(), WINDOW_CAP, CHAIN_ID, admin.pubkey());
+    w.send(&[ix], &[&admin]).unwrap();
+    let st = w.state_data();
+    assert_eq!(st.alpha_mint, w.mint);
+    assert_eq!(st.admin, admin.pubkey());
+    assert_eq!(w.token_balance(&w.escrow), 5);
+}
+
+#[test]
+fn initialize_is_once() {
+    // `init_if_needed` applies to the escrow only: the state PDA is still `init`, so a
+    // second initialize can never rebind the admin, the signer or the mint.
+    let mut w = setup_uninitialized();
+    let admin = w.admin.insecure_clone();
+    let ix = w.initialize_ix(w.signer_pubkey(), WINDOW_CAP, CHAIN_ID, admin.pubkey());
+    w.send(&[ix], &[&admin]).unwrap();
+    let intruder = Keypair::new();
+    w.svm.airdrop(&intruder.pubkey(), 10_000_000_000).unwrap();
+    let again = w.initialize_ix(Keypair::new().pubkey(), WINDOW_CAP * 9, CHAIN_ID, intruder.pubkey());
+    assert!(w.send(&[again], &[&intruder]).is_err());
+    let st = w.state_data();
+    assert_eq!(st.admin, admin.pubkey());
+    assert_eq!(st.window_cap, WINDOW_CAP);
+}
+
+#[test]
 fn admin_cannot_move_funds() {
     // No instruction lets the admin transfer from the escrow: the only outflow is
     // `withdraw`, and the admin holds no valid voucher. Submitting a self-signed
