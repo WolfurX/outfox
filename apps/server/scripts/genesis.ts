@@ -153,7 +153,7 @@ const existing = await conn.getAccountInfo(STATE);
 if (existing?.owner.equals(cfg.programId)) {
   const diff = sameAsOurs(existing.data, LAUNCHED_MINT);
   throw new Error(diff.length
-    ? `settlement state ${STATE.toBase58()} was initialized by SOMEONE ELSE (${diff.join('; ')}). Do not run the game on this program id.`
+    ? `settlement state ${STATE.toBase58()} does not match this run (${diff.join('; ')}). Either someone else initialized this program id, and it must not be used, or these are your keys after a signer rotation or admin handover: compare with your records before deciding.`
     : `settlement state ${STATE.toBase58()} is already initialized with this admin and signer${LAUNCHED_MINT ? ' and this mint' : ''}: genesis is once`);
 }
 
@@ -255,4 +255,5 @@ console.log(`\nserver env:`);
 console.log(`  OUTFOX_RPC_URL=${cfg.rpcUrl}`);
 console.log(`  OUTFOX_CHAIN_ID=${cfg.chainId}`);
 console.log(`  OUTFOX_PROGRAM_ID=${cfg.programId.toBase58()}`);
+console.log(`  OUTFOX_ADMIN=${ADMIN.publicKey.toBase58()}   # the current admin; update it after an admin handover`);
 console.log(`  OUTFOX_SIGNER_KEY=<the hot seed used for this genesis>`);

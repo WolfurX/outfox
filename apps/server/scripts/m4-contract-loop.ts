@@ -113,7 +113,7 @@ function sendExpectFail(ixs: TransactionInstruction[], signers: Keypair[]): stri
 
 /** Fold a sent transaction into the game ledger through the REAL indexer logic. */
 function fold(db0: ReturnType<typeof openDb>, r: { signature: string; logs: string[] }) {
-  foldTransaction(db0, r.signature, Number(svm.getClock().slot), r.logs, chainMs());
+  foldTransaction(db0, r.signature, Number(svm.getClock().slot), r.logs, chainMs(), cfg.programId);
 }
 
 // ----------------------------------------------------------- SPL plumbing

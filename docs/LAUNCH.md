@@ -158,10 +158,13 @@ multisig treasury never has to be on the operator's machine. Order with the rest
 genesis: `create` first (the mint must exist), then `GENESIS_MINT=<mint> genesis.ts`. The
 treasury key is not needed for that step, but `GENESIS_LAUNCH_POOL` must name the curve
 pool so genesis binds only to the mint that pool launched. Settlement can be initialized
-while the curve is still open; deposits only need the mint. **Do both in the same
-sitting**: between `create` and genesis this program id can be initialized by anyone, so
-genesis and the server both compare the state's admin (`OUTFOX_ADMIN`) and voucher signer
-with their own keys and refuse a state somebody else made. The escrow token account
+while the curve is still open; deposits only need the mint. **Deploy the program, `create`
+and genesis in the same sitting**: from the moment the program is deployed, anyone can
+initialize it (with any mint), and `create` would then refuse with the state's admin
+named. Genesis and the server both compare the state's admin (`OUTFOX_ADMIN`, the
+current one; update it after an admin handover) and voucher signer with their own keys
+and refuse a state somebody else made; the server re-reads the state every minute, so a
+rotation or a handover is seen without a restart. The escrow token account
 cannot be used to block genesis: since 2026-10-03 `initialize` accepts one that already
 exists at its address (it is owned by the state PDA either way). The devnet deployment
 of 2026-08-28 still runs the earlier build; the beta deployment is the first with this

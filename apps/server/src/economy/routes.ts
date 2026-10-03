@@ -1,12 +1,12 @@
 /** Routes for the value edge: $ALPHA position, cash-out, deposits, and the exchange. */
 import type { FastifyInstance } from 'fastify';
-import { PublicKey } from '@solana/web3.js';
+import { Connection, PublicKey } from '@solana/web3.js';
 import { type Ctx, requireChain } from '../core/ctx.js';
 import { EngineError } from '../core/errors.js';
 import { requirePlayer } from '../identity/sessions.js';
 import { playerView } from '../identity/players.js';
 import {
-  alphaMintFor, reserveFor, prepareDepositTx, prepareRedeemTx, signVoucher, statePda,
+  alphaMintFor, finalizedReserveFor, reserveFor, prepareDepositTx, prepareRedeemTx, signVoucher, statePda,
 } from '../chain/adapter.js';
 import {
   alphaView, requestWithdrawal, prepareClaim, recordSignedVoucher, withdrawalView,
@@ -35,7 +35,12 @@ export function registerEconomyRoutes(app: FastifyInstance, ctx: Ctx): void {
     let reserve: bigint | null = null;
     if (ctx.chain) {
       try {
-        reserve = await withTimeout(reserveFor(ctx.chain), 5_000);
+        // bounded as a whole: a read the cache gives up on must not keep running
+        const conn = new Connection(ctx.chain.rpcUrl, {
+          commitment: 'confirmed', disableRetryOnRateLimit: true,
+          fetch: (input, init) => fetch(input, { ...init, signal: AbortSignal.timeout(5_000) }),
+        });
+        reserve = await withTimeout(finalizedReserveFor(ctx.chain, conn), 5_000);
       } catch (e) {
         app.log.warn({ err: String(e) }, 'economy overview: reserve read failed');
       }
@@ -70,6 +75,7 @@ export function registerEconomyRoutes(app: FastifyInstance, ctx: Ctx): void {
     const cfg = requireChain(ctx);
     const { id } = (req.body ?? {}) as { id?: number };
     const c = prepareClaim(db, playerId, Number(id));
+    await alphaMintFor(cfg); // the state check: never sign for a settlement that is not ours
     const signature = await signVoucher(cfg, {
       to: c.to, amount: c.amountWei, nonce: c.nonce, deadline: c.deadline,
     });

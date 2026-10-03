@@ -67,8 +67,10 @@ transactions against the devnet program without sending them, that the treasury 
 withdraw its share before graduation (`NotPermitToDoThisAction`, 6022, both right after
 creation and after the curve completed), that a second withdrawal is refused
 (`LeftoverHasBeenWithdraw`, 6026), that the owner of the locked position cannot remove
-liquidity (cp-amm `InsufficientLiquidity`, 6023), and that a buy larger than the curve
-still needs fails (`InsufficientLiquidity`, 6033) unless it is a partial fill. That run
+liquidity (cp-amm `InsufficientLiquidity`, 6023), that a buy larger than the curve
+still needs fails (`InsufficientLiquidity`, 6033) unless it is a partial fill, and that
+between the curve completing and the pool being created both a buy and a sell are
+refused (`PoolIsCompleted`, 6013). That run
 used a 120-second fee window and measured the resting fee: a buy at 128 s paid 1.0025%.
 That the program has no abort or refund instruction is read from its instruction list
 (SDK 1.5.13, IDL 0.2.1), not tested.

@@ -73,6 +73,10 @@ file — WAL makes that a torn read.)
       then shows proof of reserves as broken, correctly; production seeding goes through
       `poolSeedFromDeposit` after a real treasury deposit)
       verify with `systemctl show outfox-server -p Environment` after start.
+- [ ] `OUTFOX_ADMIN` is the settlement's current admin and `OUTFOX_PROGRAM_ID` the beta
+      program (`programs/deployments/devnet-beta.md`); the server refuses to start
+      without `OUTFOX_ADMIN` when it holds the signer key, and refuses every chain path
+      when the state on chain names another admin or signer.
 - [ ] `NODE_ENV=production` exactly — it gates the `Secure` cookie AND the listen
       guard (`NODE_ENV=test` starts the process without ever binding: healthy-looking
       unit, 502 from Caddy).

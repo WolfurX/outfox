@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { join } from 'node:path';
-import { Connection, PublicKey } from '@solana/web3.js';
+import { Connection, Keypair, PublicKey } from '@solana/web3.js';
 import {
   createDammV2Program, createDbcProgram, DAMM_V2_MIGRATION_FEE_ADDRESS, deriveDammV2PoolAddress,
   DynamicBondingCurveIdl,
@@ -308,7 +308,8 @@ describe('the reader the server runs', () => {
     s.close = async () => { server.closeAllConnections(); await new Promise((r) => server.close(r)); };
     return s;
   }
-  const ctxFor = (url: string) => ({ chain: { rpcUrl: url, programId: PROGRAM } } as unknown as Ctx);
+  // chain id 0: the fixture state carries zeros where the program writes chain id, cap and clocks
+  const ctxFor = (url: string) => ({ chain: { rpcUrl: url, programId: PROGRAM, chainId: 0 } } as unknown as Ctx);
   const open = {
     [REHEARSAL.pool]: fx('rehearsal-pool', DBC_PROGRAM),
     [REHEARSAL.config]: fx('rehearsal-config', DBC_PROGRAM),
@@ -330,6 +331,14 @@ describe('the reader the server runs', () => {
     const rpc = await rpcServer({ ...open, [STATE]: stateWith(SPIKE.mint) });
     try {
       await expect(gameLaunchReader(ctxFor(rpc.url))(cfgOf(REHEARSAL.pool))).rejects.toThrow(/not the settlement mint/);
+    } finally { await rpc.close(); }
+  });
+
+  it('refuses a state someone else initialized, like the money paths do', async () => {
+    const rpc = await rpcServer({ ...open, [STATE]: stateWith(REHEARSAL.mint) });
+    try {
+      const ctx = { chain: { rpcUrl: rpc.url, programId: PROGRAM, chainId: 0, admin: Keypair.generate().publicKey } } as unknown as Ctx;
+      await expect(gameLaunchReader(ctx)(cfgOf(REHEARSAL.pool))).rejects.toThrow(/not this deployment's.*admin/);
     } finally { await rpc.close(); }
   });
 

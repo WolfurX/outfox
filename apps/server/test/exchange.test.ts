@@ -63,6 +63,15 @@ describe('seeding', () => {
     expect(() => buyAlpha(db, p, 1_000, null, now)).toThrow(/not open/);
   });
 
+  it('a deposit held for an unlinked wallet is owed, so solvency counts it', () => {
+    creditDeposit(db, W1, 7n * 10n ** 9n, '0xheld', 0, now); // W1 unlinked -> held
+    expect(alphaBalance(db, p)).toBe(0n);
+    expect(solvencyAudit(db, 7n * 10n ** 9n).holds).toBe(true);
+    expect(solvencyAudit(db, 7n * 10n ** 9n - 1n).holds).toBe(false); // the held deposit is not free backing
+    linkWallet(db, p, W1, now); // claimed: the same amount, now as a lot
+    expect(solvencyAudit(db, 7n * 10n ** 9n - 1n).holds).toBe(false);
+  });
+
   it('E6: poolSeedFromDeposit consumes the held treasury deposit — it can never ALSO be claimed by a wallet link', () => {
     creditDeposit(db, W1, SEED_A, '0xseed', 0, now); // W1 unlinked → held
     poolSeedFromDeposit(db, '0xseed', 0, SEED_C, now);

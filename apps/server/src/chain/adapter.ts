@@ -34,14 +34,18 @@ export interface ChainConfig {
   signerSeed?: Uint8Array;
   /** Max transactions folded per indexOnce batch. */
   batchLimit?: number;
-  /** The cold admin this deployment was initialized with (OUTFOX_ADMIN). When set, a
-   * settlement state with any other admin is refused: see settlementProblems. */
+  /** The settlement's CURRENT cold admin (OUTFOX_ADMIN; after a transfer_admin +
+   * accept_admin handover it is the new one). A state with any other admin is refused:
+   * see settlementProblems. Required whenever the server holds the signer key. */
   admin?: PublicKey;
 }
 
 export function chainConfigFromEnv(): ChainConfig | null {
   const { OUTFOX_RPC_URL, OUTFOX_CHAIN_ID, OUTFOX_PROGRAM_ID, OUTFOX_SIGNER_KEY, OUTFOX_ADMIN } = process.env;
   if (!OUTFOX_RPC_URL || OUTFOX_CHAIN_ID === undefined || !OUTFOX_PROGRAM_ID) return null;
+  // A server that signs vouchers must also know whose settlement it is signing for:
+  // the admin check (settlementProblems) is not optional in that configuration.
+  if (OUTFOX_SIGNER_KEY && !OUTFOX_ADMIN) throw new Error('OUTFOX_ADMIN must be set together with OUTFOX_SIGNER_KEY');
   let seed: Uint8Array | undefined;
   if (OUTFOX_SIGNER_KEY) {
     seed = /^[0-9a-fA-Fx]+$/.test(OUTFOX_SIGNER_KEY) && OUTFOX_SIGNER_KEY.length >= 64
@@ -133,29 +137,45 @@ export function settlementProblems(state: SettlementStateView, cfg: ChainConfig)
   return problems;
 }
 
-let mintCache: { state: string; mint: PublicKey } | null = null;
+/** The state is re-read on this cadence so a signer rotation or an admin handover is
+ * seen within a minute: a cached verdict must not outlive the keys it vouched for. */
+const STATE_RECHECK_MS = 60_000;
+let mintCache: { state: string; mint: PublicKey; checkedAt: number } | null = null;
 
 /** The ALPHA mint, read from the on-chain settlement state itself (set at initialize,
  * so cached for the process lifetime — no separate env var to drift). */
 export async function alphaMintFor(cfg: ChainConfig): Promise<PublicKey> {
   const state = statePda(cfg);
-  if (mintCache && mintCache.state === state.toBase58()) return mintCache.mint;
+  if (mintCache && mintCache.state === state.toBase58() && Date.now() - mintCache.checkedAt < STATE_RECHECK_MS) {
+    return mintCache.mint;
+  }
   const info = await connectionFor(cfg).getAccountInfo(state);
   if (!info) throw new Error('settlement state account not found — program not initialized?');
   if (!info.owner.equals(cfg.programId)) throw new Error('settlement state account is not owned by the program — not initialized');
   const parsed = parseSettlementState(info.data);
   const problems = settlementProblems(parsed, cfg);
   if (problems.length) throw new Error(`the settlement state on chain is not this deployment's: ${problems.join('; ')}`);
-  mintCache = { state: state.toBase58(), mint: parsed.alphaMint };
+  mintCache = { state: state.toBase58(), mint: parsed.alphaMint, checkedAt: Date.now() };
   return parsed.alphaMint;
 }
 
 /** Live reserve — the escrow token-account balance, the solvency ceiling every
  * withdrawal request is checked against. Base units (9dp). */
-export async function reserveFor(cfg: ChainConfig): Promise<bigint> {
+export async function reserveFor(cfg: ChainConfig, conn: Connection = connectionFor(cfg)): Promise<bigint> {
   const mint = await alphaMintFor(cfg);
   const escrow = ataFor(statePda(cfg), mint);
-  const bal = await connectionFor(cfg).getTokenAccountBalance(escrow);
+  const bal = await conn.getTokenAccountBalance(escrow);
+  return BigInt(bal.value.amount);
+}
+
+/** The reserve as the indexer sees it: at `finalized`, the commitment the indexer folds
+ * withdrawals at. A redeemed voucher lowers the escrow at `confirmed` seconds before the
+ * indexer marks it confirmed, and in that gap a `confirmed` reserve against a ledger
+ * that still counts the voucher outstanding reads as a shortfall that is not there.
+ * Public and audit views use this; the valve keeps the stricter `confirmed` read. */
+export async function finalizedReserveFor(cfg: ChainConfig, conn: Connection = connectionFor(cfg)): Promise<bigint> {
+  const mint = await alphaMintFor(cfg);
+  const bal = await conn.getTokenAccountBalance(ataFor(statePda(cfg), mint), 'finalized');
   return BigInt(bal.value.amount);
 }
 

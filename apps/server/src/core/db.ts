@@ -81,6 +81,7 @@ export function openDb(path: string): DB {
     );
     INSERT OR IGNORE INTO treasury (id, scrip) VALUES (1, 0);
     CREATE INDEX IF NOT EXISTS idx_ledger_player ON ledger(player_id, id DESC);
+    CREATE INDEX IF NOT EXISTS idx_ledger_at ON ledger(at);
     CREATE INDEX IF NOT EXISTS idx_items_owner ON items(owner_id);
     CREATE INDEX IF NOT EXISTS idx_listings_active ON listings(active, id DESC);
 

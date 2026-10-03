@@ -16,7 +16,7 @@ import type { LaunchView } from '@outfox/shared';
 import { ALPHA_DECIMALS } from '@outfox/shared';
 import type { Ctx } from '../core/ctx.js';
 import { cachedRead } from '../core/cached.js';
-import { parseSettlementState, statePda } from './adapter.js';
+import { parseSettlementState, settlementProblems, statePda } from './adapter.js';
 
 export const DBC_PROGRAM = new PublicKey('dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN');
 export const DAMM_V2_PROGRAM = new PublicKey('cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG');
@@ -205,7 +205,11 @@ export function gameLaunchReader(
       if (!state || !state.owner.equals(chain.programId)) {
         throw new Error('settlement is not initialized: the game has no token yet');
       }
-      settlementMint = parseSettlementState(state.data).alphaMint.toBase58();
+      const parsed = parseSettlementState(state.data);
+      // the same test the money paths apply: a state someone else initialized is not ours
+      const problems = settlementProblems(parsed, chain);
+      if (problems.length) throw new Error(`the settlement state is not this deployment's: ${problems.join('; ')}`);
+      settlementMint = parsed.alphaMint.toBase58();
     }
     if (settlementMint !== view.addresses.mint) {
       throw new Error('the configured launch pool is not the settlement mint\'s launch');

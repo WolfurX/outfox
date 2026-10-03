@@ -55,6 +55,7 @@ import {
 } from '@solana/spl-token';
 import { Connection, Keypair, PublicKey, SystemProgram, Transaction, type Signer } from '@solana/web3.js';
 import BN from 'bn.js';
+import bs58 from 'bs58';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { ALPHA_BASE_UNITS, ALPHA_DECIMALS, LAUNCH } from '@outfox/shared';
@@ -296,14 +297,17 @@ async function swap(step: string, who: Keypair, buy: boolean, amountIn: BN, mode
 }
 
 /**
- * The positions the launch created, read from the migration transaction itself. Nothing a
- * third party later creates in the pool or sends to the treasury can stand in for them:
- * the transaction must have succeeded, must carry the curve program's own MigrationDammV2
- * (at any call depth: a keeper may migrate through its own program), and must have
- * created a position in THIS graduated pool whose NFT mint signed it. Another launch's
- * migration that merely names our addresses creates no position here, so it is skipped.
+ * The positions the launch created, read from the migration transaction itself. The
+ * transaction must have succeeded and must carry the curve program's own MigrationDammV2
+ * instruction (top level or inner: a keeper may migrate through its own program) whose
+ * accounts name THIS curve pool and THIS graduated pool; the two position NFT mints are
+ * accounts 5 and 8 of that instruction (IDL order), not whatever else signed. Nothing a
+ * third party appends to the transaction, creates in the pool later, or sends to the
+ * treasury can pass for them or hide them.
  */
+const MIGRATION_DISC = Buffer.from([156, 169, 230, 103, 53, 228, 80, 64]); // migration_damm_v2
 async function launchPositions(damm: any, dammPool: PublicKey): Promise<{ position: PublicKey; nftMint: PublicKey }[]> {
+  const curvePool = need('pool');
   const migrationIn = async (sig: string, named: boolean) => {
     const tx = await rpc(() => conn.getTransaction(sig, { commitment: 'confirmed', maxSupportedTransactionVersion: 0 }));
     if (!tx) {
@@ -311,19 +315,21 @@ async function launchPositions(damm: any, dammPool: PublicKey): Promise<{ positi
       return null;
     }
     if (tx.meta?.err) return null;
-    const logs = tx.meta?.logMessages ?? [];
-    const invoke = new RegExp(`^Program ${DBC_PROGRAM} invoke \\[\\d+\\]$`);
-    if (!logs.some((l, i) => invoke.test(l) && logs[i + 1] === 'Program log: Instruction: MigrationDammV2')) return null;
-    const keys = tx.transaction.message.getAccountKeys({ accountKeysFromLookups: tx.meta?.loadedAddresses }).keySegments().flat();
-    const has = new Set(keys.map((k) => k.toBase58()));
-    const found: { position: PublicKey; nftMint: PublicKey }[] = [];
-    for (const nftMint of keys.slice(0, tx.transaction.message.header.numRequiredSignatures)) {
-      const position = derivePositionAddress(nftMint);
-      if (!has.has(position.toBase58())) continue;
-      const pos: any = await rpc(() => damm.account.position.fetchNullable(position, 'confirmed'));
-      if (pos?.pool.equals(dammPool)) found.push({ position, nftMint });
+    const keys = tx.transaction.message.getAccountKeys({ accountKeysFromLookups: tx.meta?.loadedAddresses });
+    const all = [
+      ...tx.transaction.message.compiledInstructions,
+      ...(tx.meta?.innerInstructions ?? []).flatMap((x) => x.instructions.map((i) => ({
+        programIdIndex: i.programIdIndex, accountKeyIndexes: i.accounts, data: bs58.decode(i.data),
+      }))),
+    ];
+    for (const ix of all) {
+      if (keys.get(ix.programIdIndex)?.toBase58() !== DBC_PROGRAM) continue;
+      if (!Buffer.from(ix.data).subarray(0, 8).equals(MIGRATION_DISC) || ix.accountKeyIndexes.length < 11) continue;
+      const acct = (i: number) => keys.get(ix.accountKeyIndexes[i])!;
+      if (!acct(0).equals(curvePool) || !acct(4).equals(dammPool)) continue;
+      return [5, 8].map((i) => ({ nftMint: acct(i), position: derivePositionAddress(acct(i)) }));
     }
-    return found.length ? found : null;
+    return null;
   };
   const named = process.env.LAUNCH_MIGRATION_TX ?? rec.addresses.migrationTx;
   if (named) {
@@ -331,9 +337,9 @@ async function launchPositions(damm: any, dammPool: PublicKey): Promise<{ positi
     if (!found) throw new Error(`${named} is not this launch's migration transaction`);
     return found;
   }
-  // otherwise walk the graduated pool's whole history from its beginning (an address can
-  // be referenced, and so have history, before it exists): the first transaction that
-  // qualifies is the creation, because the pool is created exactly once
+  // otherwise walk the graduated pool's history from its beginning (an address can be
+  // referenced, and so have history, before it exists). Anyone can pad that history, so
+  // the walk is bounded; past the bound the operator names the transaction.
   const sigs: string[] = [];
   for (let before: string | undefined, page = 0; ; page++) {
     if (page === 30) throw new Error('the pool has too long a history to search; set LAUNCH_MIGRATION_TX to the migration transaction');
@@ -342,7 +348,9 @@ async function launchPositions(damm: any, dammPool: PublicKey): Promise<{ positi
     if (batch.length < 1000) break;
     before = batch[batch.length - 1].signature;
   }
+  let looked = 0;
   for (const sig of sigs.reverse()) {
+    if (++looked > 300) throw new Error('more than 300 transactions precede the migration in the pool history; set LAUNCH_MIGRATION_TX');
     const found = await migrationIn(sig, false);
     if (found) return found;
   }
@@ -391,8 +399,10 @@ const commands: Record<string, (args: string[]) => Promise<void>> = {
     if (process.env.OUTFOX_PROGRAM_ID) {
       const [state] = PublicKey.findProgramAddressSync([Buffer.from('settlement')], new PublicKey(process.env.OUTFOX_PROGRAM_ID));
       // owned by the program = initialized; lamports someone sent to the address are not a state
-      if ((await rpc(() => conn.getAccountInfo(state)))?.owner.toBase58() === process.env.OUTFOX_PROGRAM_ID) {
-        throw new Error(`settlement ${process.env.OUTFOX_PROGRAM_ID} is already initialized on this cluster: the game has its token`);
+      const st = await rpc(() => conn.getAccountInfo(state));
+      if (st?.owner.toBase58() === process.env.OUTFOX_PROGRAM_ID) {
+        const admin = new PublicKey(st.data.subarray(8, 40)).toBase58(); // SettlementState: discriminator, then admin
+        throw new Error(`settlement ${process.env.OUTFOX_PROGRAM_ID} is already initialized on this cluster, admin ${admin}. If that admin is yours the game already has its token; if it is not, someone took this program id and it must not be used.`);
       }
     }
     // 88% of the supply and the locked position go to this address for good
@@ -442,7 +452,7 @@ const commands: Record<string, (args: string[]) => Promise<void>> = {
       if (!st || !st.baseMint.equals(mintKp.publicKey) || !st.config.equals(configKp.publicKey)) {
         throw new Error(`an account exists at the pool address ${pool.toBase58()} but it is not this launch's pool; nothing recorded`);
       }
-      console.log('  the pool already exists on chain; recording it');
+      console.log('  the pool already exists on chain; recording it (its metadata keeps the address it was created with; verify checks it against LAUNCH_URI)');
     } else {
       await send('create pool (creates the mint)', await rpc(() => client.creator.createPool({
         baseMint: mintKp.publicKey, config: configKp.publicKey, name: TOKEN_NAME, symbol: TOKEN_SYMBOL,
@@ -450,7 +460,7 @@ const commands: Record<string, (args: string[]) => Promise<void>> = {
       })), [mintKp]);
     }
     rec.addresses.pool = pool.toBase58();
-    rec.addresses.uri = uri;
+    if (!rec.addresses.uri) rec.addresses.uri = uri; // never overwritten on a resume
     save();
     console.log(`$ALPHA mint ${rec.addresses.mint}\ncurve pool  ${rec.addresses.pool}\nrecord      ${RECORD}`);
   },

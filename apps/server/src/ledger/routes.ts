@@ -7,7 +7,7 @@ import { conservationAudit, ledgerView } from './scrip.js';
 import { alphaDriftAudit } from './alpha.js';
 import { solvencyAudit } from '../economy/valve.js';
 import { exchangeAudit } from '../economy/exchange.js';
-import { reserveFor } from '../chain/adapter.js';
+import { finalizedReserveFor } from '../chain/adapter.js';
 
 export function registerLedgerRoutes(app: FastifyInstance, ctx: Ctx, debug: boolean): void {
   const { db } = ctx;
@@ -22,7 +22,7 @@ export function registerLedgerRoutes(app: FastifyInstance, ctx: Ctx, debug: bool
   if (debug) {
     app.get('/api/debug/conservation', async () => conservationAudit(db));
     app.get('/api/debug/alpha-drift', async () => alphaDriftAudit(db));
-    app.get('/api/debug/solvency', async () => solvencyAudit(db, await reserveFor(requireChain(ctx))));
+    app.get('/api/debug/solvency', async () => solvencyAudit(db, await finalizedReserveFor(requireChain(ctx))));
     app.get('/api/debug/exchange', async () => exchangeAudit(db));
   }
 }

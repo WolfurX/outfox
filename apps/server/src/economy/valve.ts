@@ -276,8 +276,8 @@ export function alphaView(db: DB, playerId: number, now = Date.now()): AlphaView
 
 /** Proof of reserves, game side: the chain must always hold at least what the game owes.
  * "Owes" counts EVERY ledger-recorded ALPHA holder — player lots, unredeemed vouchers,
- * the exchange pool's inventory, and the ALPHA treasury — so nothing in the ledger is
- * ever unbacked. Fees the program keeps are un-owed surplus (ECONOMY.md §3 boundary-fee
+ * deposits held for wallets not yet linked, the exchange pool's inventory, and the
+ * ALPHA treasury — so nothing in the ledger is ever unbacked. Fees the program keeps are un-owed surplus (ECONOMY.md §3 boundary-fee
  * revenue), so a healthy system runs reserve > liabilities, never below. */
 export function solvencyAudit(db: DB, reserveWei: bigint): {
   holds: boolean; reserveWei: string; liabilitiesWei: string; surplusWei: string;
@@ -289,7 +289,10 @@ export function solvencyAudit(db: DB, reserveWei: bigint): {
     { alpha_wei: string } | undefined;
   const treasury = db.prepare(`SELECT wei FROM treasury_alpha WHERE id = 1`).get() as
     { wei: string } | undefined;
-  const liabilities = balances + outstandingNet(db)
+  // deposits held for a wallet nobody has linked yet are owed to whoever links it
+  const unclaimed = (db.prepare(`SELECT amount_wei AS w FROM unclaimed_deposits`).all() as { w: string }[])
+    .reduce((a, r) => a + BigInt(r.w), 0n);
+  const liabilities = balances + outstandingNet(db) + unclaimed
     + BigInt(pool?.alpha_wei ?? '0') + BigInt(treasury?.wei ?? '0');
   return {
     holds: reserveWei >= liabilities,

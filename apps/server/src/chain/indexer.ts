@@ -51,10 +51,11 @@ function recordEvent(
  * indexer happened to see it (M4 finding, carried over from the EVM edge). */
 export function foldTransaction(
   db: DB, signature: string, slot: number, logs: string[], blockTimeMs: number | undefined,
+  programId: PublicKey,
 ): { deposits: number; withdrawals: number } {
   let deposits = 0;
   let withdrawals = 0;
-  parseEventsFromLogs(logs).forEach((ev, i) => {
+  parseEventsFromLogs(logs, programId).forEach((ev, i) => {
     const fresh = recordEvent(db, signature, i, slot, ev.kind, {
       address: ev.address, amount: ev.amount.toString(),
       ...(ev.nonce !== undefined ? { nonce: ev.nonce.toString() } : {}),
@@ -78,11 +79,33 @@ interface ParsedEvent {
   nonce?: bigint;
 }
 
-/** Anchor events ride in "Program data: <base64>" log lines: disc(8) ++ borsh fields. */
-export function parseEventsFromLogs(logs: string[]): ParsedEvent[] {
+/**
+ * Anchor events ride in "Program data: <base64>" log lines: disc(8) ++ borsh fields.
+ *
+ * Only lines logged BY THE SETTLEMENT PROGRAM count. The log is a stack: every
+ * "Program X invoke [n]" opens X's frame and "Program X success" or "Program X failed"
+ * closes it, and a data line belongs to whichever frame is open. Any program can log
+ * bytes shaped like our events (the discriminators are public), and any transaction can
+ * name our program id as an account without invoking it, so a line outside our own
+ * frame is noise, never a deposit (independent review, 2026-10-03). Inside our frame
+ * the line is ours even when we were called by CPI: our program ran its own checks.
+ */
+export function parseEventsFromLogs(logs: string[], programId: PublicKey): ParsedEvent[] {
   const out: ParsedEvent[] = [];
+  const ours = programId.toBase58();
+  const stack: string[] = [];
   for (const line of logs) {
+    const invoke = /^Program (\S+) invoke \[\d+\]$/.exec(line);
+    if (invoke) { stack.push(invoke[1]); continue; }
+    const close = /^Program (\S+) (success|failed: .*)$/.exec(line);
+    if (close) {
+      // pop to the matching frame; a malformed log never leaves a foreign frame open as ours
+      const at = stack.lastIndexOf(close[1]);
+      stack.length = at < 0 ? 0 : at;
+      continue;
+    }
     if (!line.startsWith('Program data: ')) continue;
+    if (stack[stack.length - 1] !== ours) continue;
     const raw = Buffer.from(line.slice('Program data: '.length), 'base64');
     if (raw.length < 8) continue;
     const d = raw.subarray(0, 8);
@@ -129,7 +152,7 @@ export async function indexOnce(
       commitment: 'finalized', maxSupportedTransactionVersion: 0,
     });
     const r = foldTransaction(db, s.signature, s.slot, tx?.meta?.logMessages ?? [],
-      tx?.blockTime ? tx.blockTime * 1000 : undefined);
+      tx?.blockTime ? tx.blockTime * 1000 : undefined, cfg.programId);
     deposits += r.deposits;
     withdrawals += r.withdrawals;
   }

@@ -12,7 +12,8 @@ import { startRegister, verifyRegister } from '../src/identity/rungs.js';
 import { postTx } from '../src/ledger/scrip.js';
 import { refill } from '../src/systems/refills/rules.js';
 import { listItem, buyListing, listingsView } from '../src/systems/market/rules.js';
-import { seedExchange, buyAlpha } from '../src/economy/exchange.js';
+import { seedExchange, buyAlpha, sellAlpha } from '../src/economy/exchange.js';
+import { applyCarry } from '../src/economy/carry.js';
 import { economyOverview } from '../src/economy/overview.js';
 import { registerEconomyRoutes } from '../src/economy/routes.js';
 import { ALPHA_BASE_UNITS, EXCHANGE, MARKET_FEE_BPS, REFILL } from '@outfox/shared';
@@ -107,6 +108,26 @@ describe('economyOverview', () => {
     expect(v.audits).toEqual({ conservation: true, alphaLedger: true, exchange: true, solvency: true });
     // one base unit short of what the game owes is insolvent
     expect(economyOverview(db, SEED_ALPHA - 1n, T0 + HOUR).audits.solvency).toBe(false);
+  });
+
+  it('the carry and the exchange sell-leg fee are sinks; the rate series has one point per day', () => {
+    const { worker, buyer } = world();
+    seedExchange(db, 3_000_000, 30_000n * ALPHA_BASE_UNITS, 'test', T0);
+    const bought = buyAlpha(db, buyer, 1_000, null, T0).outWei;
+    // the Scrip carry: a balance above the floor decays once a day, to the treasury (the worker holds 5,000)
+    const DAY = 24 * HOUR;
+    applyCarry(db, worker, T0 + DAY);
+    const decayed = (db.prepare(`SELECT -SUM(d_settled + d_unsettled) AS t FROM ledger WHERE kind = 'carry'`).get() as { t: number }).t;
+    expect(decayed).toBeGreaterThan(0);
+    // an exchange sell the next day: the ALPHA-side fee is not Scrip, so it is not a Scrip sink
+    const sold = sellAlpha(db, buyer, bought / 2n, null, T0 + DAY);
+    expect(sold.feeWei).toBeGreaterThan(0n);
+    const v = economyOverview(db, null, T0 + DAY + HOUR);
+    expect(v.scrip.captured24h).toBe(decayed); // the buy-leg fee (15) fell out of the window; the carry is in it
+    expect(v.scrip.minted24h).toBe(0);
+    expect(v.exchange!.points).toHaveLength(2); // one close per day, the buy's day and the sell's day
+    expect(v.exchange!.points[1].at).toBe(T0 + DAY);
+    expect(v.audits.conservation).toBe(true);
   });
 
   it('a broken ledger shows as a failed audit, not as a number that looks fine', () => {

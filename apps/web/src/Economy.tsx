@@ -14,12 +14,21 @@ import { Amount, Banner, Chip, ListRow, Meter, RowGroup, Skeleton, Spark } from 
 const WEI = 10n ** 9n;
 const REFRESH_MS = 30_000; // the server recomputes at most this often
 
-function alpha(wei: string, dp = 2): string {
-  const w = BigInt(wei);
-  const frac = (w % WEI).toString().padStart(9, '0').slice(0, dp).replace(/0+$/, '');
-  return `${(w / WEI).toLocaleString()}${frac ? '.' + frac : ''}`;
+/** Whole ALPHA as a number for display (two decimals): Amount formats it for the locale.
+ * Never a pre-formatted string: in dot-grouping locales (id-ID) a grouped string re-parses
+ * a thousand times off (the Clearinghouse's lesson). */
+const alpha = (wei: string) => Number(BigInt(wei) / 10_000_000n) / 100;
+const usdc = (units: string) => Number(BigInt(units) / 10_000n) / 100;
+const fmt2 = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+/** A price in USDC with its decimals intact: Amount would round it to three. */
+function Price({ value }: { value: number }) {
+  return (
+    <span className="ofx-amount ofx-amount--lg">
+      {value.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
+      <span className="ofx-amount__unit">USDC</span>
+    </span>
+  );
 }
-const usdc = (units: string) => (Number(BigInt(units) / 10_000n) / 100).toLocaleString(undefined, { minimumFractionDigits: 2 });
 const clock = (t: number) => new Date(t).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 const EXPLORER: Record<number, string> = { 1: '?cluster=devnet', 2: '' };
 // addresses are case-sensitive: the statline's uppercase must not apply
@@ -50,7 +59,7 @@ function Launch({ launch, chainId }: { launch: LaunchView; chainId: number | nul
   return (
     <RowGroup title="$ALPHA on the open market">
       <ListRow title={phase} sub="Launched through Meteora"
-        trail={<Amount value={launch.price.toFixed(4)} unit="USDC" size="lg" />} />
+        trail={<Price value={launch.price} />} />
       {launch.phase !== 'pool' && (
         <div className="ofx-row" style={{ display: 'block' }}>
           <Meter label={`Raised of ${threshold.toLocaleString()} USDC`} value={raised} max={threshold} />
@@ -59,7 +68,7 @@ function Launch({ launch, chainId }: { launch: LaunchView; chainId: number | nul
       {launch.pool && (
         <>
           <ListRow title="Pool reserves"
-            trail={<span className="ofx-row__title">{alpha(launch.pool.alpha)} $ALPHA · {usdc(launch.pool.quote)} USDC</span>} />
+            trail={<span className="ofx-row__title">{fmt2(alpha(launch.pool.alpha))} $ALPHA · {fmt2(usdc(launch.pool.quote))} USDC</span>} />
           <ListRow title="Permanently locked share of pool liquidity"
             sub="The launch liquidity cannot be withdrawn. Others can add their own on top."
             trail={<Amount value={(launch.pool.lockedBps / 100).toFixed(2)} unit="%" />} />
@@ -139,7 +148,7 @@ export default function Economy() {
                 <RowGroup title="Foxes">
                   <ListRow title="On the Street" trail={<Amount value={eco.players.total} size="lg" />} />
                   <ListRow title="Registered" trail={<Amount value={eco.players.registered} />} />
-                  <ListRow title="Active in the last 24 hours" trail={<Amount value={eco.players.active24h} />} />
+                  <ListRow title="Earned, spent or sold in the last 24 hours" trail={<Amount value={eco.players.active24h} />} />
                 </RowGroup>
 
                 <RowGroup title="Scrip">
@@ -177,7 +186,7 @@ export default function Economy() {
                     ? (
                       <>
                         <ListRow title="Scrip per $ALPHA" sub="Floats freely. Never pegged."
-                          trail={<Amount value={Number(eco.exchange.rateCentsPerAlpha).toFixed(2)} unit="Scrip" size="lg" />} />
+                          trail={<Amount value={Math.round(Number(eco.exchange.rateCentsPerAlpha) * 100) / 100} unit="Scrip" size="lg" />} />
                         {eco.exchange.points.length > 1 && (
                           <div className="ofx-row" style={{ display: 'block' }}>
                             <Spark data={eco.exchange.points.map((p) => p.rate)} width={560} height={48} fill
