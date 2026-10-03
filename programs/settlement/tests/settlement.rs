@@ -257,7 +257,7 @@ impl World {
 /// settlement state and fund the escrow via a deposit.
 fn setup() -> World {
     let mut svm = LiteSVM::new();
-    let program_id = Pubkey::from_str("FFNwC5HX9jzjnNrLiUkJ3y6uovVCGCpms5jo9R2Yn9o1").unwrap();
+    let program_id = Pubkey::from_str("574eotmx4QLJ1F3eNjBDXa1tECFs2kXRpbYEEmP8U98y").unwrap();
     svm.add_program_from_file(program_id, "../target/deploy/settlement.so")
         .expect("run `anchor build` first");
 
@@ -727,7 +727,7 @@ fn unpause_restores_operation() {
 /// Like `setup` but stops before `initialize` (for initialize-guard tests).
 fn setup_uninitialized() -> World {
     let mut svm = LiteSVM::new();
-    let program_id = Pubkey::from_str("FFNwC5HX9jzjnNrLiUkJ3y6uovVCGCpms5jo9R2Yn9o1").unwrap();
+    let program_id = Pubkey::from_str("574eotmx4QLJ1F3eNjBDXa1tECFs2kXRpbYEEmP8U98y").unwrap();
     svm.add_program_from_file(program_id, "../target/deploy/settlement.so")
         .expect("run `anchor build` first");
     let payer = Keypair::new();

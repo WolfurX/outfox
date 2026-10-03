@@ -6,7 +6,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-settlement = "FFNwC5HX9jzjnNrLiUkJ3y6uovVCGCpms5jo9R2Yn9o1"
+settlement = "574eotmx4QLJ1F3eNjBDXa1tECFs2kXRpbYEEmP8U98y"
 
 [provider]
 cluster = "localnet"

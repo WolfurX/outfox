@@ -27,7 +27,7 @@ use solana_sdk_ids::sysvar::instructions::ID as INSTRUCTIONS_SYSVAR_ID;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{self, Mint, Token, TokenAccount};
 
-declare_id!("FFNwC5HX9jzjnNrLiUkJ3y6uovVCGCpms5jo9R2Yn9o1");
+declare_id!("574eotmx4QLJ1F3eNjBDXa1tECFs2kXRpbYEEmP8U98y");
 
 /// Rolling window of the withdrawal cap, in seconds (24h).
 pub const WINDOW: i64 = 86_400;

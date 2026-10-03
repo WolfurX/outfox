@@ -1,0 +1,7 @@
+{
+  "name": "Outfox Alpha",
+  "symbol": "ALPHA",
+  "description": "$ALPHA is the premium token of Outfox, an economy-first trading game on Solana: a fixed supply of 2,000,000, created by a Meteora bonding curve that graduates into a permanently locked pool. This is the devnet beta token; it has no value.",
+  "image": "https://raw.githubusercontent.com/WolfurX/outfox/master/apps/web/public/art/coin-alpha.webp",
+  "external_url": "https://outfox.gitbook.io/whitepaper/"
+}
