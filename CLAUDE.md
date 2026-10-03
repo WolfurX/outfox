@@ -74,10 +74,13 @@ the settlement program (`programs/`), the chain adapter and indexer
 §9 gates and the carry (`apps/server/src/economy/`), and the identity adapters
 (`apps/server/src/identity/`) as security-critical.
 
-- **Model floor: no downgrades.** Every subagent spawned for work on this project runs
-  on the main-loop model or higher — never a cheaper tier, and never a `model` override
-  that downgrades security-relevant review, review-verify, or implementation. This is
-  the capability floor, deliberately.
+- **Model floor, sized to the stake (owner, 2026-10-03).** The top tier is for what
+  touches custody: changes to the program, the voucher path, the ledger gates, and the
+  independent review of those. Finders, mechanical stages, doc checks and refuters run
+  on cheaper tiers (seats as in the wiki's workflow-seats skill). A review is sized to
+  the diff: a few finders and one refuter per finding, not a fleet; one review per round
+  before it ships, not one per commit. Fifty top-tier agents for one round is the
+  mistake this line exists to prevent.
 - **Adversarial review, not self-review.** Custody-touching changes get an independent
   adversarial pass (fresh agent or reviewer, not the author) before they are called
   done. Money-path changes carry a regression test that goes red on the exact defect.
