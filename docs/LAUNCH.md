@@ -72,7 +72,9 @@ a 500 USD trade near 4% impact) is where these come from.
   plus the curve fee at that moment: 1% at rest, far more inside the opening window. 80%
   of that fee returns to the treasury as fee claimer and 20% goes to Meteora, as does 0.2%
   of the liquidity at graduation. The launcher ends up holding the $ALPHA it bought (the
-  sold share), outside the treasury until it sends it back.
+  sold share), outside the treasury until it sends it back. **Rule (owner, 2026-10-03):**
+  operator wallets do not buy on the curve except to complete it when it stalls, and
+  anything bought that way is transferred to the treasury. Published in the whitepaper.
 - **It is the pool's own price path.** A constant-product segment from the opening price
   to the graduation price is what a pool of that depth would trace anyway, so the curve
   adds an orderly opening and a fee schedule, not a different market.
