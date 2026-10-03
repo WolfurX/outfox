@@ -63,6 +63,11 @@ and the launch verifier survives burns, keeper migrations and griefed treasuries
 whole flow ran on a local validator with Meteora's programs cloned from devnet, through
 `e2e-devnet.ts` and the live `GET /api/launch`. Details: `log.md` 2026-10-03.
 
+**Beta on devnet, chain side (2026-10-03):** program `574eotmx4QLJ1F3eNjBDXa1tECFs2kXRpbYEEmP8U98y`,
+launched mint `43n17cHnw41WBCnxF8BSDprq7CW9wrXgrNwZmiR5NqLL` (curve open), settlement bound to it
+by `GENESIS_MINT` genesis, `e2e-devnet.ts` green against it; record
+`programs/deployments/devnet-beta.md`. Waiting on the box and the domain for the server.
+
 Deploy change: the box installs with `npm ci --omit=dev` (`tsx` is now a dependency),
 so no dev tooling lands beside the voucher key (`deploy/README.md`).
 
