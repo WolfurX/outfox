@@ -1,8 +1,15 @@
 # Outfox beta — one-box reverse proxy. Caddy terminates TLS (automatic certs),
 # serves the built PWA, and proxies /api to the game server on loopback.
-# Replace outfox.game with the real domain; DNS A/AAAA must point here first.
+# Beta domain outfoxgame.com (Cloudflare DNS, unproxied, A/AAAA to the box). The box's
+# Debian 13 caddy (2.6) needs the global acme_ca pinned to Let's Encrypt: its ZeroSSL
+# fallback fails with caddy_legacy_user_removed.
 
-outfox.game {
+{
+	email rizki@imahpiksel.com
+	acme_ca https://acme-v02.api.letsencrypt.org/directory
+}
+
+outfoxgame.com {
 	encode zstd gzip
 
 	# --- the API: game server, loopback only (server binds 127.0.0.1) ---
@@ -41,4 +48,8 @@ outfox.game {
 		output file /var/log/caddy/outfox-access.log
 		format json
 	}
+}
+
+www.outfoxgame.com {
+	redir https://outfoxgame.com{uri} permanent
 }

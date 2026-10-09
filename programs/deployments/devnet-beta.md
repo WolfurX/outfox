@@ -21,7 +21,7 @@ completion and graduation are an explicit operator step (`launch.ts complete`, `
 | State PDA | `CBeSoxt4o7ZtmLEgm5Hz3MF2HQuditYFw7HmrELDeNQD` |
 | Escrow ATA | `EBcdf4KxzUwyHThMt3HbRh828jWKD9bfFQMwZhyQ6SzZ` |
 | Admin (cold) | `DDpPhoRNLF2hpb7xiuCRiEPaKa7qimfsMYi1ZmHYaoLf` |
-| Voucher signer (hot) | derived from the seed in the beta key directory; set `OUTFOX_SIGNER_KEY` on the box from it |
+| Voucher signer (hot) | `Dt94u1HmFVNAGdxcJPwTfP3fTaAmshhiP6tstnogv5bk`, seed generated on the beta box 2026-10-09 and never left it; registered by `set_signer` (below). The 2026-10-03 signer from the beta key directory is retired |
 | Treasury | `8MfTGfFNgPSXsWrMaBGM8kzeyUmySBuTLTnAmyxrue3A` (fee claimer, leftover receiver, locked-position owner) |
 | Window cap | 500 ALPHA per rolling 24h |
 
@@ -36,6 +36,7 @@ completion and graduation are an explicit operator step (`launch.ts complete`, `
 | create pool (creates the mint) | `4HjnsDC6UihZG4zDo4kEMdbvBTBwg3S9xY7aq68dgcxy5sVV4JeJUSsowUK6ttPVmE8m5rLJZsA7fedi2AXe1EVB` |
 | buy with 1500 quote | `4rhkGobvuaoW9ua7xZyB1RQTyhr4bfDj4mkfyBTK7wxzRjbmkGyVX1hEkdez9ts9Eb6rug4kFKZQmHwBLAj7ayCb` |
 | settlement initialize (genesis, GENESIS_MINT mode) | `` |
+| set_signer to the beta box's key (2026-10-09, `scripts/set-signer.ts`) | `5MNz6A4bUByxey2KqLrTdii2yYJSvg6SrZgecqtVr8jH65jfAinwdb8Y2rAGPzrvRjhr5L76tsHTmRLxzwLda6ER` |
 
 Server env for the box: `OUTFOX_PROGRAM_ID=574eotmx4QLJ1F3eNjBDXa1tECFs2kXRpbYEEmP8U98y`, `OUTFOX_ADMIN=DDpPhoRNLF2hpb7xiuCRiEPaKa7qimfsMYi1ZmHYaoLf`,
 `OUTFOX_LAUNCH_POOL=HhMKSRKXQCRB9jkQdd2PVhTse8a5to5M8h6mdHmFy4XW`, `OUTFOX_CHAIN_ID=1`, the hot seed. The 2026-08-28 deployment (`devnet.md`)

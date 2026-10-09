@@ -11,7 +11,7 @@ services:
 
 | Env | Box | Chain | DB | Domain |
 |---|---|---|---|---|
-| **dev+beta** | small VPS (1 vCPU / 1 GB, add swap) | devnet | SQLite | real domain pending (owner purchase); until then dev-only access via a temporary DNS name or SSH tunnel |
+| **dev+beta** | Vultr `outfox-beta`, sgp, 1 vCPU / 1 GB (2.4 GB swap from the image), Debian 13, Node 24 (NodeSource) | devnet | SQLite | `outfoxgame.com`, live 2026-10-09 |
 | **production** | separate, larger box (2 GB+) | mainnet — exists only after the audit + counsel gates | PostgreSQL (migration queued) | `outfox.game` (whether beta takes the apex first is an open owner call) |
 
 Rules:
@@ -24,8 +24,8 @@ Rules:
 
 ## Prerequisites (owner)
 
-1. **Domain** — `outfox.game` (checked available 2026-08-28; ~$30/yr). DNS A/AAAA
-   → the box.
+1. **Domain** — `outfoxgame.com` (bought 2026-10-09 on the owner's Cloudflare account;
+   `.game` turned out to be about $300/yr, deferred). DNS A/AAAA → the box, unproxied.
 2. **A VPS** — any small instance; the server is a single Node process and SQLite.
 3. The devnet deployment already live (`programs/deployments/devnet.md`) and a
    **production hot signer seed** — generate FRESH for this box (never reuse the
@@ -51,7 +51,7 @@ systemctl enable --now outfox-server
 # Caddy: install distro package, drop deploy/Caddyfile into /etc/caddy/, reload
 ```
 
-Smoke test: `curl -s https://outfox.game/api/session/bootstrap -X POST` returns a
+Smoke test: `curl -s https://outfoxgame.com/api/session/bootstrap -X POST` returns a
 player JSON and sets a `Secure` cookie (NODE_ENV=production gates the flag);
 `[indexer] watching program …` appears in `journalctl -u outfox-server`.
 

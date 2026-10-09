@@ -958,7 +958,7 @@ war-defense and security); S3 never pushes individually; all copy passes the
 
 ## 15. Referral & invite loop
 
-- **Link:** `outfox.game/f/<foxtag>` (player-claimed handle; fallback short code). Share
+- **Link:** `outfoxgame.com/f/<foxtag>` (player-claimed handle; fallback short code). Share
   surfaces generate OG cards (fox mascot + inviter foxtag + “Outfox the Houses”) for
   Discord/Farcaster/X unfurls. No platform deep-link SDKs.
 - **Landing = the game:** the URL boots an anonymous guest session straight into The Sim —

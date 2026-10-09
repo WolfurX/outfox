@@ -15,6 +15,19 @@ PWA); the Solana chain edge is **live on devnet and verified end-to-end**
 EVM reference `contracts/` was deleted at that gate, git history keeps it).
 Operator revenue is formalized and sim-proven. Remaining: Phase C (step 6).
 
+## Beta live (2026-10-09)
+
+The R1 beta runs at **https://outfoxgame.com** (Vultr sgp `outfox-beta`, 1 vCPU / 1 GB,
+Debian 13, Node 24, Caddy with Let's Encrypt, ufw 22/80/443, SSH keys only). Domain
+`outfoxgame.com` on the owner's Cloudflare account, DNS only (`.game` is about $300/yr,
+deferred). Hot voucher signer generated on the box and registered with `set_signer`
+(`programs/deployments/devnet-beta.md`, new `apps/server/scripts/set-signer.ts`); the
+2026-10-03 signer is retired. Smoke passed: `/healthz` ok with the indexer running,
+bootstrap sets a `Secure` cookie, the 31st bootstrap from one IP is a 429, `/api/economy`
+and `/api/launch` answer, a 6-hourly SQLite backup timer runs and its copy passed an
+integrity check. Open from the pre-deploy gate: backups do not leave the box yet;
+`npm ci` ran as root (before the env file existed); no on-chain-vs-ledger divergence alert.
+
 ## Launch through Meteora (2026-10-02)
 
 Owner decision 2026-10-02 (`docs/LAUNCH.md`, ARCHITECTURE A16, PRD FR-MKT-11): $ALPHA and

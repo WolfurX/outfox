@@ -218,7 +218,7 @@ point at the rule; this table does not restate rules.
 
 | Item | Blocks | State |
 |---|---|---|
-| domain (`outfox.game`) and a VPS | R1 beta deploy | owner decision 2026-10-02: buy both; purchase pending |
+| domain (`outfoxgame.com`) and a VPS | R1 beta deploy | bought 2026-10-09; beta live at https://outfoxgame.com |
 | R3 PoP provider | FR-ID-6, launch | owner decision pending; the provider brief is internal; couple with counsel and geofence |
 | on-ramp rail | FR-PAY-1 | couple with geofence |
 | `op_take_f3`, `op_take_wdfee` rates | FR-CH-7 | inside proven intervals [0, 0.9] and [0, 1.0] |

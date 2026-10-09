@@ -11,7 +11,7 @@
 | Env | Where | Chain | Ledger | Domain | Keys | Who reaches it |
 |---|---|---|---|---|---|---|
 | local | developer machine | off, or devnet by env | SQLite in `apps/server/` | `localhost:5173` (Vite) proxying `:8787` | throwaway devnet keys in `~/.config/outfox/devnet/` | the developer |
-| dev+beta | one small VPS (1 vCPU, 1 GB, swap) | devnet, chain id 1 | SQLite at `/var/lib/outfox/outfox.sqlite` | `outfox.game` pending purchase; until then SSH tunnel or a temporary name | fresh hot signer generated on the box; admin key stays cold | closed beta players, the operator |
+| dev+beta | one small VPS (1 vCPU, 1 GB, swap) | devnet, chain id 1 | SQLite at `/var/lib/outfox/outfox.sqlite` | `outfoxgame.com`, live 2026-10-09 (Vultr sgp box `outfox-beta`) | fresh hot signer generated on the box; admin key stays cold | closed beta players, the operator |
 | production | a separate larger box (2 GB+) | mainnet, chain id 2, only after the audit and counsel gates | Postgres | `outfox.game` (apex versus subdomain for beta is an open owner call) | fresh keys; admin = multisig; signer never reused from beta | the public |
 
 Rules: the two boxes never share anything and never co-host unrelated services; the web
@@ -218,7 +218,7 @@ Mirrors `ARCHITECTURE.md` §17 from the operations side:
 | Item | Beta | Production |
 |---|---|---|
 | VPS | one small instance (about $5–6 per month) | 2 GB+ instance; managed Postgres optional |
-| domain | `outfox.game`, about $30 per year | same |
+| domain | `outfoxgame.com`, about $11 per year (`.game` is about $300 per year, deferred) | same |
 | RPC | public devnet endpoint | a provider plan once rate limits bite |
 | backups | on-box plus a small object-storage bucket | same, larger |
 | monitoring | free tier of an uptime monitor; self-hosted metrics | same |
