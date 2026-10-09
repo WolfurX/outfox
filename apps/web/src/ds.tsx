@@ -118,12 +118,19 @@ export function Meter({ label, value, max, tone = 'accent', segments = 20, icon 
 
 // ---------- Ruled sections + rows ----------
 
-export function RowGroup({ title, capless, children }: {
+export function RowGroup({ title, capless, children, id, arrived, hint }: {
   title?: string; capless?: boolean; children: ReactNode;
+  /** one plain line under the title: what this group is for (no callout box) */
+  hint?: string;
+  /** anchor for an in-page landing (a Street district lands on its Tape section) */
+  id?: string;
+  /** briefly marks the title after such a landing, so the eye finds where it arrived */
+  arrived?: boolean;
 }) {
   return (
-    <section>
-      {title && <h2 className="ofx-rowgroup__title">{title}</h2>}
+    <section id={id} className={id ? 'ofx-rowgroup-anchor' : undefined}>
+      {title && <h2 className="ofx-rowgroup__title" data-arrived={arrived || undefined}>{title}</h2>}
+      {hint && <p className="ofx-rowgroup__hint">{hint}</p>}
       <div className={cx('ofx-rowgroup', capless && 'ofx-rowgroup--capless')}>{children}</div>
     </section>
   );

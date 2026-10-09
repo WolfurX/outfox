@@ -9,13 +9,14 @@ import { Chip, ListRow, RowGroup } from './ds';
  * Calls, Raids, Gigs and The Sim at R0; deposits and cash-out gate inside the
  * Clearinghouse itself. District-to-system assignment follows the published whitepaper
  * (whitepaper/the-game/the-street.md; owner ruling 2026-09-12): The Floor is Gigs and
- * Options Alley is Calls, both of which live on The Tape, so both rows enter there.
+ * Options Alley is Calls. Both live on The Tape, so each row lands on its own section
+ * there: The Floor on Gigs, Options Alley on Calls (one screen, two distinct doors).
  */
-export type DistrictEntry = 'tape' | 'clearinghouse';
+export type DistrictEntry = 'gigs' | 'calls' | 'clearinghouse';
 
 const DISTRICTS: { id: string; name: string; line: string; entry?: DistrictEntry }[] = [
-  { id: 'floor', name: 'The Floor', line: 'Gigs. Honest work, reliable pay.', entry: 'tape' },
-  { id: 'options_alley', name: 'Options Alley', line: 'Calls against the market. Open outcry, all day.', entry: 'tape' },
+  { id: 'floor', name: 'The Floor', line: 'Gigs. Honest work, reliable pay.', entry: 'gigs' },
+  { id: 'options_alley', name: 'Options Alley', line: 'Calls against the market. Open outcry, all day.', entry: 'calls' },
   { id: 'pit', name: 'The Pit', line: 'Raids on the Houses. The Sheriff watches this one.' },
   { id: 'dark_pool', name: 'The Dark Pool', line: 'The quiet end of the market.' },
   {

@@ -67,6 +67,7 @@ export default function App() {
   const [listings, setListings] = useState<ListingView[]>([]);
   const [tab, setTab] = useState<Tab>('tape');
   const [clearing, setClearing] = useState(false); // Clearinghouse, a Ledger sub-surface
+  const [landing, setLanding] = useState<'gigs' | 'calls' | null>(null); // a Street district's Tape section
   const [error, setError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [halted, setHalted] = useState(false);
@@ -310,11 +311,13 @@ export default function App() {
             {tab === 'tape' && !showFtue && (
               <Tape
                 player={player} boot={boot} srvNow={srvNow} feedback={feedback}
+                landing={landing} onLanded={() => setLanding(null)}
                 onCall={doCall}
                 onGig={async () => {
                   fx.emit('press');
                   const r = await run(() => api.gig());
-                  if (r) fx.emit('clean');
+                  if (!r) return; // rejected or offline: the Rejected/halted banner speaks, the row claims no pay
+                  fx.emit('clean');
                   const tool = (r as { toolAwarded?: ItemKind } | null)?.toolAwarded;
                   setFeedback(tool
                     ? {
@@ -334,7 +337,7 @@ export default function App() {
               <Street
                 onEnter={(e) => {
                   fx.emit('select');
-                  if (e === 'tape') setTab('tape');
+                  if (e === 'gigs' || e === 'calls') { setTab('tape'); if (!showFtue) setLanding(e); } // no Tape yet during the FTUE
                   else { setTab('ledger'); setClearing(true); }
                 }}
               />
@@ -431,9 +434,38 @@ function Ftue({ call, onCall }: { call: CallDef; onCall: (id: string) => Promise
 
 function Tape(props: {
   player: PlayerView; boot: BootstrapResponse; srvNow: number; feedback: Feedback;
+  landing: 'gigs' | 'calls' | null; onLanded: () => void;
   onCall: (id: string) => void; onGig: () => void; onRefill: (bar: 'focus' | 'risk') => void;
 }) {
   const { player: p, boot, srvNow, feedback } = props;
+
+  // Your Book scrolls away under the Calls and Gigs; once it does, a one-line copy of it
+  // pins to the top so a payout is seen landing while the thumb is still on the button.
+  const bookRef = useRef<HTMLDivElement>(null);
+  const [bookInView, setBookInView] = useState(true);
+  useEffect(() => {
+    const el = bookRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(([e]) => setBookInView(e.isIntersecting));
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  // A Street district lands on its own section: The Floor on Gigs, Options Alley on Calls.
+  const [arrived, setArrived] = useState<'gigs' | 'calls' | null>(null);
+  const { landing, onLanded } = props;
+  useEffect(() => {
+    if (!landing) return;
+    const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    document.getElementById(`tape-${landing}`)?.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'start' });
+    setArrived(landing);
+    onLanded();
+  }, [landing, onLanded]);
+  useEffect(() => {
+    if (!arrived) return;
+    const t = setTimeout(() => setArrived(null), 1600);
+    return () => clearTimeout(t);
+  }, [arrived]);
   const total = p.scripSettled + p.scripUnsettled;
   const cd = (id: string) => Math.max(0, Math.ceil(((p.cooldowns[id] ?? 0) - srvNow) / 1000));
   const focus = projectBar(p.focus, p.serverTime, REGEN.focusPerSec, p.focusMax, srvNow);
@@ -451,18 +483,21 @@ function Tape(props: {
         {feedback ? `${feedback.text}. ${feedback.note ?? ''}` : ''}
       </div>
 
-      <RowGroup title="Your Book">
-        <ListRow
-          lead={<ScripMark provenance="settled" />}
-          title={<Amount value={p.scripSettled} unit="Scrip" size="xl" />}
-          sub={<ProvenanceChip provenance="settled" />}
-        />
-        <ListRow
-          lead={<ScripMark provenance="unsettled" />}
-          title={<Amount value={p.scripUnsettled} unit="Scrip" size="lg" tone="unsettled" />}
-          sub={<ProvenanceChip provenance="unsettled" />}
-        />
-      </RowGroup>
+      <BookBar settled={p.scripSettled} unsettled={p.scripUnsettled} on={!bookInView} />
+      <div ref={bookRef}>
+        <RowGroup title="Your Book">
+          <ListRow
+            lead={<ScripMark provenance="settled" />}
+            title={<Amount value={p.scripSettled} unit="Scrip" size="xl" />}
+            sub={<ProvenanceChip provenance="settled" />}
+          />
+          <ListRow
+            lead={<ScripMark provenance="unsettled" />}
+            title={<Amount value={p.scripUnsettled} unit="Scrip" size="lg" tone="unsettled" />}
+            sub={<ProvenanceChip provenance="unsettled" />}
+          />
+        </RowGroup>
+      </div>
       <Banner tone="unsettled" title="Unsettled Scrip">{UNSETTLED_EXPLAINER}</Banner>
 
       <RowGroup title="Condition">
@@ -482,7 +517,7 @@ function Tape(props: {
         </div>
       </RowGroup>
 
-      <RowGroup title="Calls — vs the market">
+      <RowGroup title="Calls — vs the market" id="tape-calls" arrived={arrived === 'calls'}>
         {boot.catalog.calls.map((c) => {
           const wait = cd(c.id);
           const blocked = wait > 0 || risk < c.riskCost;
@@ -512,7 +547,7 @@ function Tape(props: {
         })}
       </RowGroup>
 
-      <RowGroup title="Gigs — honest work">
+      <RowGroup title="Gigs — honest work" id="tape-gigs" arrived={arrived === 'gigs'}>
         <ActionRow
           title={boot.catalog.gig.name}
           desc={boot.catalog.gig.flavor}
@@ -537,6 +572,33 @@ function Tape(props: {
         />
       </RowGroup>
     </>
+  );
+}
+
+/** The pinned one-line Book. Decorative duplicate of Your Book (the live region already
+ * speaks every result), so hidden from assistive tech. A changed balance re-mounts its
+ * figure, which replays one flat tint: the same short print for every amount and both
+ * provenances, never a count-up (DESIGN-SYSTEM-WEB §8.2: no escalation by payout size). */
+function BookBar({ settled, unsettled, on }: { settled: number; unsettled: number; on: boolean }) {
+  return (
+    <div className="ofx-bookbar-anchor" aria-hidden="true">
+      <div className={on ? 'ofx-bookbar ofx-bookbar--on' : 'ofx-bookbar'}>
+        <span className="ofx-bookbar__cell">
+          <ScripMark provenance="settled" />
+          <span key={settled} className="ofx-bookbar__val ofx-bookbar__val--settled">
+            <Amount value={settled} unit="Scrip" size="md" />
+          </span>
+          <ProvenanceChip provenance="settled" />
+        </span>
+        <span className="ofx-bookbar__cell">
+          <ScripMark provenance="unsettled" />
+          <span key={unsettled} className="ofx-bookbar__val ofx-bookbar__val--unsettled">
+            <Amount value={unsettled} unit="Scrip" size="md" tone="unsettled" />
+          </span>
+          <ProvenanceChip provenance="unsettled" />
+        </span>
+      </div>
+    </div>
   );
 }
 
@@ -571,7 +633,7 @@ function Market(props: {
           <EmptyState
             art="/art/empty-after-hours.webp"
             title="Nothing on the book"
-            hint="List a tool below, or wait for another Fox."
+            hint="Other Foxes list tools here at a price they set. You buy with Settled Scrip."
           />
         )}
         {listings.map((l) => {
@@ -603,18 +665,28 @@ function Market(props: {
         {' '}{feePct}% clearing fee.
       </Banner>
 
-      <RowGroup title="Your kit">
+      <RowGroup title="Your kit" hint="Tools you own. Set a price and list one; another Fox buys it with Settled Scrip. Players set every price.">
         {unlisted.length === 0 && (
           <EmptyState title="Nothing to list" hint="Run Gigs to earn tools." />
         )}
         {unlisted.map((i) => {
           const price = prices[i.id] ?? '';
+          const asked = Number(price);
+          // same rounding as the server's sale (systems/market/rules.ts): fee rounds up
+          const net = asked >= 1 ? asked - Math.ceil((asked * MARKET_FEE_BPS) / 10_000) : null;
           return (
             <ListRow
               key={i.id}
               lead={<ItemThumb kind={i.kind} />}
               title={kindName(i.kind)}
-              sub={ITEM_KINDS[i.kind].desc}
+              sub={
+                <>
+                  {ITEM_KINDS[i.kind].desc} {ITEM_KINDS[i.kind].source}
+                  {net !== null && (
+                    <span className="ofx-row__net">You get {net.toLocaleString()} Settled after the {feePct}% fee.</span>
+                  )}
+                </>
+              }
               trail={
                 <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
                   <input

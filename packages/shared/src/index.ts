@@ -201,8 +201,11 @@ export const GIG: GigDef = {
 };
 
 export const ITEM_KINDS = {
-  terminal_mk1: { name: 'Terminal Mk I', desc: 'A Fox’s first rig. Sturdy. Sellable.' },
-  signal_booster: { name: 'Signal Booster', desc: 'Earned on the tape, not won. Traders pay for clean signal.' },
+  terminal_mk1: { name: 'Terminal Mk I', desc: 'A Fox’s first rig. Sturdy. Sellable.', source: 'Every Fox starts with one.' },
+  signal_booster: {
+    name: 'Signal Booster', desc: 'Earned on the tape, not won. Traders pay for clean signal.',
+    source: `Earned every ${GIG.toolEvery} Gigs.`,
+  },
 } as const;
 export type ItemKind = keyof typeof ITEM_KINDS;
 

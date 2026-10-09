@@ -138,9 +138,17 @@ Overnight Tape) · **The Street** (districts) · **Market** (The Open Market; �
 the registered tab-label short form, Appendix A) · **Skulk** (§16 screen spec) ·
 **Ledger** (§12).
 
+**Pinned Book (The Tape, 2026-10-09):** once Your Book scrolls out of view, a one-line
+copy of both balances pins to the top of the screen, so a payout is seen landing while the
+thumb is still on the action. It is a visual duplicate (`aria-hidden`; the live region
+already speaks every result). A changed figure replays one flat tint of its provenance
+color, the same short print for every amount (§8.2: no escalation by payout size).
+
 **The Street (screen spec):** a district panel list — one `Card`/`ListRow` per district
 (The Floor, Options Alley, The Pit, The Dark Pool, The Vault, After Hours, The Hollow)
-showing the district's state and entry points. It is **menu/stat-based, not a rendered
+showing the district's state and entry points. Districts whose system lives on The Tape
+land on their own section there: The Floor on Gigs, Options Alley on Calls (2026-10-09;
+one screen, two distinct doors). It is **menu/stat-based, not a rendered
 map** (principle 3 — no canvas, no geography; “map” is banned as a description of this
 screen). Stacked list at every breakpoint; it does not join the §2.3 Wide list-detail
 launch scope.
