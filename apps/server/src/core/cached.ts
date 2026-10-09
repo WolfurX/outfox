@@ -26,8 +26,10 @@ export function cachedRead<T>(read: () => Promise<T>, o: {
         .catch(o.onError)
         .finally(() => { inflight = null; });
     }
-    if (value === null && inflight) await inflight;
+    // Drop a stale value BEFORE deciding whether to wait: after a quiet spell past maxAge
+    // the caller must wait for the refresh just started, not be answered null.
     if (value !== null && now() - valueAt > o.maxAgeMs) value = null;
+    if (value === null && inflight) await inflight;
     return value;
   };
 }
