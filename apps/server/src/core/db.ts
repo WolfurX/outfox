@@ -220,6 +220,19 @@ export function openDb(path: string): DB {
       wei TEXT NOT NULL
     );
     INSERT OR IGNORE INTO treasury_alpha (id, wei) VALUES (1, '0');
+    -- The Wire (Wire Calls on Panta markets, systems/wire). wire_markets is the job's
+    -- cache of the catalog and its quotes; a position is fixed at open (price, payout)
+    -- and settles when the market's outcome is read. UNIQUE: one position per market.
+    CREATE TABLE IF NOT EXISTS wire_markets (market_id TEXT PRIMARY KEY, title TEXT NOT NULL,
+      category TEXT NOT NULL, ends_at INTEGER NOT NULL, settles_at INTEGER NOT NULL,
+      yes_price REAL, quoted_at INTEGER, listed INTEGER NOT NULL DEFAULT 0,
+      outcome TEXT, resolved_at INTEGER, updated_at INTEGER NOT NULL);
+    CREATE TABLE IF NOT EXISTS wire_positions (id INTEGER PRIMARY KEY AUTOINCREMENT,
+      player_id INTEGER NOT NULL REFERENCES players(id), market_id TEXT NOT NULL REFERENCES wire_markets(market_id),
+      side TEXT NOT NULL, price REAL NOT NULL, payout INTEGER NOT NULL, opened_at INTEGER NOT NULL,
+      status TEXT NOT NULL DEFAULT 'open', settled_at INTEGER, UNIQUE(player_id, market_id));
+    CREATE INDEX IF NOT EXISTS idx_wire_positions_player ON wire_positions(player_id, id DESC);
+    CREATE INDEX IF NOT EXISTS idx_wire_positions_open ON wire_positions(status, market_id);
   `);
   // Migration: alpha_carry_at arrived with the §13.A/§13.D carry module. Pre-module
   // rows get the clock started at upgrade time — the carry is not retroactive.

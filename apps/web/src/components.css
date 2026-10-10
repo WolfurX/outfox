@@ -180,6 +180,7 @@
 }
 .ofx-result--clean { color: var(--c-up); border-color: color-mix(in oklab, var(--c-up) 35%, transparent); background: var(--c-up-soft); box-shadow: var(--glow-reveal); }
 .ofx-result--nicked { color: var(--c-down); border-color: color-mix(in oklab, var(--c-down) 35%, transparent); background: var(--c-danger-soft); box-shadow: var(--glow-reveal); }
+.ofx-result--open { color: var(--c-text); border-color: var(--c-border-strong); }
 .ofx-result__note { margin-left: auto; color: var(--c-text-2); font-weight: var(--fw-med); text-transform: none; letter-spacing: 0; font-family: var(--font-ui); }
 
 /* ---------- TabBar / NavRail ---------- */
@@ -241,6 +242,12 @@
 .ofx-banner__title { font-family: var(--font-mono); font-size: var(--fs-sm); font-weight: var(--fw-semi); text-transform: uppercase; letter-spacing: var(--track-caps); }
 .ofx-banner__body { font-size: var(--fs-sm); color: var(--c-text-2); margin-top: 2px; }
 .ofx-banner__action { margin-left: auto; align-self: center; }
+/* A link inside a banner: a full tap target, underlined (not colour alone), body ink so it
+   reads on the tinted strip in both themes (the accent text falls under 4.5:1 on it in light). */
+.ofx-banner__link {
+  display: flex; align-items: center; min-height: var(--tap-min);
+  color: var(--c-text); text-decoration: underline; text-underline-offset: 3px;
+}
 .ofx-banner--warn, .ofx-banner--halted { border-color: color-mix(in oklab, var(--c-warn) 40%, transparent); background: var(--c-warn-soft); }
 .ofx-banner--warn .ofx-banner__icon, .ofx-banner--halted .ofx-banner__icon,
 .ofx-banner--warn .ofx-banner__title, .ofx-banner--halted .ofx-banner__title { color: var(--c-warn); }

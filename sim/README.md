@@ -30,6 +30,7 @@ criteria** (sourced thresholds: [`docs/VALIDATION-BENCHMARKS.md`](../docs/VALIDA
 - `run.py` — Monte-Carlo driver (`--procs` multiprocessing) + scorecard.
 - `sweep.py` — OAT sensitivity + 2-D safe-region sweep (5-scenario stress subset incl. funnel).
 - `probe_booster.py`: the Signal Booster consumable probe (v7, 2026-10-10), record `v7_booster_probe.txt`/`.json`.
+- `probe_wire.py`: the Wire probe, Wire Calls on real Panta markets (v8, 2026-10-10), record `v8_wire_probe.txt`/`.json`.
 
 ## Run it
 ```bash
@@ -281,6 +282,68 @@ economy with the Booster in play and reproduces the Phase-1 numbers above at the
 `booster_pp=0.0` is the v5/v6 engine (the probe pins it for its identity and control
 phases). Decision: ARCHITECTURE A17; GDD §5.1; PRD FR-LOOP-9. Standing rule for every
 future item: repo `CLAUDE.md` §Items.
+
+## v8 probe: the Wire (2026-10-10)
+
+**Question (owner: integrate Panta):** can real-world markets enter the game as **Wire
+Calls** (GDD §5.1), YES or NO on a live Panta market at its quoted chance p for 20 Risk
+Appetite, a right call paying Unsettled (Bound here) at the chance taken, 100 / p cents capped
+at 700, settled when the market settles, without breaking the gate? New for the model: the
+outcome comes from the world, one per market and shared by every player, so Wire emission is
+correlated across agents in a way no Exploit is.
+
+**Wiring (`simulation.py`, DEFAULT_PARAMS "Wire probe" block, default OFF):** a share
+`wire_share` of each agent's daily Nerve spend is routed to Wire Calls at 10 Nerve each
+(20 of a 100 bar), spread over `wire_markets`=5 markets with quoted prices p ~ U(0.2, 0.8)
+and ONE Bernoulli(p) outcome per market per day shared by all agents. An agent takes YES with
+probability p and is right with probability p for the side taken (EV 100 cents per call
+before the cap); a right call mints Bound min(700, 100 / p_side), ledgered as F1. The Wire
+spend is ADDITIVE to the Exploit yield (the Exploit F1 is not reduced by the Nerve routed
+away), the stricter reading for G1. Two attack knobs: `wire_edge_share` (a cohort that knows
+outcomes, right with probability `wire_edge_acc`=0.7) and `wire_herd` (everyone takes the
+same side of market 0). Wire draws use their own generator, so the main stream is identical
+with the Wire on or off. Owner default under test: `wire_share`=0.25.
+
+**Identity:** `wire_share=0` reproduces the pre-Wire engine (git 9422153, Booster at its
+adopted default) on every value of every daily row, 13 scenarios × 2 seeds × 720 days:
+823,680 values, 0 mismatches.
+
+| Run | Seeds | Result |
+|---|---|---|
+| Standard gate, 25% share | 500 × 6 | **6/6 pass**, every criterion at 100% (v7: 6/6) |
+| Red-team, 25% share | 100 × 7 | **6/7 survive**; smart_sybil fails G11 at 6.07% (v7: 6.08%, the known PoP item); bank_run and pump_dump G3/G4 diagnostics as in v7 (G4 pass 35% and 90% against v7's 24% and 76%) |
+| Wire Bound minted, as share of F1 | 500 | 50.8% at 25% share, every scenario (50.7 to 50.8%); right calls 56.0% (the analytic value for p ~ U(0.2, 0.8)) |
+| Stress (a): herd, 100% share | 50 | the only Wire-attributable movement: baseline G3 at 94% (median 3.3%/mo against the 5% bar); Wire Bound 80.5% of F1 |
+| Stress (b): informed 10% cohort | 50 | no criterion moves; Wire Bound 52.0% of F1 |
+| Stress (c): cap off | 50 | identical to the capped run: with p in [0.2, 0.8] the cap never binds (it binds below p = 1/7) |
+| Stress (d): 50% share | 50 | no criterion moves; Wire Bound 67.4% of F1; G1 median 0.9886 |
+| Control, same 50 seeds, Wire off | 50 | baseline G1 median 0.9816 (25%: 0.9862, 50%: 0.9886, herd: 0.9910); smart_sybil G11 6.20% off and on |
+
+**Why the gate does not move:** a Wire Call mints **Bound only**, spend-only and firewalled
+(G10 holds); its EV is bounded at 100 cents per call at every price (the cap only lowers it);
+and the sinks absorb even the herd cell (G1 stays below 1.0). The correlated outcome is the
+one new dynamic, and it shows exactly where expected: as lumpier monthly M growth (G3) when
+everyone takes the same side with all their Nerve.
+
+**Units (read before quoting the 50.8%):** the probe pays a Wire Call 100 sim-cents of EV for
+10 Nerve, 4.6× the calibrated Exploit yield (`f1_yield` 2.18 per Nerve point), and adds it on
+top of the Exploit F1 instead of diverting Nerve from it. In the game the Wire is the leanest
+Call per Risk point: EV at most 100 ¢ for 20 Risk (5 ¢ per point) against 6.3 to 8.3 ¢ per
+point for the three Calls in `CALLS` (success chance × mean payout ÷ Risk). Both choices
+overstate the Wire faucet, so the pass is conservative and the 50.8% is the probe's upper
+reading, not a forecast; the live share is the `wire` provenance in the ledger.
+
+**What this does not show (do not over-read):** take-up is an input (25% of Nerve spend),
+not behaviour; Panta's catalog is thin (three to seven open markets on 2026-10-10) and the
+listing rule may show nothing on a given day; a market that settles days later ties Nerve up
+in a way the daily model does not price; long-shot variance (p below 0.2, where the cap
+binds) was not exercised; nothing here judges how a Call on the real world reads to players.
+
+**Not adopted as the engine default:** unlike `booster_pp`, `wire_share` stays 0.0 in
+`DEFAULT_PARAMS`, because the share is an assumption and the units are deliberately
+pessimistic; `run.py` therefore still reproduces the v7 economy. The default moves once live
+take-up and payout per Nerve are read from the ledger and the probe is recalibrated to them.
+Decision: ARCHITECTURE A19; GDD §5.1; PRD FR-LOOP-10.
 
 ## Historical — v2 FINAL results (superseded by v3 above)
 

@@ -52,7 +52,7 @@ carries a rung gate.
 | District | What happens there | System | Status |
 |---|---|---|---|
 | The Floor | honest work, reliable pay | Gigs (live on The Tape) | Built, open; enters The Tape |
-| Options Alley | Calls against the market and other Foxes | Calls (market side live on The Tape; versus-Fox designed) | Built, open; enters The Tape |
+| Options Alley | Calls against the market and other Foxes, and the Wire | Calls (market side live on The Tape; versus-Fox designed) | Built, open; enters The Tape |
 | The Pit | Raids on the Houses | Raids | Designed, closed |
 | The Dark Pool | the quiet end of the market | The Index, Desks | Designed, closed |
 | The Vault | the Houses' treasure and the target | The Clearinghouse | Built, open; enters the Clearinghouse |
@@ -152,7 +152,8 @@ non-transferable. Rich is one leaderboard; beloved is another.
 **Minute to minute**: spend Risk Appetite on a Call, or Focus on a Gig; take the
 result; bank, spend, or list it; the bars refill; again. Calls state their probability
 before commit, resolve flat and immediate (reveal capped at 320 ms, no near-miss
-theatre), and pay **Unsettled** Scrip on success or Nicked on failure. Gigs pay
+theatre), and pay **Unsettled** Scrip on success or Nicked on failure. Wire Calls are the one
+Call that settles later, when its real market does. Gigs pay
 **Settled** Scrip and a Signal Booster every fifth completion.
 
 **Session (5 to 15 minutes)**: burn the banked bars, check Open Market listings and
@@ -179,6 +180,7 @@ before it ships (`ARCHITECTURE.md` §4).
 | System | Player action | Economy | Scrip class | Rung | Status |
 |---|---|---|---|---|---|
 | Calls | chance action against the market | F1 faucet; versus-Fox tier is F5 transfer | Unsettled out | R0 | Built (market side) |
+| Wire Calls | YES/NO on a live Panta market | F1 faucet (correlated outcomes) | Unsettled out | R0 | Built |
 | Gigs | deterministic work | F2 faucet (small, capped) | Settled out | R0 | Built |
 | Raids | chance action against a House, with Heat | F1 faucet | Unsettled out | R0 | Designed |
 | The Sim | train stats; FTUE Call | S2 throttle (Focus) | none | R0 | Specified; FTUE Built |
@@ -217,6 +219,16 @@ shown on the Call before it runs, the Booster is used up whether the Call lands 
 Nicked, and a win still pays Unsettled Scrip only. Simulated before it was built: the
 standard gate still passes all 6 scenarios at 500 seeds and the red-team result is unchanged
 (`sim/v7_booster_probe.txt`). Constants: `BOOSTER` in `@outfox/shared`.
+
+**Wire Calls (Built; owner adoption 2026-10-10).** The Wire, in Options Alley, lists
+up to five live markets from Panta (a prediction market on Solana) with the time they
+settle and Panta's quoted chance. A Wire Call takes YES or NO at that chance for 20
+Risk Appetite; a right call pays Unsettled Scrip at the odds taken (100 ¢ ÷ chance,
+capped at 700 ¢), fixed when the call is made; a wrong one is Nicked. Chance comes
+from the world, not the server, so a Wire Call settles when the market does, not
+immediately, and the Book shows it pending. No money moves: the Wire never sells,
+buys or links a Panta position. "Powered by Panta" is shown with the Wire (their API
+terms). Simulated before it ships: `sim/v8_wire_probe.txt`.
 
 ### 5.2 Gigs (Built)
 

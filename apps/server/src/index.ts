@@ -18,6 +18,9 @@ import { getPool, seedExchange } from './economy/exchange.js';
 import { registerIdentityRoutes } from './identity/routes.js';
 import { registerLedgerRoutes } from './ledger/routes.js';
 import { registerCallRoutes } from './systems/calls/routes.js';
+import { wireConfigFromEnv } from './systems/wire/panta.js';
+import { registerWireRoutes } from './systems/wire/routes.js';
+import { startWireJob } from './systems/wire/job.js';
 import { registerGigRoutes } from './systems/gigs/routes.js';
 import { registerRefillRoutes } from './systems/refills/routes.js';
 import { registerMarketRoutes } from './systems/market/routes.js';
@@ -73,6 +76,7 @@ const ctx: Ctx = {
   privy: privyConfigFromEnv(),
   chain,
   launch: launchConfigFromEnv(),
+  wire: wireConfigFromEnv(),
   rl: {
     bootstrap: { rateLimit: { max: 30, timeWindow: RL_WINDOW_MS } },
     auth: { rateLimit: { max: 10, timeWindow: RL_WINDOW_MS } },
@@ -95,6 +99,7 @@ app.get('/healthz', async () => {
 
 registerIdentityRoutes(app, ctx);
 registerCallRoutes(app, ctx);
+registerWireRoutes(app, ctx);
 registerGigRoutes(app, ctx);
 registerRefillRoutes(app, ctx);
 registerMarketRoutes(app, ctx);
@@ -138,5 +143,10 @@ if (process.env.NODE_ENV !== 'test') {
     console.log(`[indexer] watching program ${chain.programId.toBase58()} on chain ${chain.chainId}`);
   } else {
     console.log('[indexer] chain edge not configured (set OUTFOX_RPC_URL / _CHAIN_ID / _PROGRAM_ID)');
+  }
+
+  if (ctx.wire) {
+    startWireJob(db, ctx.wire.client, 600_000, (m) => console.log(`[wire] ${m}`));
+    console.log('[wire] job started (10 min)');
   }
 }

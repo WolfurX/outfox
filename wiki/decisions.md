@@ -26,5 +26,6 @@ decisions pre-pivot are in `PLAN.md` §Locked/§Confirmed.)
 | 2026-09-12 | **Mechanics-layer vocabulary exception** (owner): the frozen economy canon and `sim/` keep Credits/Clean/Bound/Exploits/Compute/Nerve/Operations/Safehouses/Quarantine; everything else canonical; `GDD.md` §2.4 is the bridge | repo `CLAUDE.md`, `docs/THEME-OUTFOX.md` status note |
 | 2026-10-02 | **$ALPHA launches through Meteora** (owner): bonding curve creates the mint and funds a permanently locked DAMM v2 pool; reverses the earlier no-bonding-curve line because the adopted shape (USDC, one gentle segment, opening fee against sniping, 12% of supply through Meteora) is not the pump-style launch that line ruled out; mainnet band and depth stay open | `docs/LAUNCH.md`, `docs/ARCHITECTURE.md` A16, `programs/deployments/devnet-launch.md` |
 | 2026-10-02 | **Beta purchases unparked** (owner): domain and a small VPS; Colosseum scope = beta live on devnet, a public economy page, the launch on devnet | `docs/PRD.md` §8 |
+| 2026-10-10 | **The Wire** (owner): real Panta markets enter as Wire Calls in Options Alley, Unsettled payout only, no real-money action, "Powered by Panta"; THEME §3 prediction-market ban narrowed to the game's own chance mechanics | `docs/GDD.md` §5.1, `docs/ARCHITECTURE.md` A19, `docs/THEME-OUTFOX.md` §3 |
 
 as-of: solana-migration commit (2026-08-25)

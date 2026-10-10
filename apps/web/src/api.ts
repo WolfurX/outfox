@@ -3,6 +3,7 @@ import type {
   RegisterStartResponse, RegisterVerifyResponse, ExchangeResponse,
   ExchangeHistoryResponse, AlphaResponse, ClaimResponse, DepositPrepareResponse,
   PlayerView, AlphaView, WithdrawalView, EconomyResponse, LaunchResponse,
+  WireResponse, WireSide,
 } from '@outfox/shared';
 
 /** Parse a response defensively: a non-JSON body (gateway 502 HTML, dead proxy) is a
@@ -51,6 +52,9 @@ export const api = {
     post<ActionResponse>('/api/actions/call', boost ? { callId, boost: true } : { callId }),
   gig: () => post<ActionResponse>('/api/actions/gig'),
   refill: (bar: 'focus' | 'risk') => post<ActionResponse>('/api/sinks/refill', { bar }),
+  wire: () => get<WireResponse>('/api/wire'),
+  wireCall: (marketId: string, side: WireSide) =>
+    post<WireResponse>('/api/actions/wire', { marketId, side }),
   market: () => get<MarketResponse>('/api/market'),
   list: (itemId: number, price: number) => post<MarketResponse>('/api/market/list', { itemId, price }),
   cancel: (listingId: number) => post<MarketResponse>('/api/market/cancel', { listingId }),

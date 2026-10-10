@@ -37,7 +37,7 @@ export function economyOverview(db: DB, reserveWei: bigint | null, now = Date.no
   // the Open Market fee as the gap between what buyers paid and sellers received, and
   // the exchange's buy-leg fee).
   const minted24h = one<{ t: number }>(
-    `SELECT COALESCE(SUM(d_settled + d_unsettled), 0) AS t FROM ledger WHERE kind IN ('call','gig') AND at >= ?`, since).t;
+    `SELECT COALESCE(SUM(d_settled + d_unsettled), 0) AS t FROM ledger WHERE kind IN ('call','gig','wire') AND at >= ?`, since).t;
   const captured24h = -one<{ t: number }>(
     `SELECT COALESCE(SUM(d_settled + d_unsettled), 0) AS t FROM ledger
      WHERE kind IN ('refill','carry','market_buy','market_sale') AND at >= ?`, since).t

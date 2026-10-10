@@ -216,10 +216,22 @@ export const BOOSTER = { item: 'signal_booster', pp: 0.05, maxP: 0.95 } as const
 export const BOOSTER_EFFECT = `Run a Call with it: +${Math.round(BOOSTER.pp * 100)} points on the clean chance. Used up either way.`;
 export type ItemKind = keyof typeof ITEM_KINDS;
 
+/** Wire Calls (owner adoption 2026-10-10; sim v8 probe, sim/v8_wire_probe.txt): a Call on
+ * a live Panta market, taken at the quoted chance. Pays Unsettled Scrip only (I4); the
+ * payout is fixed when the call is made and capped. No money moves. */
+export const WIRE = { riskCost: 20, base: 100, cap: 700, maxOpen: 5, listed: 5,
+  pMin: 0.05, pMax: 0.95, quoteStaleSec: 900 } as const;
+export const WIRE_ATTRIBUTION = { text: 'Powered by Panta', href: 'https://panta.market' } as const;
+export const WIRE_EXPLAINER =
+  'The Wire carries live markets from Panta, a prediction market on Solana. A Wire Call pays Unsettled Scrip only; no money moves here.';
+/** ¢ Unsettled paid if right, for a call taken at chance p (clamped to [pMin, pMax]). */
+export const wirePayout = (p: number) =>
+  Math.min(WIRE.cap, Math.round(WIRE.base / Math.min(WIRE.pMax, Math.max(WIRE.pMin, p))));
+
 // ----- wire types -----
 export type Provenance =
   | 'call' | 'gig' | 'market_sale' | 'market_buy' | 'fee'
-  | 'refill' | 'starter' | 'carry' | 'exchange_buy' | 'exchange_sell';
+  | 'refill' | 'starter' | 'carry' | 'exchange_buy' | 'exchange_sell' | 'wire';
 
 export interface ItemView {
   id: number;
@@ -486,4 +498,20 @@ export interface EconomyView {
 }
 export interface EconomyResponse {
   economy: EconomyView | null;
+}
+
+// ----- the Wire (Wire Calls on Panta markets) -----
+export type WireSide = 'yes' | 'no';
+export interface WireMarketView {
+  marketId: string; title: string; category: string;
+  endsAt: number; settlesAt: number; yesPrice: number; quotedAt: number; // epoch ms
+  payoutYes: number; payoutNo: number; // ¢, precomputed by wirePayout
+}
+export interface WirePositionView {
+  id: number; marketId: string; title: string; side: WireSide;
+  price: number; payout: number; openedAt: number; settlesAt: number;
+  status: 'open' | 'won' | 'nicked' | 'void'; settledAt: number | null;
+}
+export interface WireResponse {
+  enabled: boolean; markets: WireMarketView[]; positions: WirePositionView[]; player?: PlayerView;
 }

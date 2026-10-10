@@ -28,6 +28,20 @@ fs.writeFileSync(PREVIEW_CONFIG, `export default {
   preview: { host: '127.0.0.1', port: ${PORT_WEB}, proxy: { '/api': 'http://127.0.0.1:${PORT_API}' } },
 };\n`);
 
+// The Wire's Panta stand-in: the server test fixture, anchored at T0 = 1.8e9 s (the route
+// test fakes Date there). This server runs on the real clock, so world F's copy is shifted
+// to now; the listing rule and quote freshness then hold exactly as they do at T0.
+const WIRE_FIXTURE_SRC = path.join(REPO, 'apps/server/test/fixtures/wire/market-world.json');
+const WIRE_FIXTURE = path.join(WORK, 'wire-fixture.json');
+function writeWireFixture() {
+  const f = JSON.parse(fs.readFileSync(WIRE_FIXTURE_SRC, 'utf8'));
+  const shift = Math.floor(Date.now() / 1000) - 1_800_000_000;
+  for (const m of f.markets) {
+    for (const k of ['startTime', 'endTime', 'resolutionTime']) if (typeof m[k] === 'number') m[k] += shift;
+  }
+  fs.writeFileSync(WIRE_FIXTURE, JSON.stringify(f));
+}
+
 const kp = nacl.sign.keyPair();
 const ADDRESS = bs58.encode(Buffer.from(kp.publicKey));
 const altKp = nacl.sign.keyPair();
@@ -273,6 +287,60 @@ async function farmAndOpenExchange(page) {
     ok('E6 zero console errors in world E', E.errors.length === 0);
     if (E.errors.length) console.log('   errors:', E.errors.slice(0, 5));
     await E.ctx.close();
+
+    // ---- world F: the Wire (Wire Calls on Panta markets, GDD §5.1). With no Panta source
+    // the section is quiet; on a server reading the Panta fixture the listed markets render
+    // with the "Powered by Panta" attribution, and taking YES spends 20 Risk and prints the
+    // call on its row ----
+    const Fq = await newWorld(browser);
+    await Fq.page.goto(`http://127.0.0.1:${PORT_WEB}/`);
+    await Fq.page.getByText('Your Book').first().waitFor({ timeout: 10000 });
+    await Fq.page.getByText('The Wire is quiet').waitFor({ timeout: 10000 });
+    ok('F1 without a Panta source the Wire shows the quiet state',
+      await Fq.page.locator('#tape-wire .ofx-action').count() === 0);
+    ok('F1b zero console errors on the quiet Wire', Fq.errors.length === 0);
+    if (Fq.errors.length) console.log('   errors:', Fq.errors.slice(0, 5));
+    await Fq.ctx.close();
+
+    server.kill();
+    await new Promise((r) => setTimeout(r, 500));
+    writeWireFixture();
+    server = startServer({ OUTFOX_WIRE_FIXTURE: WIRE_FIXTURE });
+    await waitHttp(`http://127.0.0.1:${PORT_API}/api/market`);
+    const F = await newWorld(browser);
+    await F.page.goto(`http://127.0.0.1:${PORT_WEB}/`);
+    await F.page.getByText('Haaland 8+ points, GW6').waitFor({ timeout: 10000 });
+    const wireRows = F.page.locator('#tape-wire .ofx-action');
+    ok('F2 the Wire lists five markets, soonest first',
+      await wireRows.count() === 5
+      && (await wireRows.first().locator('.ofx-action__title').textContent()) === 'Haaland 8+ points, GW6');
+    const attribution = F.page.locator('#tape-wire a');
+    ok('F3 attribution reads exactly "Powered by Panta" and links to panta.market',
+      await attribution.count() === 1
+      && (await attribution.textContent()) === 'Powered by Panta'
+      && (await attribution.getAttribute('href')) === 'https://panta.market');
+    const riskMeter = F.page.getByRole('meter', { name: 'Risk Appetite' });
+    const riskBefore = Number(await riskMeter.getAttribute('aria-valuenow'));
+    const haaland = wireRows.filter({ hasText: 'Haaland 8+ points, GW6' });
+    const [took] = await Promise.all([
+      F.page.waitForResponse((r) => r.url().endsWith('/api/actions/wire')),
+      haaland.getByRole('button', { name: 'YES 50%', exact: true }).click(),
+    ]);
+    const tookBody = await took.json();
+    await haaland.getByText('Your call: YES at 50%.').waitFor({ timeout: 5000 });
+    const riskShown = Number(await riskMeter.getAttribute('aria-valuenow'));
+    ok('F4 taking YES drops Risk by 20 (state-after, and on the meter)',
+      took.status() === 200 && tookBody.player.risk === riskBefore - 20
+      && riskShown >= riskBefore - 20 && riskShown <= riskBefore - 19);
+    ok('F5 the row prints the call and its pay, and turns Taken',
+      await haaland.getByText('Pays 200 Scrip if right.').count() === 1
+      && await haaland.getByRole('button', { name: 'Taken', exact: true }).isDisabled());
+    ok('F6 Your Book carries the open Wire call',
+      await F.page.getByText('Wire calls open · 1').isVisible()
+      && await F.page.getByText('Pays up to 200 Scrip if right').isVisible());
+    ok('F7 zero console errors in world F', F.errors.length === 0);
+    if (F.errors.length) console.log('   errors:', F.errors.slice(0, 5));
+    await F.ctx.close();
 
     await browser.close();
   } catch (e) {

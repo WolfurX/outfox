@@ -82,8 +82,11 @@ product names (Gold, Legend, Cortex) and "Greenwood" (Tulsa connotation — henc
 verbs — use *raid, outtrade, take the other side, claim*); depictions of raiding real-world
 institutions; casino vocabulary (bet, wager, jackpot, house edge, parlay, loot box,
 casino, slots; narrowed by the owner 2026-10-10: odds, chance and luck are ordinary words
-and allowed); and never framing chance mechanics as
-"prediction markets" or "event contracts" (active CFTC rulemaking category).
+and allowed); and never framing the game's own chance mechanics (Calls, Raids, the Index) as
+"prediction markets" or "event contracts" (active CFTC rulemaking category). The Wire
+(GDD §5.1, Wire Calls) carries real Panta markets under Panta's own name and attribution, by
+owner ruling 2026-10-10; "prediction market" appears in the product only inside the
+Wire's fixed explainer and the "Powered by Panta" attribution.
 
 **The tone test:** every line of copy should read as *sporting defiance* ("the Houses never
 saw it coming"), not criminality ("we broke in"). The Sheriff is an antagonist referee, not

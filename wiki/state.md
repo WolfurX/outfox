@@ -41,6 +41,25 @@ built server and client (FR-LOOP-9, ARCHITECTURE A17, GDD §5.1), sim default no
 whitepaper pages updated (publish waits for the deploy, since the status page says "built
 and running"). Standing rule for every future item: `CLAUDE.md` §Items.
 
+## The Wire (2026-10-10)
+
+Owner decision: integrate Panta. Real Panta markets enter the game as **Wire Calls** in
+Options Alley: up to five listed markets, YES or NO at Panta's quoted chance for 20 Risk
+Appetite, a right call pays Unsettled Scrip at the odds taken (100 / chance, capped at 700),
+a wrong one is Nicked, and it settles when the market does. No money moves; "Powered by
+Panta" is shown with the Wire. Canon: GDD §5.1 (Wire Calls) and §5, ARCHITECTURE A19 + §8 +
+§12, PRD R0 scope, THEME §3 (the "prediction markets" ban now covers the game's own chance
+mechanics only; the Wire's fixed explainer and the attribution are the exception),
+whitepaper the-loop (unpublished until deploy). Built on the `wire` worktree branch and
+gated by the v8 sim probe (`sim/v8_wire_probe.txt`; `sim/README.md` v8 section): identity 0
+mismatches against 9422153, standard 6/6 at 500 seeds, red team 6/7 (smart_sybil G11, the
+pre-existing item; the Wire-off control fails it too), stress cells clean except herd at 100%
+share (G3 94%). The probe's units overstate the Wire faucet (4.6× the Exploit yield, additive
+to it), so the pass is conservative; `wire_share` stays 0 in DEFAULT_PARAMS until live
+take-up is read from the ledger. Deploy needs
+`OUTFOX_PANTA_KEY` in the box env; `OUTFOX_PANTA_WALLET` is optional (the code has a
+built-in default quote pubkey).
+
 ## Launch through Meteora (2026-10-02)
 
 Owner decision 2026-10-02 (`docs/LAUNCH.md`, ARCHITECTURE A16, PRD FR-MKT-11): $ALPHA and
@@ -350,4 +369,4 @@ This repo is the **fresh-history Solana continuation** of a private development
 repository; the pre-migration history is not carried over (provenance details:
 founders' private notes). Work happens on `master`.
 
-as-of: launch round commit (2026-10-02)
+as-of: the Wire round (2026-10-10)

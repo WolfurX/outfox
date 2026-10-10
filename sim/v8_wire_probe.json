@@ -1,0 +1,1301 @@
+{
+ "identity": {
+  "scenarios": 13,
+  "seeds": 2,
+  "values": 823680,
+  "mismatches": 0
+ },
+ "standard": {
+  "baseline": {
+   "gate": {
+    "G1": {
+     "pass_rate": 1.0,
+     "median": 0.9862985485252463,
+     "detail": "cumulative faucet:sink (2nd half) \u2264 1.0"
+    },
+    "G2": {
+     "pass_rate": 1.0,
+     "median": -1297.140162256602,
+     "detail": "mean net Credit emission, t\u2265180 \u2264 0"
+    },
+    "G3": {
+     "pass_rate": 1.0,
+     "median": 0.016715173603723883,
+     "detail": "p95 |30-day smoothed M/Q growth| \u2264 5%/mo (mature window)"
+    },
+    "G4": {
+     "pass_rate": 1.0,
+     "median": -0.00011755214687139692,
+     "detail": "median mature CPI inflation in [\u22125%, +10%] (annualised)"
+    },
+    "G5": {
+     "pass_rate": 1.0,
+     "median": 0.9913842057061819,
+     "detail": "credit velocity end \u2265 0.5\u00d7 mid (no collapse)"
+    },
+    "G6": {
+     "pass_rate": 1.0,
+     "median": 0.1952784800684525,
+     "detail": "median mature $ALPHA velocity in [0.02, 30]\u00d7/month"
+    },
+    "G7": {
+     "pass_rate": 1.0,
+     "median": 0.5218637520735446,
+     "detail": "median wealth Gini \u2264 0.70 AND Pareto \u03b1 \u2265 2 (\u03b1=7.47)"
+    },
+    "G8": {
+     "pass_rate": 1.0,
+     "median": 1.0,
+     "detail": "CAPTURE share of cumulative sink volume \u2265 50% (sinks accrue value)"
+    },
+    "G9": {
+     "pass_rate": 1.0,
+     "median": 1.0732727123412542,
+     "detail": "no hoard/dump split: e\u2208[0.2,5]\u00d7e0 and price <3\u00d7"
+    },
+    "G10": {
+     "pass_rate": 1.0,
+     "median": 0.0,
+     "detail": "unexplained Bound (chance-origin) outflow = 0 (ledger-verified)"
+    },
+    "G11": {
+     "pass_rate": 1.0,
+     "median": 0.00013617236904447746,
+     "detail": "sybil share of realized cash-out value < 5%"
+    },
+    "G12": {
+     "pass_rate": 1.0,
+     "median": 0.6138041240674786,
+     "detail": "ledgers conserve ($ALPHA resid=0.00, \u00a2 resid=0.00) AND exit-Gini < 0.85"
+    }
+   },
+   "finals": {
+    "N": 888.5,
+    "M": 1019813.9370055553,
+    "e": 94.68512856356028,
+    "gini": 0.538999550156734,
+    "faucet_sink": 0.9995235884306717,
+    "sybil_share": 0.00013617236904447746,
+    "alpha_burned": 187430.8588337262,
+    "treasury": 276551946.3771333,
+    "cashout_total": 7271279.816967199
+   },
+   "wire": {
+    "wire_calls": 851809.53125,
+    "wire_bound": 85180953.125,
+    "wire_right": 476913.3919930449,
+    "share_of_f1": 0.508189634059915,
+    "hit_rate": 0.5599867517558834
+   }
+  },
+  "whale_shock": {
+   "gate": {
+    "G1": {
+     "pass_rate": 1.0,
+     "median": 0.9861132853749148,
+     "detail": "cumulative faucet:sink (2nd half) \u2264 1.0"
+    },
+    "G2": {
+     "pass_rate": 1.0,
+     "median": -1176.3614275913912,
+     "detail": "mean net Credit emission, t\u2265180 \u2264 0"
+    },
+    "G3": {
+     "pass_rate": 1.0,
+     "median": 0.028958828988807542,
+     "detail": "p95 |30-day smoothed M/Q growth| \u2264 5%/mo (mature window)"
+    },
+    "G4": {
+     "pass_rate": 1.0,
+     "median": 0.05315223076847858,
+     "detail": "median mature CPI inflation in [\u22125%, +10%] (annualised)"
+    },
+    "G5": {
+     "pass_rate": 1.0,
+     "median": 0.9910398387079655,
+     "detail": "credit velocity end \u2265 0.5\u00d7 mid (no collapse)"
+    },
+    "G6": {
+     "pass_rate": 1.0,
+     "median": 0.19442894659741541,
+     "detail": "median mature $ALPHA velocity in [0.02, 30]\u00d7/month"
+    },
+    "G7": {
+     "pass_rate": 1.0,
+     "median": 0.521714701345862,
+     "detail": "median wealth Gini \u2264 0.70 AND Pareto \u03b1 \u2265 2 (\u03b1=7.48)"
+    },
+    "G8": {
+     "pass_rate": 1.0,
+     "median": 1.0,
+     "detail": "CAPTURE share of cumulative sink volume \u2265 50% (sinks accrue value)"
+    },
+    "G9": {
+     "pass_rate": 1.0,
+     "median": 1.0729569557379137,
+     "detail": "no hoard/dump split: e\u2208[0.2,5]\u00d7e0 and price <3\u00d7"
+    },
+    "G10": {
+     "pass_rate": 1.0,
+     "median": 0.0,
+     "detail": "unexplained Bound (chance-origin) outflow = 0 (ledger-verified)"
+    },
+    "G11": {
+     "pass_rate": 1.0,
+     "median": 0.0001378542721864664,
+     "detail": "sybil share of realized cash-out value < 5%"
+    },
+    "G12": {
+     "pass_rate": 1.0,
+     "median": 0.6135692560192658,
+     "detail": "ledgers conserve ($ALPHA resid=0.00, \u00a2 resid=0.00) AND exit-Gini < 0.85"
+    }
+   },
+   "finals": {
+    "N": 888.5,
+    "M": 1018657.2639179946,
+    "e": 94.5635211824001,
+    "gini": 0.5388028403472831,
+    "faucet_sink": 0.9971723188818715,
+    "sybil_share": 0.0001378542721864664,
+    "alpha_burned": 190333.5406621616,
+    "treasury": 276550530.05459464,
+    "cashout_total": 7245862.664102189
+   },
+   "wire": {
+    "wire_calls": 851809.53125,
+    "wire_bound": 85180953.125,
+    "wire_right": 476913.3919930449,
+    "share_of_f1": 0.508189634059915,
+    "hit_rate": 0.5599867517558834
+   }
+  },
+  "plateau": {
+   "gate": {
+    "G1": {
+     "pass_rate": 1.0,
+     "median": 0.9836042070781216,
+     "detail": "cumulative faucet:sink (2nd half) \u2264 1.0"
+    },
+    "G2": {
+     "pass_rate": 1.0,
+     "median": -6221.696913589443,
+     "detail": "mean net Credit emission, t\u2265180 \u2264 0"
+    },
+    "G3": {
+     "pass_rate": 0.996,
+     "median": 0.026796645715161993,
+     "detail": "p95 |30-day smoothed M/Q growth| \u2264 5%/mo (mature window)"
+    },
+    "G4": {
+     "pass_rate": 1.0,
+     "median": -0.005051688295875489,
+     "detail": "median mature CPI inflation in [\u22125%, +10%] (annualised)"
+    },
+    "G5": {
+     "pass_rate": 1.0,
+     "median": 0.9889602382883663,
+     "detail": "credit velocity end \u2265 0.5\u00d7 mid (no collapse)"
+    },
+    "G6": {
+     "pass_rate": 1.0,
+     "median": 0.1737694730514599,
+     "detail": "median mature $ALPHA velocity in [0.02, 30]\u00d7/month"
+    },
+    "G7": {
+     "pass_rate": 1.0,
+     "median": 0.5238804707533109,
+     "detail": "median wealth Gini \u2264 0.70 AND Pareto \u03b1 \u2265 2 (\u03b1=7.95)"
+    },
+    "G8": {
+     "pass_rate": 1.0,
+     "median": 1.0,
+     "detail": "CAPTURE share of cumulative sink volume \u2265 50% (sinks accrue value)"
+    },
+    "G9": {
+     "pass_rate": 1.0,
+     "median": 1.0808579922522696,
+     "detail": "no hoard/dump split: e\u2208[0.2,5]\u00d7e0 and price <3\u00d7"
+    },
+    "G10": {
+     "pass_rate": 1.0,
+     "median": 0.0,
+     "detail": "unexplained Bound (chance-origin) outflow = 0 (ledger-verified)"
+    },
+    "G11": {
+     "pass_rate": 1.0,
+     "median": 0.00011989945132100735,
+     "detail": "sybil share of realized cash-out value < 5%"
+    },
+    "G12": {
+     "pass_rate": 1.0,
+     "median": 0.611697460379004,
+     "detail": "ledgers conserve ($ALPHA resid=0.00, \u00a2 resid=0.00) AND exit-Gini < 0.85"
+    }
+   },
+   "finals": {
+    "N": 395.0,
+    "M": 452956.9664234128,
+    "e": 94.17535233629442,
+    "gini": 0.5381206773126612,
+    "faucet_sink": 0.9984915915134696,
+    "sybil_share": 0.00011989945132100735,
+    "alpha_burned": 114091.21455190741,
+    "treasury": 169054659.48908538,
+    "cashout_total": 4465028.8687834805
+   },
+   "wire": {
+    "wire_calls": 518430.9375,
+    "wire_bound": 51843093.75,
+    "wire_right": 290294.4619854742,
+    "share_of_f1": 0.5079082650441022,
+    "hit_rate": 0.5598686457088109
+   }
+  },
+  "bot_attack": {
+   "gate": {
+    "G1": {
+     "pass_rate": 1.0,
+     "median": 0.9861825849167369,
+     "detail": "cumulative faucet:sink (2nd half) \u2264 1.0"
+    },
+    "G2": {
+     "pass_rate": 1.0,
+     "median": -1314.4398898190177,
+     "detail": "mean net Credit emission, t\u2265180 \u2264 0"
+    },
+    "G3": {
+     "pass_rate": 1.0,
+     "median": 0.015988769537974314,
+     "detail": "p95 |30-day smoothed M/Q growth| \u2264 5%/mo (mature window)"
+    },
+    "G4": {
+     "pass_rate": 1.0,
+     "median": 0.001969144713846238,
+     "detail": "median mature CPI inflation in [\u22125%, +10%] (annualised)"
+    },
+    "G5": {
+     "pass_rate": 1.0,
+     "median": 0.9913941360812021,
+     "detail": "credit velocity end \u2265 0.5\u00d7 mid (no collapse)"
+    },
+    "G6": {
+     "pass_rate": 1.0,
+     "median": 0.19760280956149345,
+     "detail": "median mature $ALPHA velocity in [0.02, 30]\u00d7/month"
+    },
+    "G7": {
+     "pass_rate": 1.0,
+     "median": 0.5805148518489609,
+     "detail": "median wealth Gini \u2264 0.70 AND Pareto \u03b1 \u2265 2 (\u03b1=6.96)"
+    },
+    "G8": {
+     "pass_rate": 1.0,
+     "median": 1.0,
+     "detail": "CAPTURE share of cumulative sink volume \u2265 50% (sinks accrue value)"
+    },
+    "G9": {
+     "pass_rate": 1.0,
+     "median": 1.0715657693471783,
+     "detail": "no hoard/dump split: e\u2208[0.2,5]\u00d7e0 and price <3\u00d7"
+    },
+    "G10": {
+     "pass_rate": 1.0,
+     "median": 0.0,
+     "detail": "unexplained Bound (chance-origin) outflow = 0 (ledger-verified)"
+    },
+    "G11": {
+     "pass_rate": 1.0,
+     "median": 0.0005907746208869111,
+     "detail": "sybil share of realized cash-out value < 5%"
+    },
+    "G12": {
+     "pass_rate": 1.0,
+     "median": 0.6077121243353822,
+     "detail": "ledgers conserve ($ALPHA resid=0.00, \u00a2 resid=0.00) AND exit-Gini < 0.85"
+    }
+   },
+   "finals": {
+    "N": 888.5,
+    "M": 1045137.0752716372,
+    "e": 99.89274954219138,
+    "gini": 0.5933032542241443,
+    "faucet_sink": 0.9983670100977073,
+    "sybil_share": 0.0005907746208869111,
+    "alpha_burned": 142045.2153189538,
+    "treasury": 294841661.39047337,
+    "cashout_total": 5616874.582222549
+   },
+   "wire": {
+    "wire_calls": 941940.0,
+    "wire_bound": 94194000.0,
+    "wire_right": 527588.3881442002,
+    "share_of_f1": 0.5070860099700214,
+    "hit_rate": 0.5599952207560841
+   }
+  },
+  "gresham": {
+   "gate": {
+    "G1": {
+     "pass_rate": 1.0,
+     "median": 0.9810944151822216,
+     "detail": "cumulative faucet:sink (2nd half) \u2264 1.0"
+    },
+    "G2": {
+     "pass_rate": 1.0,
+     "median": -2591.390797825343,
+     "detail": "mean net Credit emission, t\u2265180 \u2264 0"
+    },
+    "G3": {
+     "pass_rate": 1.0,
+     "median": 0.01626977666914761,
+     "detail": "p95 |30-day smoothed M/Q growth| \u2264 5%/mo (mature window)"
+    },
+    "G4": {
+     "pass_rate": 1.0,
+     "median": 0.002865820845085243,
+     "detail": "median mature CPI inflation in [\u22125%, +10%] (annualised)"
+    },
+    "G5": {
+     "pass_rate": 1.0,
+     "median": 0.9914883211412033,
+     "detail": "credit velocity end \u2265 0.5\u00d7 mid (no collapse)"
+    },
+    "G6": {
+     "pass_rate": 1.0,
+     "median": 0.1976448786318723,
+     "detail": "median mature $ALPHA velocity in [0.02, 30]\u00d7/month"
+    },
+    "G7": {
+     "pass_rate": 1.0,
+     "median": 0.5238100972047354,
+     "detail": "median wealth Gini \u2264 0.70 AND Pareto \u03b1 \u2265 2 (\u03b1=7.51)"
+    },
+    "G8": {
+     "pass_rate": 1.0,
+     "median": 1.0,
+     "detail": "CAPTURE share of cumulative sink volume \u2265 50% (sinks accrue value)"
+    },
+    "G9": {
+     "pass_rate": 1.0,
+     "median": 1.072508571493896,
+     "detail": "no hoard/dump split: e\u2208[0.2,5]\u00d7e0 and price <3\u00d7"
+    },
+    "G10": {
+     "pass_rate": 1.0,
+     "median": 0.0,
+     "detail": "unexplained Bound (chance-origin) outflow = 0 (ledger-verified)"
+    },
+    "G11": {
+     "pass_rate": 1.0,
+     "median": 0.00013036229846256415,
+     "detail": "sybil share of realized cash-out value < 5%"
+    },
+    "G12": {
+     "pass_rate": 1.0,
+     "median": 0.6129181620800195,
+     "detail": "ledgers conserve ($ALPHA resid=0.00, \u00a2 resid=0.00) AND exit-Gini < 0.85"
+    }
+   },
+   "finals": {
+    "N": 888.5,
+    "M": 1070814.9914480823,
+    "e": 99.51597579254249,
+    "gini": 0.5407562828161294,
+    "faucet_sink": 0.9952842307646723,
+    "sybil_share": 0.00013036229846256415,
+    "alpha_burned": 205481.38391679266,
+    "treasury": 281303822.15772104,
+    "cashout_total": 7533185.523288196
+   },
+   "wire": {
+    "wire_calls": 851809.53125,
+    "wire_bound": 85180953.125,
+    "wire_right": 476913.3919930449,
+    "share_of_f1": 0.508189634059915,
+    "hit_rate": 0.5599867517558834
+   }
+  },
+  "funnel": {
+   "gate": {
+    "G1": {
+     "pass_rate": 1.0,
+     "median": 0.9860711041644906,
+     "detail": "cumulative faucet:sink (2nd half) \u2264 1.0"
+    },
+    "G2": {
+     "pass_rate": 1.0,
+     "median": -1306.3845091044616,
+     "detail": "mean net Credit emission, t\u2265180 \u2264 0"
+    },
+    "G3": {
+     "pass_rate": 1.0,
+     "median": 0.015892840619456727,
+     "detail": "p95 |30-day smoothed M/Q growth| \u2264 5%/mo (mature window)"
+    },
+    "G4": {
+     "pass_rate": 1.0,
+     "median": 0.0018916151875402187,
+     "detail": "median mature CPI inflation in [\u22125%, +10%] (annualised)"
+    },
+    "G5": {
+     "pass_rate": 1.0,
+     "median": 0.9913728313754424,
+     "detail": "credit velocity end \u2265 0.5\u00d7 mid (no collapse)"
+    },
+    "G6": {
+     "pass_rate": 1.0,
+     "median": 0.20098988067156678,
+     "detail": "median mature $ALPHA velocity in [0.02, 30]\u00d7/month"
+    },
+    "G7": {
+     "pass_rate": 1.0,
+     "median": 0.5899567224948862,
+     "detail": "median wealth Gini \u2264 0.70 AND Pareto \u03b1 \u2265 2 (\u03b1=6.16)"
+    },
+    "G8": {
+     "pass_rate": 1.0,
+     "median": 1.0,
+     "detail": "CAPTURE share of cumulative sink volume \u2265 50% (sinks accrue value)"
+    },
+    "G9": {
+     "pass_rate": 1.0,
+     "median": 1.0717017882119242,
+     "detail": "no hoard/dump split: e\u2208[0.2,5]\u00d7e0 and price <3\u00d7"
+    },
+    "G10": {
+     "pass_rate": 1.0,
+     "median": 0.0,
+     "detail": "unexplained Bound (chance-origin) outflow = 0 (ledger-verified)"
+    },
+    "G11": {
+     "pass_rate": 1.0,
+     "median": 0.012382996474071175,
+     "detail": "sybil share of realized cash-out value < 5%"
+    },
+    "G12": {
+     "pass_rate": 1.0,
+     "median": 0.6086965182642762,
+     "detail": "ledgers conserve ($ALPHA resid=0.00, \u00a2 resid=0.00) AND exit-Gini < 0.85"
+    }
+   },
+   "finals": {
+    "N": 888.5,
+    "M": 1037878.2409112761,
+    "e": 99.8463615559534,
+    "gini": 0.6016601199840852,
+    "faucet_sink": 0.9989772018480155,
+    "sybil_share": 0.012382996474071175,
+    "alpha_burned": 151561.6508334847,
+    "treasury": 290636977.1251466,
+    "cashout_total": 6128968.315232212
+   },
+   "wire": {
+    "wire_calls": 921468.21875,
+    "wire_bound": 92146821.875,
+    "wire_right": 516043.8542335222,
+    "share_of_f1": 0.5073270166581753,
+    "hit_rate": 0.5600075138259217
+   }
+  }
+ },
+ "redteam": {
+  "demurrage_flight": {
+   "gate": {
+    "G1": {
+     "pass_rate": 1.0,
+     "median": 0.9883793939515162,
+     "detail": "cumulative faucet:sink (2nd half) \u2264 1.0"
+    },
+    "G2": {
+     "pass_rate": 1.0,
+     "median": -804.19381058714,
+     "detail": "mean net Credit emission, t\u2265180 \u2264 0"
+    },
+    "G3": {
+     "pass_rate": 1.0,
+     "median": 0.019042737492671654,
+     "detail": "p95 |30-day smoothed M/Q growth| \u2264 5%/mo (mature window)"
+    },
+    "G4": {
+     "pass_rate": 1.0,
+     "median": 0.008522724080175792,
+     "detail": "median mature CPI inflation in [\u22125%, +10%] (annualised)"
+    },
+    "G5": {
+     "pass_rate": 1.0,
+     "median": 0.9825196557474085,
+     "detail": "credit velocity end \u2265 0.5\u00d7 mid (no collapse)"
+    },
+    "G6": {
+     "pass_rate": 1.0,
+     "median": 0.20206201883987845,
+     "detail": "median mature $ALPHA velocity in [0.02, 30]\u00d7/month"
+    },
+    "G7": {
+     "pass_rate": 1.0,
+     "median": 0.5451405562160432,
+     "detail": "median wealth Gini \u2264 0.70 AND Pareto \u03b1 \u2265 2 (\u03b1=6.97)"
+    },
+    "G8": {
+     "pass_rate": 1.0,
+     "median": 1.0,
+     "detail": "CAPTURE share of cumulative sink volume \u2265 50% (sinks accrue value)"
+    },
+    "G9": {
+     "pass_rate": 1.0,
+     "median": 1.113551752360675,
+     "detail": "no hoard/dump split: e\u2208[0.2,5]\u00d7e0 and price <3\u00d7"
+    },
+    "G10": {
+     "pass_rate": 1.0,
+     "median": 0.0,
+     "detail": "unexplained Bound (chance-origin) outflow = 0 (ledger-verified)"
+    },
+    "G11": {
+     "pass_rate": 1.0,
+     "median": 1.7478848577410865e-05,
+     "detail": "sybil share of realized cash-out value < 5%"
+    },
+    "G12": {
+     "pass_rate": 1.0,
+     "median": 0.6319110248371673,
+     "detail": "ledgers conserve ($ALPHA resid=0.00, \u00a2 resid=0.00) AND exit-Gini < 0.85"
+    }
+   },
+   "finals": {
+    "N": 884.0,
+    "M": 1008621.98314517,
+    "e": 151.81625301656925,
+    "gini": 0.5644044986582972,
+    "faucet_sink": 0.9996873762571226,
+    "sybil_share": 1.7478848577410865e-05,
+    "alpha_burned": 189588.82418685913,
+    "treasury": 275457688.225184,
+    "cashout_total": 11644400.506924458
+   },
+   "wire": {
+    "wire_calls": 849786.875,
+    "wire_bound": 84978687.5,
+    "wire_right": 476172.78444184,
+    "share_of_f1": 0.5082750099506381,
+    "hit_rate": 0.5603491204756939
+   }
+  },
+  "bank_run": {
+   "gate": {
+    "G1": {
+     "pass_rate": 1.0,
+     "median": 0.9798505715760952,
+     "detail": "cumulative faucet:sink (2nd half) \u2264 1.0"
+    },
+    "G2": {
+     "pass_rate": 1.0,
+     "median": -2575.6657411728056,
+     "detail": "mean net Credit emission, t\u2265180 \u2264 0"
+    },
+    "G3": {
+     "pass_rate": 0.0,
+     "median": 0.1436666665062299,
+     "detail": "p95 |30-day smoothed M/Q growth| \u2264 5%/mo (mature window)"
+    },
+    "G4": {
+     "pass_rate": 0.35,
+     "median": -0.05478206119268633,
+     "detail": "median mature CPI inflation in [\u22125%, +10%] (annualised)"
+    },
+    "G5": {
+     "pass_rate": 1.0,
+     "median": 0.9698276157413666,
+     "detail": "credit velocity end \u2265 0.5\u00d7 mid (no collapse)"
+    },
+    "G6": {
+     "pass_rate": 1.0,
+     "median": 0.2097878514444709,
+     "detail": "median mature $ALPHA velocity in [0.02, 30]\u00d7/month"
+    },
+    "G7": {
+     "pass_rate": 1.0,
+     "median": 0.5102700839984727,
+     "detail": "median wealth Gini \u2264 0.70 AND Pareto \u03b1 \u2265 2 (\u03b1=7.07)"
+    },
+    "G8": {
+     "pass_rate": 1.0,
+     "median": 1.0,
+     "detail": "CAPTURE share of cumulative sink volume \u2265 50% (sinks accrue value)"
+    },
+    "G9": {
+     "pass_rate": 1.0,
+     "median": 1.133347527104028,
+     "detail": "no hoard/dump split: e\u2208[0.2,5]\u00d7e0 and price <3\u00d7"
+    },
+    "G10": {
+     "pass_rate": 1.0,
+     "median": 0.0,
+     "detail": "unexplained Bound (chance-origin) outflow = 0 (ledger-verified)"
+    },
+    "G11": {
+     "pass_rate": 1.0,
+     "median": 0.000131061459964525,
+     "detail": "sybil share of realized cash-out value < 5%"
+    },
+    "G12": {
+     "pass_rate": 1.0,
+     "median": 0.6158067701902075,
+     "detail": "ledgers conserve ($ALPHA resid=0.00, \u00a2 resid=0.00) AND exit-Gini < 0.85"
+    }
+   },
+   "finals": {
+    "N": 884.0,
+    "M": 1014362.4033400901,
+    "e": 85.01137989948435,
+    "gini": 0.5294734393315297,
+    "faucet_sink": 0.9756281451086783,
+    "sybil_share": 0.000131061459964525,
+    "alpha_burned": 195846.05956895492,
+    "treasury": 275780310.38621366,
+    "cashout_total": 6667579.326683626
+   },
+   "wire": {
+    "wire_calls": 849786.875,
+    "wire_bound": 84978687.5,
+    "wire_right": 476172.78444184,
+    "share_of_f1": 0.5082750099506381,
+    "hit_rate": 0.5603491204756939
+   }
+  },
+  "smart_sybil": {
+   "gate": {
+    "G1": {
+     "pass_rate": 1.0,
+     "median": 0.9862872908489482,
+     "detail": "cumulative faucet:sink (2nd half) \u2264 1.0"
+    },
+    "G2": {
+     "pass_rate": 1.0,
+     "median": -1295.7678305171753,
+     "detail": "mean net Credit emission, t\u2265180 \u2264 0"
+    },
+    "G3": {
+     "pass_rate": 1.0,
+     "median": 0.015818627256317462,
+     "detail": "p95 |30-day smoothed M/Q growth| \u2264 5%/mo (mature window)"
+    },
+    "G4": {
+     "pass_rate": 1.0,
+     "median": 0.0006719226404935941,
+     "detail": "median mature CPI inflation in [\u22125%, +10%] (annualised)"
+    },
+    "G5": {
+     "pass_rate": 1.0,
+     "median": 0.991263620790876,
+     "detail": "credit velocity end \u2265 0.5\u00d7 mid (no collapse)"
+    },
+    "G6": {
+     "pass_rate": 1.0,
+     "median": 0.20028901225834778,
+     "detail": "median mature $ALPHA velocity in [0.02, 30]\u00d7/month"
+    },
+    "G7": {
+     "pass_rate": 1.0,
+     "median": 0.5972715399944526,
+     "detail": "median wealth Gini \u2264 0.70 AND Pareto \u03b1 \u2265 2 (\u03b1=7.23)"
+    },
+    "G8": {
+     "pass_rate": 1.0,
+     "median": 1.0,
+     "detail": "CAPTURE share of cumulative sink volume \u2265 50% (sinks accrue value)"
+    },
+    "G9": {
+     "pass_rate": 1.0,
+     "median": 1.071994980107322,
+     "detail": "no hoard/dump split: e\u2208[0.2,5]\u00d7e0 and price <3\u00d7"
+    },
+    "G10": {
+     "pass_rate": 1.0,
+     "median": 0.0,
+     "detail": "unexplained Bound (chance-origin) outflow = 0 (ledger-verified)"
+    },
+    "G11": {
+     "pass_rate": 0.0,
+     "median": 0.060724179944560544,
+     "detail": "sybil share of realized cash-out value < 5%"
+    },
+    "G12": {
+     "pass_rate": 1.0,
+     "median": 0.6033385944157583,
+     "detail": "ledgers conserve ($ALPHA resid=0.00, \u00a2 resid=0.00) AND exit-Gini < 0.85"
+    }
+   },
+   "finals": {
+    "N": 881.0,
+    "M": 1037230.2074892914,
+    "e": 100.03230450710561,
+    "gini": 0.609106508128194,
+    "faucet_sink": 0.9992200115159433,
+    "sybil_share": 0.060724179944560544,
+    "alpha_burned": 140637.46330794579,
+    "treasury": 295463408.4489764,
+    "cashout_total": 5936233.061216268
+   },
+   "wire": {
+    "wire_calls": 943814.25,
+    "wire_bound": 94381425.0,
+    "wire_right": 528171.4494516643,
+    "share_of_f1": 0.5070883134895086,
+    "hit_rate": 0.5603086022788575
+   }
+  },
+  "floor_split": {
+   "gate": {
+    "G1": {
+     "pass_rate": 1.0,
+     "median": 0.9882487662368713,
+     "detail": "cumulative faucet:sink (2nd half) \u2264 1.0"
+    },
+    "G2": {
+     "pass_rate": 1.0,
+     "median": -1029.343082875484,
+     "detail": "mean net Credit emission, t\u2265180 \u2264 0"
+    },
+    "G3": {
+     "pass_rate": 1.0,
+     "median": 0.0159447241588492,
+     "detail": "p95 |30-day smoothed M/Q growth| \u2264 5%/mo (mature window)"
+    },
+    "G4": {
+     "pass_rate": 1.0,
+     "median": -0.006355042140777478,
+     "detail": "median mature CPI inflation in [\u22125%, +10%] (annualised)"
+    },
+    "G5": {
+     "pass_rate": 1.0,
+     "median": 0.9937283141374365,
+     "detail": "credit velocity end \u2265 0.5\u00d7 mid (no collapse)"
+    },
+    "G6": {
+     "pass_rate": 1.0,
+     "median": 0.19208658044710708,
+     "detail": "median mature $ALPHA velocity in [0.02, 30]\u00d7/month"
+    },
+    "G7": {
+     "pass_rate": 1.0,
+     "median": 0.521927815550847,
+     "detail": "median wealth Gini \u2264 0.70 AND Pareto \u03b1 \u2265 2 (\u03b1=7.12)"
+    },
+    "G8": {
+     "pass_rate": 1.0,
+     "median": 1.0,
+     "detail": "CAPTURE share of cumulative sink volume \u2265 50% (sinks accrue value)"
+    },
+    "G9": {
+     "pass_rate": 1.0,
+     "median": 1.078572904419702,
+     "detail": "no hoard/dump split: e\u2208[0.2,5]\u00d7e0 and price <3\u00d7"
+    },
+    "G10": {
+     "pass_rate": 1.0,
+     "median": 0.0,
+     "detail": "unexplained Bound (chance-origin) outflow = 0 (ledger-verified)"
+    },
+    "G11": {
+     "pass_rate": 1.0,
+     "median": 0.0001197805542158263,
+     "detail": "sybil share of realized cash-out value < 5%"
+    },
+    "G12": {
+     "pass_rate": 1.0,
+     "median": 0.6144613286607673,
+     "detail": "ledgers conserve ($ALPHA resid=0.00, \u00a2 resid=0.00) AND exit-Gini < 0.85"
+    }
+   },
+   "finals": {
+    "N": 884.0,
+    "M": 1035724.715218286,
+    "e": 96.4328236736491,
+    "gini": 0.5408598738567209,
+    "faucet_sink": 1.000357891603643,
+    "sybil_share": 0.0001197805542158263,
+    "alpha_burned": 186939.17870842753,
+    "treasury": 275598398.4733748,
+    "cashout_total": 7363665.840216256
+   },
+   "wire": {
+    "wire_calls": 849786.875,
+    "wire_bound": 84978687.5,
+    "wire_right": 476172.78444184,
+    "share_of_f1": 0.5082750099506381,
+    "hit_rate": 0.5603491204756939
+   }
+  },
+  "pump_dump": {
+   "gate": {
+    "G1": {
+     "pass_rate": 1.0,
+     "median": 0.9747587491344365,
+     "detail": "cumulative faucet:sink (2nd half) \u2264 1.0"
+    },
+    "G2": {
+     "pass_rate": 1.0,
+     "median": -4803.732024802019,
+     "detail": "mean net Credit emission, t\u2265180 \u2264 0"
+    },
+    "G3": {
+     "pass_rate": 0.0,
+     "median": 0.855430625283383,
+     "detail": "p95 |30-day smoothed M/Q growth| \u2264 5%/mo (mature window)"
+    },
+    "G4": {
+     "pass_rate": 0.9,
+     "median": -0.03405300585336954,
+     "detail": "median mature CPI inflation in [\u22125%, +10%] (annualised)"
+    },
+    "G5": {
+     "pass_rate": 1.0,
+     "median": 1.0056591356272333,
+     "detail": "credit velocity end \u2265 0.5\u00d7 mid (no collapse)"
+    },
+    "G6": {
+     "pass_rate": 1.0,
+     "median": 0.24093710705506755,
+     "detail": "median mature $ALPHA velocity in [0.02, 30]\u00d7/month"
+    },
+    "G7": {
+     "pass_rate": 1.0,
+     "median": 0.48880354812008364,
+     "detail": "median wealth Gini \u2264 0.70 AND Pareto \u03b1 \u2265 2 (\u03b1=7.77)"
+    },
+    "G8": {
+     "pass_rate": 1.0,
+     "median": 1.0,
+     "detail": "CAPTURE share of cumulative sink volume \u2265 50% (sinks accrue value)"
+    },
+    "G9": {
+     "pass_rate": 1.0,
+     "median": 1.0806761556131328,
+     "detail": "no hoard/dump split: e\u2208[0.2,5]\u00d7e0 and price <3\u00d7"
+    },
+    "G10": {
+     "pass_rate": 1.0,
+     "median": 0.0,
+     "detail": "unexplained Bound (chance-origin) outflow = 0 (ledger-verified)"
+    },
+    "G11": {
+     "pass_rate": 1.0,
+     "median": 0.00010623276445995875,
+     "detail": "sybil share of realized cash-out value < 5%"
+    },
+    "G12": {
+     "pass_rate": 1.0,
+     "median": 0.6396508512468517,
+     "detail": "ledgers conserve ($ALPHA resid=0.00, \u00a2 resid=0.00) AND exit-Gini < 0.85"
+    }
+   },
+   "finals": {
+    "N": 884.0,
+    "M": 1295806.4531717566,
+    "e": 39.742979584140784,
+    "gini": 0.4612981420951693,
+    "faucet_sink": 0.946140194427664,
+    "sybil_share": 0.00010623276445995875,
+    "alpha_burned": 242187.96278969105,
+    "treasury": 276402433.95065695,
+    "cashout_total": 6116682.890326886
+   },
+   "wire": {
+    "wire_calls": 849786.875,
+    "wire_bound": 84978687.5,
+    "wire_right": 476172.78444184,
+    "share_of_f1": 0.5082750099506381,
+    "hit_rate": 0.5603491204756939
+   }
+  },
+  "confidence_crisis": {
+   "gate": {
+    "G1": {
+     "pass_rate": 1.0,
+     "median": 0.9901145748256269,
+     "detail": "cumulative faucet:sink (2nd half) \u2264 1.0"
+    },
+    "G2": {
+     "pass_rate": 1.0,
+     "median": -1278.7905608216456,
+     "detail": "mean net Credit emission, t\u2265180 \u2264 0"
+    },
+    "G3": {
+     "pass_rate": 1.0,
+     "median": 0.024256651528833644,
+     "detail": "p95 |30-day smoothed M/Q growth| \u2264 5%/mo (mature window)"
+    },
+    "G4": {
+     "pass_rate": 1.0,
+     "median": 0.05869859206347672,
+     "detail": "median mature CPI inflation in [\u22125%, +10%] (annualised)"
+    },
+    "G5": {
+     "pass_rate": 1.0,
+     "median": 0.9930739241829061,
+     "detail": "credit velocity end \u2265 0.5\u00d7 mid (no collapse)"
+    },
+    "G6": {
+     "pass_rate": 1.0,
+     "median": 0.20523777842345275,
+     "detail": "median mature $ALPHA velocity in [0.02, 30]\u00d7/month"
+    },
+    "G7": {
+     "pass_rate": 1.0,
+     "median": 0.5249217526391241,
+     "detail": "median wealth Gini \u2264 0.70 AND Pareto \u03b1 \u2265 2 (\u03b1=7.46)"
+    },
+    "G8": {
+     "pass_rate": 1.0,
+     "median": 1.0,
+     "detail": "CAPTURE share of cumulative sink volume \u2265 50% (sinks accrue value)"
+    },
+    "G9": {
+     "pass_rate": 1.0,
+     "median": 1.071747627300084,
+     "detail": "no hoard/dump split: e\u2208[0.2,5]\u00d7e0 and price <3\u00d7"
+    },
+    "G10": {
+     "pass_rate": 1.0,
+     "median": 0.0,
+     "detail": "unexplained Bound (chance-origin) outflow = 0 (ledger-verified)"
+    },
+    "G11": {
+     "pass_rate": 1.0,
+     "median": 0.00014652596993514067,
+     "detail": "sybil share of realized cash-out value < 5%"
+    },
+    "G12": {
+     "pass_rate": 1.0,
+     "median": 0.6224234940270887,
+     "detail": "ledgers conserve ($ALPHA resid=0.00, \u00a2 resid=0.00) AND exit-Gini < 0.85"
+    }
+   },
+   "finals": {
+    "N": 881.0,
+    "M": 1014247.0243477441,
+    "e": 93.17832697745428,
+    "gini": 0.5371046055208868,
+    "faucet_sink": 1.0014506102307252,
+    "sybil_share": 0.00014652596993514067,
+    "alpha_burned": 175015.47644477314,
+    "treasury": 276341749.97645223,
+    "cashout_total": 6541741.286568855
+   },
+   "wire": {
+    "wire_calls": 852940.625,
+    "wire_bound": 85294062.5,
+    "wire_right": 478098.891861266,
+    "share_of_f1": 0.508150765704537,
+    "hit_rate": 0.5603147804529992
+   }
+  },
+  "whale_market": {
+   "gate": {
+    "G1": {
+     "pass_rate": 1.0,
+     "median": 0.9847313649972477,
+     "detail": "cumulative faucet:sink (2nd half) \u2264 1.0"
+    },
+    "G2": {
+     "pass_rate": 1.0,
+     "median": -1469.986361991082,
+     "detail": "mean net Credit emission, t\u2265180 \u2264 0"
+    },
+    "G3": {
+     "pass_rate": 1.0,
+     "median": 0.01721182826462859,
+     "detail": "p95 |30-day smoothed M/Q growth| \u2264 5%/mo (mature window)"
+    },
+    "G4": {
+     "pass_rate": 1.0,
+     "median": -0.004226561356612202,
+     "detail": "median mature CPI inflation in [\u22125%, +10%] (annualised)"
+    },
+    "G5": {
+     "pass_rate": 1.0,
+     "median": 0.9965696586761619,
+     "detail": "credit velocity end \u2265 0.5\u00d7 mid (no collapse)"
+    },
+    "G6": {
+     "pass_rate": 1.0,
+     "median": 0.3545769263152915,
+     "detail": "median mature $ALPHA velocity in [0.02, 30]\u00d7/month"
+    },
+    "G7": {
+     "pass_rate": 1.0,
+     "median": 0.6451154011673298,
+     "detail": "median wealth Gini \u2264 0.70 AND Pareto \u03b1 \u2265 2 (\u03b1=2.81)"
+    },
+    "G8": {
+     "pass_rate": 1.0,
+     "median": 1.0,
+     "detail": "CAPTURE share of cumulative sink volume \u2265 50% (sinks accrue value)"
+    },
+    "G9": {
+     "pass_rate": 1.0,
+     "median": 1.057388703139846,
+     "detail": "no hoard/dump split: e\u2208[0.2,5]\u00d7e0 and price <3\u00d7"
+    },
+    "G10": {
+     "pass_rate": 1.0,
+     "median": 0.0,
+     "detail": "unexplained Bound (chance-origin) outflow = 0 (ledger-verified)"
+    },
+    "G11": {
+     "pass_rate": 1.0,
+     "median": 0.00021382663052078854,
+     "detail": "sybil share of realized cash-out value < 5%"
+    },
+    "G12": {
+     "pass_rate": 1.0,
+     "median": 0.7241480970209239,
+     "detail": "ledgers conserve ($ALPHA resid=0.00, \u00a2 resid=0.00) AND exit-Gini < 0.85"
+    }
+   },
+   "finals": {
+    "N": 881.0,
+    "M": 1014929.8857015935,
+    "e": 64.9923188847416,
+    "gini": 0.6510416131457103,
+    "faucet_sink": 0.9972695024429465,
+    "sybil_share": 0.00021382663052078854,
+    "alpha_burned": 294229.83842841745,
+    "treasury": 276928097.6292461,
+    "cashout_total": 5026455.614780375
+   },
+   "wire": {
+    "wire_calls": 852940.625,
+    "wire_bound": 85294062.5,
+    "wire_right": 478098.891861266,
+    "share_of_f1": 0.508150765704537,
+    "hit_rate": 0.5603147804529992
+   }
+  }
+ },
+ "cells": [
+  {
+   "cell": "control: Wire off",
+   "params": {
+    "wire_share": 0.0
+   },
+   "baseline": {
+    "g1": 0.9816331739915125,
+    "g11": 0.00013730096775810323,
+    "gini": 0.5428861805853197,
+    "wire": {
+     "wire_calls": 0.0,
+     "wire_bound": 0.0,
+     "wire_right": 0.0,
+     "share_of_f1": 0.0,
+     "hit_rate": 0.0
+    },
+    "below_95": [],
+    "survival_min": 100.0
+   },
+   "smart_sybil": {
+    "g1": 0.981472008670262,
+    "g11": 0.06203317894003786,
+    "gini": 0.6149086059023583,
+    "wire": {
+     "wire_calls": 0.0,
+     "wire_bound": 0.0,
+     "wire_right": 0.0,
+     "share_of_f1": 0.0,
+     "hit_rate": 0.0
+    },
+    "below_95": [
+     "G11 0% (median 0.0620)"
+    ],
+    "survival_min": 0.0
+   }
+  },
+  {
+   "cell": "owner 25%",
+   "params": {
+    "wire_share": 0.25
+   },
+   "baseline": {
+    "g1": 0.9861709551615012,
+    "g11": 0.0001375535646160505,
+    "gini": 0.5394851137653124,
+    "wire": {
+     "wire_calls": 852265.6875,
+     "wire_bound": 85226568.75,
+     "wire_right": 477961.00950107176,
+     "share_of_f1": 0.5081456334069571,
+     "hit_rate": 0.5607829217498912
+    },
+    "below_95": [],
+    "survival_min": 100.0
+   },
+   "smart_sybil": {
+    "g1": 0.986130437959871,
+    "g11": 0.06204043895869167,
+    "gini": 0.6092131961831888,
+    "wire": {
+     "wire_calls": 942518.21875,
+     "wire_bound": 94251821.875,
+     "wire_right": 528087.4891284828,
+     "share_of_f1": 0.5070883134895086,
+     "hit_rate": 0.5607729430048133
+    },
+    "below_95": [
+     "G11 0% (median 0.0620)"
+    ],
+    "survival_min": 0.0
+   }
+  },
+  {
+   "cell": "(a) herd, share 100%",
+   "params": {
+    "wire_herd": 1.0,
+    "wire_share": 1.0
+   },
+   "baseline": {
+    "g1": 0.9909932566591761,
+    "g11": 0.00013848740685458736,
+    "gini": 0.5306040532093965,
+    "wire": {
+     "wire_calls": 3409062.75,
+     "wire_bound": 341678291.2683184,
+     "wire_right": 1912921.7405622383,
+     "share_of_f1": 0.8054382123109363,
+     "hit_rate": 0.5615108473418745
+    },
+    "below_95": [
+     "G3 94% (median 0.0325)"
+    ],
+    "survival_min": 100.0
+   },
+   "smart_sybil": {
+    "g1": 0.9908960946715315,
+    "g11": 0.06198517628380247,
+    "gini": 0.594516114852478,
+    "wire": {
+     "wire_calls": 3770072.875,
+     "wire_bound": 378086791.349801,
+     "wire_right": 2118040.6938871583,
+     "share_of_f1": 0.8047100434579046,
+     "hit_rate": 0.5615013008861294
+    },
+    "below_95": [
+     "G11 0% (median 0.0620)"
+    ],
+    "survival_min": 0.0
+   }
+  },
+  {
+   "cell": "(b) informed 10%",
+   "params": {
+    "wire_edge_share": 0.1,
+    "wire_share": 0.25
+   },
+   "baseline": {
+    "g1": 0.986352760092296,
+    "g11": 0.0001377033882935923,
+    "gini": 0.5393051248852927,
+    "wire": {
+     "wire_calls": 852265.6875,
+     "wire_bound": 89510357.91611648,
+     "wire_right": 492792.3310395541,
+     "share_of_f1": 0.5203910645483625,
+     "hit_rate": 0.5780804707428555
+    },
+    "below_95": [],
+    "survival_min": 100.0
+   },
+   "smart_sybil": {
+    "g1": 0.986248532858998,
+    "g11": 0.06206839148873467,
+    "gini": 0.6090824680867176,
+    "wire": {
+     "wire_calls": 942518.21875,
+     "wire_bound": 98869653.73871285,
+     "wire_right": 544850.1076927887,
+     "share_of_f1": 0.5192243738377926,
+     "hit_rate": 0.5780490625955135
+    },
+    "below_95": [
+     "G11 0% (median 0.0621)"
+    ],
+    "survival_min": 0.0
+   }
+  },
+  {
+   "cell": "(c) cap off",
+   "params": {
+    "wire_cap": 1000000000.0,
+    "wire_share": 0.25
+   },
+   "baseline": {
+    "g1": 0.9861709551615012,
+    "g11": 0.0001375535646160505,
+    "gini": 0.5394851137653124,
+    "wire": {
+     "wire_calls": 852265.6875,
+     "wire_bound": 85226568.75,
+     "wire_right": 477961.00950107176,
+     "share_of_f1": 0.5081456334069571,
+     "hit_rate": 0.5607829217498912
+    },
+    "below_95": [],
+    "survival_min": 100.0
+   },
+   "smart_sybil": {
+    "g1": 0.986130437959871,
+    "g11": 0.06204043895869167,
+    "gini": 0.6092131961831888,
+    "wire": {
+     "wire_calls": 942518.21875,
+     "wire_bound": 94251821.875,
+     "wire_right": 528087.4891284828,
+     "share_of_f1": 0.5070883134895086,
+     "hit_rate": 0.5607729430048133
+    },
+    "below_95": [
+     "G11 0% (median 0.0620)"
+    ],
+    "survival_min": 0.0
+   }
+  },
+  {
+   "cell": "(d) share 50%",
+   "params": {
+    "wire_share": 0.5
+   },
+   "baseline": {
+    "g1": 0.9885854352115921,
+    "g11": 0.00013778199171884766,
+    "gini": 0.5361365583815771,
+    "wire": {
+     "wire_calls": 1704531.375,
+     "wire_bound": 170453137.5,
+     "wire_right": 955922.0190021435,
+     "share_of_f1": 0.6738681227380428,
+     "hit_rate": 0.5607829217498912
+    },
+    "below_95": [],
+    "survival_min": 100.0
+   },
+   "smart_sybil": {
+    "g1": 0.9885500154891449,
+    "g11": 0.06211749287369291,
+    "gini": 0.6035930980766304,
+    "wire": {
+     "wire_calls": 1885036.4375,
+     "wire_bound": 188503643.75,
+     "wire_right": 1056174.9782569655,
+     "share_of_f1": 0.6729377554727292,
+     "hit_rate": 0.5607729430048133
+    },
+    "below_95": [
+     "G11 0% (median 0.0621)"
+    ],
+    "survival_min": 0.0
+   }
+  }
+ ]
+}

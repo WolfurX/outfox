@@ -1,0 +1,261 @@
+# Wire probe: owner default 25% of Nerve spend routed to Wire Calls, Unsettled only
+# engine: simulation.py Wire probe block; base for identity: git 9422153
+# params: markets=5 p~U(0.2,0.8) base=100.0¢ cap=700.0¢ call_cost=10.0 Nerve edge_acc=0.7  booster_pp=0.05  horizon=720
+
+## Phase 0: identity (wire_share=0 vs 9422153): scenarios=13 seeds=2 values compared=823,680 mismatches=0
+
+## Phase 1: standard gate, Wire ON, 500 seeds
+
+=== Scenario: baseline ===
+  final medians: N=888  M=1,019,814¢  e=94.7¢/$ALPHA  Gini=0.539  cashout=7,271,280¢  sybil=0.01%
+  crit   pass%        median   detail
+  OK G1     100%       0.9863   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -1297.1402   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0167   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)
+  OK G4     100%      -0.0001   median mature CPI inflation in [−5%, +10%] (annualised)
+  OK G5     100%       0.9914   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.1953   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.5219   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=7.47)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0733   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0001   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6138   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  wire: calls 851,810  right 476,913 (56.0%)  Bound minted 85,180,953¢ = 50.82% of F1
+
+=== Scenario: whale_shock ===
+  final medians: N=888  M=1,018,657¢  e=94.6¢/$ALPHA  Gini=0.539  cashout=7,245,863¢  sybil=0.01%
+  crit   pass%        median   detail
+  OK G1     100%       0.9861   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -1176.3614   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0290   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)
+  OK G4     100%       0.0532   median mature CPI inflation in [−5%, +10%] (annualised)
+  OK G5     100%       0.9910   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.1944   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.5217   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=7.48)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0730   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0001   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6136   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  wire: calls 851,810  right 476,913 (56.0%)  Bound minted 85,180,953¢ = 50.82% of F1
+
+=== Scenario: plateau ===
+  final medians: N=395  M=452,957¢  e=94.2¢/$ALPHA  Gini=0.538  cashout=4,465,029¢  sybil=0.01%
+  crit   pass%        median   detail
+  OK G1     100%       0.9836   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -6221.6969   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0268   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)
+  OK G4     100%      -0.0051   median mature CPI inflation in [−5%, +10%] (annualised)
+  OK G5     100%       0.9890   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.1738   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.5239   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=7.95)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0809   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0001   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6117   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  wire: calls 518,431  right 290,294 (56.0%)  Bound minted 51,843,094¢ = 50.79% of F1
+
+=== Scenario: bot_attack ===
+  final medians: N=888  M=1,045,137¢  e=99.9¢/$ALPHA  Gini=0.593  cashout=5,616,875¢  sybil=0.06%
+  crit   pass%        median   detail
+  OK G1     100%       0.9862   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -1314.4399   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0160   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)
+  OK G4     100%       0.0020   median mature CPI inflation in [−5%, +10%] (annualised)
+  OK G5     100%       0.9914   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.1976   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.5805   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=6.96)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0716   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0006   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6077   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  wire: calls 941,940  right 527,588 (56.0%)  Bound minted 94,194,000¢ = 50.71% of F1
+
+=== Scenario: gresham ===
+  final medians: N=888  M=1,070,815¢  e=99.5¢/$ALPHA  Gini=0.541  cashout=7,533,186¢  sybil=0.01%
+  crit   pass%        median   detail
+  OK G1     100%       0.9811   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -2591.3908   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0163   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)
+  OK G4     100%       0.0029   median mature CPI inflation in [−5%, +10%] (annualised)
+  OK G5     100%       0.9915   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.1976   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.5238   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=7.51)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0725   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0001   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6129   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  wire: calls 851,810  right 476,913 (56.0%)  Bound minted 85,180,953¢ = 50.82% of F1
+
+=== Scenario: funnel ===
+  final medians: N=888  M=1,037,878¢  e=99.8¢/$ALPHA  Gini=0.602  cashout=6,128,968¢  sybil=1.24%
+  crit   pass%        median   detail
+  OK G1     100%       0.9861   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -1306.3845   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0159   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)
+  OK G4     100%       0.0019   median mature CPI inflation in [−5%, +10%] (annualised)
+  OK G5     100%       0.9914   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.2010   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.5900   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=6.16)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0717   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0124   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6087   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  wire: calls 921,468  right 516,044 (56.0%)  Bound minted 92,146,822¢ = 50.73% of F1
+
+>>> standard: ALL PASS
+
+## Phase 2: red-team gate, Wire ON, 100 seeds (G3/G4 diagnostic)
+
+=== Scenario: demurrage_flight === [red-team: G3/G4 diagnostic]
+  final medians: N=884  M=1,008,622¢  e=151.8¢/$ALPHA  Gini=0.564  cashout=11,644,401¢  sybil=0.00%
+  crit   pass%        median   detail
+  OK G1     100%       0.9884   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%    -804.1938   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0190   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)  [diagnostic under attack]
+  OK G4     100%       0.0085   median mature CPI inflation in [−5%, +10%] (annualised)  [diagnostic under attack]
+  OK G5     100%       0.9825   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.2021   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.5451   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=6.97)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.1136   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0000   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6319   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  wire: calls 849,787  right 476,173 (56.0%)  Bound minted 84,978,688¢ = 50.83% of F1
+
+=== Scenario: bank_run === [red-team: G3/G4 diagnostic]
+  final medians: N=884  M=1,014,362¢  e=85.0¢/$ALPHA  Gini=0.529  cashout=6,667,579¢  sybil=0.01%
+  crit   pass%        median   detail
+  OK G1     100%       0.9799   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -2575.6657   mean net Credit emission, t≥180 ≤ 0
+  DG G3       0%       0.1437   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)  [diagnostic under attack]
+  DG G4      35%      -0.0548   median mature CPI inflation in [−5%, +10%] (annualised)  [diagnostic under attack]
+  OK G5     100%       0.9698   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.2098   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.5103   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=7.07)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.1333   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0001   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6158   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  wire: calls 849,787  right 476,173 (56.0%)  Bound minted 84,978,688¢ = 50.83% of F1
+
+=== Scenario: smart_sybil === [red-team: G3/G4 diagnostic]
+  final medians: N=881  M=1,037,230¢  e=100.0¢/$ALPHA  Gini=0.609  cashout=5,936,233¢  sybil=6.07%
+  crit   pass%        median   detail
+  OK G1     100%       0.9863   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -1295.7678   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0158   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)  [diagnostic under attack]
+  OK G4     100%       0.0007   median mature CPI inflation in [−5%, +10%] (annualised)  [diagnostic under attack]
+  OK G5     100%       0.9913   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.2003   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.5973   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=7.23)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0720   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  XX G11      0%       0.0607   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6033   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE FAIL (see XX/~ rows)
+  wire: calls 943,814  right 528,171 (56.0%)  Bound minted 94,381,425¢ = 50.71% of F1
+
+=== Scenario: floor_split === [red-team: G3/G4 diagnostic]
+  final medians: N=884  M=1,035,725¢  e=96.4¢/$ALPHA  Gini=0.541  cashout=7,363,666¢  sybil=0.01%
+  crit   pass%        median   detail
+  OK G1     100%       0.9882   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -1029.3431   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0159   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)  [diagnostic under attack]
+  OK G4     100%      -0.0064   median mature CPI inflation in [−5%, +10%] (annualised)  [diagnostic under attack]
+  OK G5     100%       0.9937   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.1921   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.5219   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=7.12)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0786   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0001   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6145   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  wire: calls 849,787  right 476,173 (56.0%)  Bound minted 84,978,688¢ = 50.83% of F1
+
+=== Scenario: pump_dump === [red-team: G3/G4 diagnostic]
+  final medians: N=884  M=1,295,806¢  e=39.7¢/$ALPHA  Gini=0.461  cashout=6,116,683¢  sybil=0.01%
+  crit   pass%        median   detail
+  OK G1     100%       0.9748   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -4803.7320   mean net Credit emission, t≥180 ≤ 0
+  DG G3       0%       0.8554   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)  [diagnostic under attack]
+  DG G4      90%      -0.0341   median mature CPI inflation in [−5%, +10%] (annualised)  [diagnostic under attack]
+  OK G5     100%       1.0057   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.2409   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.4888   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=7.77)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0807   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0001   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6397   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  wire: calls 849,787  right 476,173 (56.0%)  Bound minted 84,978,688¢ = 50.83% of F1
+
+=== Scenario: confidence_crisis === [red-team: G3/G4 diagnostic]
+  final medians: N=881  M=1,014,247¢  e=93.2¢/$ALPHA  Gini=0.537  cashout=6,541,741¢  sybil=0.01%
+  crit   pass%        median   detail
+  OK G1     100%       0.9901   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -1278.7906   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0243   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)  [diagnostic under attack]
+  OK G4     100%       0.0587   median mature CPI inflation in [−5%, +10%] (annualised)  [diagnostic under attack]
+  OK G5     100%       0.9931   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.2052   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.5249   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=7.46)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0717   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0001   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6224   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  wire: calls 852,941  right 478,099 (56.0%)  Bound minted 85,294,062¢ = 50.82% of F1
+
+=== Scenario: whale_market === [red-team: G3/G4 diagnostic]
+  final medians: N=881  M=1,014,930¢  e=65.0¢/$ALPHA  Gini=0.651  cashout=5,026,456¢  sybil=0.02%
+  crit   pass%        median   detail
+  OK G1     100%       0.9847   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -1469.9864   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0172   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)  [diagnostic under attack]
+  OK G4     100%      -0.0042   median mature CPI inflation in [−5%, +10%] (annualised)  [diagnostic under attack]
+  OK G5     100%       0.9966   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.3546   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.6451   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=2.81)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0574   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0002   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.7241   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  wire: calls 852,941  right 478,099 (56.0%)  Bound minted 85,294,062¢ = 50.82% of F1
+
+>>> red-team: NOT ALL SURVIVE
+
+## Phase 3: stress cells, 50 seeds per cell (baseline and smart_sybil; criteria below 95% listed with their G-line)
+  control: Wire off      baseline     G1 median 0.9816  G11 median 0.0001  Gini 0.543  Wire Bound 0.00% of F1  below 95%: none
+  control: Wire off      smart_sybil  G1 median 0.9815  G11 median 0.0620  Gini 0.615  Wire Bound 0.00% of F1  below 95%: G11 0% (median 0.0620)
+  owner 25%              baseline     G1 median 0.9862  G11 median 0.0001  Gini 0.539  Wire Bound 50.81% of F1  below 95%: none
+  owner 25%              smart_sybil  G1 median 0.9861  G11 median 0.0620  Gini 0.609  Wire Bound 50.71% of F1  below 95%: G11 0% (median 0.0620)
+  (a) herd, share 100%   baseline     G1 median 0.9910  G11 median 0.0001  Gini 0.531  Wire Bound 80.54% of F1  below 95%: G3 94% (median 0.0325)
+  (a) herd, share 100%   smart_sybil  G1 median 0.9909  G11 median 0.0620  Gini 0.595  Wire Bound 80.47% of F1  below 95%: G11 0% (median 0.0620)
+  (b) informed 10%       baseline     G1 median 0.9864  G11 median 0.0001  Gini 0.539  Wire Bound 52.04% of F1  below 95%: none
+  (b) informed 10%       smart_sybil  G1 median 0.9862  G11 median 0.0621  Gini 0.609  Wire Bound 51.92% of F1  below 95%: G11 0% (median 0.0621)
+  (c) cap off            baseline     G1 median 0.9862  G11 median 0.0001  Gini 0.539  Wire Bound 50.81% of F1  below 95%: none
+  (c) cap off            smart_sybil  G1 median 0.9861  G11 median 0.0620  Gini 0.609  Wire Bound 50.71% of F1  below 95%: G11 0% (median 0.0620)
+  (d) share 50%          baseline     G1 median 0.9886  G11 median 0.0001  Gini 0.536  Wire Bound 67.39% of F1  below 95%: none
+  (d) share 50%          smart_sybil  G1 median 0.9886  G11 median 0.0621  Gini 0.604  Wire Bound 67.29% of F1  below 95%: G11 0% (median 0.0621)

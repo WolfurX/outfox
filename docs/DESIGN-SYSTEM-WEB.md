@@ -150,6 +150,23 @@ chance on that card's bar and labels the run button with the boost before anythi
 result note says a Booster was used. A Booster never changes a chance after the fact or out
 of sight (§8.2 applies unchanged).
 
+**Wire (The Tape, 2026-10-10):** a `RowGroup` "The Wire · calls on the real world"
+(`tape-wire`) sits under Calls. It opens with an unsettled-tone `Banner` holding the fixed
+explainer and the attribution link "Powered by Panta" (https://panta.market), an underlined
+`ofx-banner__link` with a `--tap-min` target, in body ink so it reads in both themes. Each
+listed market is one `ActionRow`: Panta's title verbatim; desc "Settles {local date, HH:mm}
+· quoted {n} min ago"; meta Risk 20, "Pays {n} on YES · {n} on NO" and the Unsettled chip;
+action a `SplitBar` labelled YES and NO (its `labels` prop; the default stays Clean and
+Nicked) over `YES {n}%` (primary) and `NO {n}%` (ghost) small buttons. Below 20 Risk the pair
+becomes one disabled button, "Low Risk"; with a position already open on that market it
+reads "Taken". The row then prints a neutral `ActionResult` of kind `open` (body ink, strong
+border, no glow, never the win colour, since nothing has resolved): "Your call: YES at 50%.
+Pays 200 Scrip if right." Quiet state (nothing listed, or the Wire off): `EmptyState` "The
+Wire is quiet", "Nothing listed right now." Your Book carries a "Wire calls open · n" row
+(pays up to the sum, Unsettled chip); a call that resolved since this device last looked
+prints once, clean ("+{n} Scrip Unsettled") or Nicked. The Ledger names the payout kind
+"Wire call". §8.2 applies unchanged: one flat print, no escalation by size.
+
 **The Street (screen spec):** a district panel list — one `Card`/`ListRow` per district
 (The Floor, Options Alley, The Pit, The Dark Pool, The Vault, After Hours, The Hollow)
 showing the district's state and entry points. Districts whose system lives on The Tape
@@ -1429,6 +1446,8 @@ Commons · Foxes.
 | **Signal Booster** | The consumable tool from Gigs (GDD §5.1) | §2.4 |
 | **Boost / Boost on** | The Call-card toggle that arms a Signal Booster | §2.4 |
 | **clean chance** | The Call's success probability in prose (the bar's “Clean” side) | §2.4 |
+| **The Wire** | The Tape section of live Panta markets taken as Calls; shown with “Powered by Panta” (GDD §5.1) | §2.4 |
+| **Wire Call** | A Call taken YES or NO on a Wire market; settles when that market does | §2.4 |
 
 **Banned in player copy:** the `THEME-OUTFOX.md` §3 lists (casino vocabulary, theft
 verbs, trademark-adjacent names, including *all-in*) — to be CI-enforced (§21.2 string-lint; no CI yet, ARCHITECTURE A13); plus wallet jargon at

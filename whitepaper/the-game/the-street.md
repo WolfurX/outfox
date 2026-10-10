@@ -11,7 +11,7 @@ The world is a 24/7 trading floor, neon terminal-noir meets old-school open-outc
 | District | What happens there |
 | --- | --- |
 | The Floor | Gigs: honest work, reliable pay |
-| Options Alley | Calls against the market and other players |
+| Options Alley | Calls against the market and other players, and the Wire |
 | The Pit | Where Raids on the Houses are run |
 | The Dark Pool | The quiet end of the market |
 | The Vault | The Houses' treasure, and the target |

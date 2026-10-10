@@ -158,7 +158,8 @@ export function ListRow({ lead, title, sub, trail, onPress, disabled }: {
 
 /** The outcome of a Call/Gig. Constant-duration print — see the file header. */
 export function ActionResult({ kind, text, note }: {
-  kind: 'clean' | 'nicked'; text: string; note?: string;
+  /** `open`: a Wire Call still waiting on its real market, printed neutral, never in the win colour */
+  kind: 'clean' | 'nicked' | 'open'; text: string; note?: string;
 }) {
   return (
     <div className={cx('ofx-result', `ofx-result--${kind}`)} role="status">
@@ -199,13 +200,17 @@ export function ScripMark({ provenance }: { provenance: 'settled' | 'unsettled' 
 }
 
 /** A Call's stated chance, quoted like market depth — never as "odds". */
-export function SplitBar({ successPct }: { successPct: number }) {
+export function SplitBar({ successPct, labels = ['Clean', 'Nicked'] }: {
+  successPct: number;
+  /** the two sides when they are not Clean and Nicked (a Wire market's YES and NO) */
+  labels?: [string, string];
+}) {
   const p = Math.max(0, Math.min(100, Math.round(successPct)));
   return (
     <div className="ofx-split">
       <div className="ofx-split__labels">
-        <span>Clean <b>{p}%</b></span>
-        <span><b>{100 - p}%</b> Nicked</span>
+        <span>{labels[0]} <b>{p}%</b></span>
+        <span><b>{100 - p}%</b> {labels[1]}</span>
       </div>
       <div className="ofx-split__track" aria-hidden="true">
         <span className="ofx-split__l" style={{ flex: p || 0.001 }} />

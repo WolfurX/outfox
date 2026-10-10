@@ -92,7 +92,7 @@ Releases are gated, not dated; each names its exit condition.
 
 | Release | Scope | Exit gate | Status |
 |---|---|---|---|
-| **R0 slice** | Calls, Gigs, bars, refills, the Open Market, Scrip carry, guest to R2 ladder with SIWS, the exchange, the Clearinghouse, the chain edge on devnet, the feedback layer, The Street tab | devnet e2e green; suite green; `verify-live` green | **shipped** (2026-08-28 edge, 2026-09-11 Street) |
+| **R0 slice** | Calls, the Wire (Wire Calls on Panta markets), Gigs, bars, refills, the Open Market, Scrip carry, guest to R2 ladder with SIWS, the exchange, the Clearinghouse, the chain edge on devnet, the feedback layer, The Street tab | devnet e2e green; suite green; `verify-live` green | **shipped** (2026-08-28 edge, 2026-09-11 Street) |
 | **R1 closed beta** | R0 on a real domain and box, devnet economics, real players, the dashboards live for the first time, CI gates, `/min-version`, idempotency keys, step-up auth, metric jobs, backups verified | hardening checklist clear; G1–G12 computed live for two weeks; D1/D7 measured | **blocked on purchases** (domain, VPS wait on the grant decision) |
 | **R2 economy systems** | one at a time behind the sim gate: Raids, staking and unbonding, progressive carry (built) and wealth-indexed issuance, Skulks, Desks, Seats, the Index, the Commons and Share-Out | each system: sim scenarios pass at full seeds, adversarial review if it touches money, a `verify-live` world | designed |
 | **R3 payments and retention** | F3 convenience checkout (USDC-first), PoP at cash-out, notifications (push, email, Discord mirror), referral loop, device handoff, settings IA | conversion and funnel events live; PoP false-reject budget met | owner decisions pending (rail, PoP provider) |
@@ -125,9 +125,10 @@ point at the rule; this table does not restate rules.
 | FR-LOOP-2 | Call payouts land as Unsettled Scrip and can never be transferred, listed, or exchanged | engine tests; G10 | Built |
 | FR-LOOP-3 | Gigs pay deterministic Settled Scrip and a Signal Booster every Nth completion (pity, not chance) | engine tests | Built |
 | FR-LOOP-9 | A Signal Booster is a consumable: a Call run with one gets +5 points of clean chance (capped at 95%), shown before the Call runs; it is used up either way; a win still pays Unsettled only; a Booster on the book or already used cannot be used or listed | engine tests (`Signal Booster` block); `sim/v7_booster_probe.txt` | Built |
+| FR-LOOP-10 | A Wire Call takes YES or NO on a live Panta market for 20 Risk Appetite, at Panta's quoted chance shown with its quote time; a right call pays Unsettled Scrip at the odds taken (100 ÷ chance, capped at 700); it settles when its market does; no money moves; "Powered by Panta" is shown with the Wire | `wire.test.ts`, `routes-wire.test.ts`; `sim/v8_wire_probe.txt` | Built |
 | FR-LOOP-4 | Focus and Risk Appetite regenerate over real time and gate work and Calls respectively | `computeBar` tests | Built |
 | FR-LOOP-5 | Refills are purchasable from Unsettled Scrip (a sink) | engine tests | Built |
-| FR-LOOP-6 | Resolution is flat and immediate: reveal capped at 320 ms, no near-miss theatre | feedback layer; motion rules | Built |
+| FR-LOOP-6 | Resolution is flat and immediate: reveal capped at 320 ms, no near-miss theatre, except Wire Calls, which settle when their real market does (FR-LOOP-10) | feedback layer; motion rules | Built |
 | FR-LOOP-7 | Raids are a parallel tier against the Houses with Heat raising Sheriff attention | `GDD.md` §5; sim F1 | Designed |
 | FR-LOOP-8 | The Sim trains the four stats and hosts the FTUE Call | `GDD.md` §3, §5 | Specified (FTUE Built; stats Designed) |
 

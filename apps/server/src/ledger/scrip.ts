@@ -76,11 +76,11 @@ export function conservationAudit(db: DB): { holds: boolean; playerTotal: number
     `SELECT COALESCE(SUM(scrip_settled + scrip_unsettled), 0) AS t FROM players`
   ).get() as { t: number };
   const treas = (db.prepare(`SELECT scrip FROM treasury WHERE id = 1`).get() as { scrip: number }).scrip;
-  // Mints: the two faucets, plus the exchange pool's protocol-minted Scrip side (the
+  // Mints: the faucets (Calls, Gigs, the Wire), plus the exchange pool's protocol-minted Scrip side (the
   // sim books pool liquidity as an in-ledger mint — audit-2). Pool Scrip counts as a
   // holder below; trades only move value between players, treasury, and the pool.
   const minted = db.prepare(
-    `SELECT (SELECT COALESCE(SUM(d_settled + d_unsettled), 0) FROM ledger WHERE kind IN ('call','gig'))
+    `SELECT (SELECT COALESCE(SUM(d_settled + d_unsettled), 0) FROM ledger WHERE kind IN ('call','gig','wire'))
           + (SELECT COALESCE(SUM(credit_in), 0) FROM exchange_events WHERE kind = 'seed') AS t`
   ).get() as { t: number };
   const pool = db.prepare(

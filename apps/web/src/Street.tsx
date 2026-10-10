@@ -16,7 +16,7 @@ export type DistrictEntry = 'gigs' | 'calls' | 'clearinghouse';
 
 const DISTRICTS: { id: string; name: string; line: string; entry?: DistrictEntry }[] = [
   { id: 'floor', name: 'The Floor', line: 'Gigs. Honest work, reliable pay.', entry: 'gigs' },
-  { id: 'options_alley', name: 'Options Alley', line: 'Calls against the market. Open outcry, all day.', entry: 'calls' },
+  { id: 'options_alley', name: 'Options Alley', line: 'Calls against the market, and the Wire. Open outcry, all day.', entry: 'calls' },
   { id: 'pit', name: 'The Pit', line: 'Raids on the Houses. The Sheriff watches this one.' },
   { id: 'dark_pool', name: 'The Dark Pool', line: 'The quiet end of the market.' },
   {

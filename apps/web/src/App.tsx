@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type {
   BootstrapResponse, CallDef, CallResult, ItemKind, LedgerRow, ListingView, PlayerView,
+  WirePositionView, WireResponse, WireSide,
 } from '@outfox/shared';
 import {
   BOOSTER, BOOSTER_EFFECT, GIG, ITEM_KINDS, MARKET_FEE_BPS, REFILL, REGEN, UNSETTLED_EXPLAINER,
+  WIRE, WIRE_ATTRIBUTION, WIRE_EXPLAINER,
 } from '@outfox/shared';
 import {
   Activity, ChevronRight, Crosshair, Gauge, Landmark, Moon, Signpost, Store, Sun, TriangleAlert, WifiOff,
@@ -60,6 +62,32 @@ function projectBar(snap: number, snapAt: number, perSec: number, max: number, s
 type Feedback = {
   actionId: string; kind: 'clean' | 'nicked'; text: string; note?: string; seq: number;
 } | null;
+
+/** The Wire positions this device last saw open. One that has resolved since prints its
+ * result once on Your Book; when storage is blocked the list lives in memory only. */
+const WIRE_SEEN_KEY = 'outfox.wire.open';
+let wireSeenIds: number[] | null = null;
+function wireSeen(): number[] {
+  if (wireSeenIds === null) {
+    try {
+      const v: unknown = JSON.parse(localStorage.getItem(WIRE_SEEN_KEY) ?? '[]');
+      wireSeenIds = Array.isArray(v) ? v.filter((x): x is number => typeof x === 'number') : [];
+    } catch { wireSeenIds = []; }
+  }
+  return wireSeenIds;
+}
+function setWireSeen(ids: number[]) {
+  wireSeenIds = ids;
+  try { localStorage.setItem(WIRE_SEEN_KEY, JSON.stringify(ids)); } catch { /* private mode */ }
+}
+const WIRE_QUIET: WireResponse = { enabled: false, markets: [], positions: [] };
+
+/** When a Wire market settles, in the player's own zone: "12 Jan 21:00". */
+function settlesLabel(ms: number): string {
+  const d = new Date(ms);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
 export default function App() {
   const [boot, setBoot] = useState<BootstrapResponse | null>(null);
@@ -189,6 +217,11 @@ export default function App() {
       return true;
     });
   }, [run, boot]);
+
+  // A Wire payout lands on the Book server-side (on the Wire read); re-read the Book.
+  const refreshPlayer = useCallback(() => {
+    api.market().then((r) => absorb(r.player)).catch(() => { /* the next action refreshes it */ });
+  }, [absorb]);
 
   // a player with anything on the Book has already had their first Call — record it
   const isFresh = player
@@ -331,6 +364,8 @@ export default function App() {
                       });
                 }}
                 onRefill={(bar) => { fx.emit('press'); return run(() => api.refill(bar)); }}
+                onWire={(marketId, side) => { fx.emit('press'); return run(() => api.wireCall(marketId, side)); }}
+                onRefresh={refreshPlayer}
               />
             )}
 
@@ -437,8 +472,46 @@ function Tape(props: {
   player: PlayerView; boot: BootstrapResponse; srvNow: number; feedback: Feedback;
   landing: 'gigs' | 'calls' | null; onLanded: () => void;
   onCall: (id: string, boost: boolean) => void; onGig: () => void; onRefill: (bar: 'focus' | 'risk') => void;
+  onWire: (marketId: string, side: WireSide) => Promise<WireResponse | null>; onRefresh: () => void;
 }) {
   const { player: p, boot, srvNow, feedback } = props;
+
+  // The Wire: live Panta markets taken as Calls. Read on mount, after every Wire action, and
+  // every 60 s while the Tape is on screen and the page is visible (A7).
+  const [wire, setWire] = useState<WireResponse | null>(null);
+  const [taking, setTaking] = useState(false);
+  const [wireDone, setWireDone] = useState<{ seq: number; list: WirePositionView[] } | null>(null);
+  const { onRefresh } = props;
+  const absorbWire = useCallback((r: WireResponse) => {
+    setWire(r);
+    const seen = new Set(wireSeen());
+    const done = r.positions.filter((x) => seen.has(x.id) && (x.status === 'won' || x.status === 'nicked'));
+    setWireSeen(r.positions.filter((x) => x.status === 'open').map((x) => x.id));
+    if (done.length === 0) return;
+    setWireDone({ seq: Date.now(), list: done });
+    if (done.some((x) => x.status === 'won')) onRefresh();
+  }, [onRefresh]);
+  const loadWire = useCallback(() => {
+    api.wire().then(absorbWire).catch(() => setWire((w) => w ?? WIRE_QUIET));
+  }, [absorbWire]);
+  useEffect(() => {
+    loadWire();
+    const t = setInterval(() => { if (document.visibilityState === 'visible') loadWire(); }, 60_000);
+    return () => clearInterval(t);
+  }, [loadWire]);
+  useEffect(() => {
+    if (!wireDone) return;
+    const t = setTimeout(() => setWireDone(null), 5000);
+    return () => clearTimeout(t);
+  }, [wireDone]);
+  const takeWire = async (marketId: string, side: WireSide) => {
+    setTaking(true);
+    try {
+      const r = await props.onWire(marketId, side);
+      if (r) absorbWire(r); else loadWire(); // refused: re-read, the market may have closed
+    } finally { setTaking(false); }
+  };
+  const wireOpen = wire?.positions.filter((x) => x.status === 'open') ?? [];
 
   // Signal Boosters in play (owned, not on the book). Arming one applies it to the next
   // run of that Call only; the server uses it up whatever the outcome.
@@ -503,6 +576,21 @@ function Tape(props: {
             title={<Amount value={p.scripUnsettled} unit="Scrip" size="lg" tone="unsettled" />}
             sub={<ProvenanceChip provenance="unsettled" />}
           />
+          {wireOpen.length > 0 && (
+            <ListRow
+              lead={<ScripMark provenance="unsettled" />}
+              title={`Wire calls open · ${wireOpen.length}`}
+              sub={`Pays up to ${wireOpen.reduce((a, x) => a + x.payout, 0).toLocaleString()} Scrip if right`}
+              trail={<ProvenanceChip provenance="unsettled" />}
+            />
+          )}
+          {wireDone && (
+            <div key={wireDone.seq} style={{ display: 'grid', gap: 'var(--space-2)', padding: 'var(--space-3) var(--space-1)' }}>
+              {wireDone.list.map((x) => (x.status === 'won'
+                ? <ActionResult key={x.id} kind="clean" text={`+${x.payout.toLocaleString()} Scrip Unsettled`} note={x.title} />
+                : <ActionResult key={x.id} kind="nicked" text="Nicked" note={x.title} />))}
+            </div>
+          )}
         </RowGroup>
       </div>
       <Banner tone="unsettled" title="Unsettled Scrip">{UNSETTLED_EXPLAINER}</Banner>
@@ -563,6 +651,67 @@ function Tape(props: {
                 </div>
               }
               result={resultFor(c.id)}
+            />
+          );
+        })}
+      </RowGroup>
+
+      <RowGroup title="The Wire · calls on the real world" id="tape-wire">
+        <Banner tone="unsettled">
+          {WIRE_EXPLAINER}
+          <a
+            className="ofx-banner__link"
+            href={WIRE_ATTRIBUTION.href} target="_blank" rel="noreferrer"
+          >
+            {WIRE_ATTRIBUTION.text}
+          </a>
+        </Banner>
+        {wire === null && <div style={{ padding: 'var(--space-3) 0' }}><Skeleton height={52} /></div>}
+        {wire && (!wire.enabled || wire.markets.length === 0) && (
+          <EmptyState title="The Wire is quiet" hint="Nothing listed right now." />
+        )}
+        {wire?.enabled && wire.markets.map((m) => {
+          const yes = Math.round(m.yesPrice * 100);
+          const mine = wire.positions.find((x) => x.marketId === m.marketId);
+          const ago = Math.max(0, Math.floor((srvNow - m.quotedAt) / 60_000));
+          return (
+            <ActionRow
+              key={m.marketId}
+              title={m.title}
+              desc={`Settles ${settlesLabel(m.settlesAt)} · quoted ${ago} min ago`}
+              meta={
+                <>
+                  <span>Risk {WIRE.riskCost}</span>
+                  <span>Pays {m.payoutYes} on YES · {m.payoutNo} on NO</span>
+                  <Chip tone="unsettled" hatch dashed>Unsettled</Chip>
+                </>
+              }
+              action={
+                <div style={{ display: 'grid', gap: 'var(--space-2)', justifyItems: 'stretch', minWidth: 132 }}>
+                  <SplitBar successPct={yes} labels={['YES', 'NO']} />
+                  {mine || risk < WIRE.riskCost
+                    ? <Button variant="primary" size="sm" disabled>{mine ? 'Taken' : 'Low Risk'}</Button>
+                    : (
+                      <>
+                        <Button variant="primary" size="sm" disabled={taking} onClick={() => takeWire(m.marketId, 'yes')}>
+                          YES {yes}%
+                        </Button>
+                        <Button variant="ghost" size="sm" disabled={taking} onClick={() => takeWire(m.marketId, 'no')}>
+                          NO {100 - yes}%
+                        </Button>
+                      </>
+                    )}
+                </div>
+              }
+              result={mine?.status === 'open'
+                ? (
+                  <ActionResult
+                    key={mine.id} kind="open"
+                    text={`Your call: ${mine.side.toUpperCase()} at ${Math.round(mine.price * 100)}%.`}
+                    note={`Pays ${mine.payout.toLocaleString()} Scrip if right.`}
+                  />
+                )
+                : undefined}
             />
           );
         })}
@@ -745,7 +894,7 @@ function Market(props: {
 
 const LEDGER_LABEL: Record<string, string> = {
   call: 'Call', gig: 'Gig', market_sale: 'Sale', market_buy: 'Purchase',
-  fee: 'Fee', refill: 'Refill', starter: 'Starter', carry: 'Carry',
+  fee: 'Fee', refill: 'Refill', starter: 'Starter', carry: 'Carry', wire: 'Wire call',
 };
 
 function Ledger({ player: p, onClearinghouse }: {

@@ -205,6 +205,29 @@ DEFAULT_PARAMS = dict(
     # who can pay; the S3 fee (phi_market) is captured like any Market sale
     booster_trade_frac=0.5,
     booster_price=3.0,
+    # Wire probe (2026-10-10, owner: Wire Calls on Panta markets, Unsettled only): a
+    # share of each agent's daily Nerve spend is routed to Wire Calls on wire_markets
+    # real-world markets. A Wire Call costs 20 of a 100 bar = 10.0 Nerve. Quoted prices
+    # p_m ~ U(lo, hi); ONE Bernoulli(p_m) outcome per market shared by every agent
+    # (correlated emission); an agent takes YES with prob p_m and is right with prob p_m
+    # for the side taken (EV 100 cents per call before the cap). A right call mints Bound
+    # min(cap, base / p_side), ledgered as F1. Wire spend is modelled ADDITIVE to the
+    # Exploit yield (the Exploit F1 is not reduced by the Nerve routed away), the stricter
+    # reading for G1. wire_edge_share = cohort that knows outcomes (right with prob
+    # wire_edge_acc, picked by slot index, no RNG); wire_herd = prob that all agents take
+    # the same side of market 0 that day. Default wire_share=0 is the v8 engine exactly: no
+    # RNG draw, no state touched (identity in v8_wire_probe.txt). Wire draws use their own
+    # generator, so the main stream is identical with the Wire on or off.
+    wire_share=0.0,
+    wire_markets=5,
+    wire_call_cost=10.0,
+    wire_base=100.0,
+    wire_cap=700.0,
+    wire_p_lo=0.2,
+    wire_p_hi=0.8,
+    wire_edge_share=0.0,
+    wire_edge_acc=0.7,
+    wire_herd=0.0,
     seed=0,
 )
 
@@ -353,6 +376,13 @@ class Sim:
         self.boost_traded = 0.0          # Boosters that changed hands on the Market
         self.boost_trade_value = 0.0     # Clean paid for them (fee included)
         self.f1_base_bound = 0.0         # Bound F1 would have minted unboosted
+        # Wire probe accumulators (all stay 0 with wire_share=0)
+        self.wire_calls = 0.0
+        self.wire_bound = 0.0            # Bound minted by right Wire Calls
+        self.wire_right = 0.0            # expected right Wire Calls
+        if p["wire_share"] > 0:
+            self.wire_rng = np.random.default_rng([int(seed), 8_000_001])
+            self.wire_edge = (np.arange(N) % 1000) < int(round(p["wire_edge_share"] * 1000))
 
         # ---- CPI / policy state ----
         self.P = 1.0
@@ -433,6 +463,32 @@ class Sim:
             self.is_mule[cand] = True
             self.can_cashout[cand] = True   # the attacker's verified identities
 
+    def _wire_day(self, a, nerve_spent):
+        """Wire probe: today's Wire Calls and the Bound minted by the right ones (per agent)."""
+        p, r = self.p, self.wire_rng
+        m = int(p["wire_markets"])
+        price = r.uniform(p["wire_p_lo"], p["wire_p_hi"], m)      # quoted YES price
+        yes = r.random(m) < price                                 # one shared outcome per market
+        herd_yes = None
+        if p["wire_herd"] > 0 and r.random() < p["wire_herd"]:
+            herd_yes = bool(r.random() < price[0])                # everyone takes this side of market 0
+        calls = np.where(a, nerve_spent * p["wire_share"] / p["wire_call_cost"], 0.0) / m
+        ps = np.where(yes, price, 1.0 - price)                    # price of the winning side
+        win = np.minimum(p["wire_cap"], p["wire_base"] / np.clip(ps, 1e-9, None))
+        # per market, the fraction of calls on the winning side, and the Bound per call
+        f_non = np.where(yes, price, 1.0 - price)                 # non-edge: YES with prob p
+        f_edge = np.full(m, p["wire_edge_acc"])
+        if herd_yes is not None:
+            f_non[0] = f_edge[0] = 1.0 if herd_yes == bool(yes[0]) else 0.0
+        g_non, g_edge = float((f_non * win).sum()), float((f_edge * win).sum())
+        unit = np.where(self.wire_edge, g_edge, g_non)
+        gain = calls * unit
+        right = calls * np.where(self.wire_edge, f_edge.sum(), f_non.sum())
+        self.wire_calls += float(calls.sum()) * m
+        self.wire_bound += float(gain.sum())
+        self.wire_right += float(right.sum())
+        return gain
+
     # ----- the per-tick update (§9) -------------------------------------
     def step(self, t):
         p = self.p
@@ -507,6 +563,8 @@ class Sim:
             self.boost_inv -= used
             self.boost_used += float(used.sum())
             self.boost_bonus_bound += float(bonus.sum())
+        if p["wire_share"] > 0:
+            bound_gain = bound_gain + self._wire_day(a, nerve_spent)
         self.C_bound += bound_gain
         self.nerve -= nerve_spent
         mint_bound += float(bound_gain.sum())
@@ -1110,6 +1168,7 @@ class Sim:
             boost_held=float(self.boost_inv[a].sum()), boost_traded=self.boost_traded,
             boost_trade_value=self.boost_trade_value, boost_bonus_bound=self.boost_bonus_bound,
             f1_base_bound=self.f1_base_bound,
+            wire_calls=self.wire_calls, wire_bound=self.wire_bound, wire_right=self.wire_right,
             reserve_ok=bool(self.alpha_resid_max < 1e-3 * self.p["alpha_max"]
                             and self.credit_resid_max < max(1e-3 * self.cum_credit_mint, 1.0)),
         )

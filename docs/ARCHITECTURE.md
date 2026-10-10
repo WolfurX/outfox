@@ -221,7 +221,8 @@ The surface today, grouped (all under `/api`, JSON, cookie session):
 |---|---|
 | session | `POST session/bootstrap` |
 | identity | `POST register/start`, `register/verify`, `register/adopt` (dev adapter); `register/siws/nonce`, `register/siws`; `register/privy`; `verify/dev`; `wallet/nonce`, `wallet/link` |
-| play | `POST actions/call`, `actions/gig`, `sinks/refill` |
+| play | `POST actions/call`, `actions/gig`, `actions/wire`, `sinks/refill` |
+| wire | `GET wire` (session; settles the player's due Wire positions first, then the listed markets and the player's last positions) |
 | market | `GET market`; `POST market/list`, `market/buy`, `market/cancel` |
 | ledger | `GET ledger` |
 | exchange | `GET exchange`, `exchange/history`; `POST exchange/quote`, `exchange/swap` |
@@ -333,6 +334,7 @@ server writes them to an `events` table keyed by account id, never by anything p
 | Job | Trigger | Today | Target |
 |---|---|---|---|
 | indexer | every 5 s | in-process `startIndexer` | same until production; then a worker process (§17) |
+| wire | every 10 min, idempotent | in-process `startWireJob` (only with `OUTFOX_PANTA_KEY`): refresh the listed Panta markets and quotes, read outcomes, settle open Wire positions | same until production; then the worker process (§17) |
 | vesting, carry, EMA day update | lazy on touch | folds in §5 | unchanged |
 | metrics | hourly and daily windows | none | `jobs/metrics` writing `metrics`; alerts from bands |
 | treasury ops (§13.B TWAP legs) | daily, rule-driven | none | `jobs/treasury` over `economy/exchange` primitives, every leg a `policy.*` event |
@@ -459,6 +461,7 @@ Each step has a trigger, so nothing is built ahead of need.
 | A13 | No CI exists yet; the pipeline is defined in `INFRASTRUCTURE.md` §4 and is a pre-beta item | adopted 2026-09-12 (owner) |
 | A14 | Parameter changes go through a policy registry with change events before any live tuning; constants in code remain the published defaults | adopted 2026-09-12 (owner) |
 | A15 | $ALPHA gets a single mutation gate (`postAlpha` becomes the only writer of `alpha_lots` and `alpha_ledger`, together, inside `withTx`) and a per-player ledger-versus-lots drift audit beside `conservationAudit` | adopted 2026-09-12 (owner); built the same day with the module move, adversarially reviewed |
+| A19 | Real-world prediction markets enter the product only as Wire Calls: Panta's catalog and simulated fill quotes read server-side, odds shown with their quote time, payouts Unsettled at the odds taken and capped, outcomes read from Panta's position records, no real-money action, "Powered by Panta" attribution. Gated by the v8 sim probe before shipping | adopted 2026-10-10 (owner) |
 | A18 | No legal-review gate. Legal review is not a launch gate; the third-party audit is the gate before real money, and jurisdiction is handled by geofencing. Player copy keeps casino vocabulary out (THEME-OUTFOX §3, narrowed the same day: odds, chance and luck are ordinary words). Mentions of a counsel gate in frozen or historical docs (`ECONOMY.md`, `VALIDATION-BENCHMARKS.md`, `PLAN.md`, `WHITEPAPER.md` v0.2, logs) are superseded by this entry | adopted 2026-10-10 (owner) |
 | A17 | Items carry effects and farmable items are consumables, used up inside the same transaction as the action they modify (an item row keeps its history: `consumed_at` marks it out of play). No NPC buyback: players set every item price. Every item effect is modelled in `sim/` behind a default-off switch, proven identical when off, and run through the standard and red-team gates with a matched control before it is adopted. First instance: the Signal Booster | adopted 2026-10-10 (owner); Signal Booster built and tested the same day, sim v7 |
 | A16 | $ALPHA and its first liquidity are created through Meteora: a Dynamic Bonding Curve pool creates the fixed-supply mint and graduates into a DAMM v2 pool whose launch liquidity is permanently locked (`LAUNCH.md`). The server shows the launch through a read-only public route that decodes the pools by byte offset; the Meteora SDK stays a scripts-only dev dependency and off the production box | adopted 2026-10-02 (owner); launch and view built and rehearsed on devnet, two adversarial review rounds; the join to settlement is a genesis mode (`GENESIS_MINT`), verified on a local validator, not yet used by a deployment |
