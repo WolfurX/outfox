@@ -690,13 +690,13 @@ function Tape(props: {
                 <div style={{ display: 'grid', gap: 'var(--space-2)', justifyItems: 'stretch', minWidth: 132 }}>
                   <SplitBar successPct={yes} labels={['YES', 'NO']} />
                   {mine || risk < WIRE.riskCost
-                    ? <Button variant="primary" size="sm" disabled>{mine ? 'Taken' : 'Low Risk'}</Button>
+                    ? <Button variant="secondary" size="sm" disabled>{mine ? 'Taken' : 'Low Risk'}</Button>
                     : (
                       <>
-                        <Button variant="primary" size="sm" disabled={taking} onClick={() => takeWire(m.marketId, 'yes')}>
+                        <Button variant="secondary" size="sm" disabled={taking} onClick={() => takeWire(m.marketId, 'yes')}>
                           YES {yes}%
                         </Button>
-                        <Button variant="ghost" size="sm" disabled={taking} onClick={() => takeWire(m.marketId, 'no')}>
+                        <Button variant="secondary" size="sm" disabled={taking} onClick={() => takeWire(m.marketId, 'no')}>
                           NO {100 - yes}%
                         </Button>
                       </>

@@ -157,7 +157,8 @@ explainer and the attribution link "Powered by Panta" (https://panta.market), an
 listed market is one `ActionRow`: Panta's title verbatim; desc "Settles {local date, HH:mm}
 · quoted {n} min ago"; meta Risk 20, "Pays {n} on YES · {n} on NO" and the Unsettled chip;
 action a `SplitBar` labelled YES and NO (its `labels` prop; the default stays Clean and
-Nicked) over `YES {n}%` (primary) and `NO {n}%` (ghost) small buttons. Below 20 Risk the pair
+Nicked) over two equal `secondary` small buttons, `YES {n}%` and `NO {n}%` (the same weight
+on both sides, owner ruling 2026-10-10: a market has no default side). Below 20 Risk the pair
 becomes one disabled button, "Low Risk"; with a position already open on that market it
 reads "Taken". The row then prints a neutral `ActionResult` of kind `open` (body ink, strong
 border, no glow, never the win colour, since nothing has resolved): "Your call: YES at 50%.
