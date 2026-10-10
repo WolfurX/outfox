@@ -1431,7 +1431,7 @@ Commons · Foxes.
 | **clean chance** | The Call's success probability in prose (the bar's “Clean” side) | §2.4 |
 
 **Banned in player copy:** the `THEME-OUTFOX.md` §3 lists (gambling vocabulary, theft
-verbs, trademark-adjacent names, including *all-in*) — CI-enforced; plus wallet jargon at
+verbs, trademark-adjacent names, including *all-in*) — to be CI-enforced (§21.2 string-lint; no CI yet, ARCHITECTURE A13); plus wallet jargon at
 R0/R1 (“wallet,” “keys,” “gas,” “sign,” “on-chain” — §10.1); plus *instant / anytime /
 no limits / all-in* near cash-out (§13); plus **emoji anywhere in UI strings, code, docs, or assets**, and **symbol characters
 doing icon work** — direction markers, the currency mark, toggle glyphs, and any other
