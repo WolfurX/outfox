@@ -1430,7 +1430,7 @@ Commons · Foxes.
 | **Boost / Boost on** | The Call-card toggle that arms a Signal Booster | §2.4 |
 | **clean chance** | The Call's success probability in prose (the bar's “Clean” side) | §2.4 |
 
-**Banned in player copy:** the `THEME-OUTFOX.md` §3 lists (gambling vocabulary, theft
+**Banned in player copy:** the `THEME-OUTFOX.md` §3 lists (casino vocabulary, theft
 verbs, trademark-adjacent names, including *all-in*) — to be CI-enforced (§21.2 string-lint; no CI yet, ARCHITECTURE A13); plus wallet jargon at
 R0/R1 (“wallet,” “keys,” “gas,” “sign,” “on-chain” — §10.1); plus *instant / anytime /
 no limits / all-in* near cash-out (§13); plus **emoji anywhere in UI strings, code, docs, or assets**, and **symbol characters
@@ -1476,5 +1476,5 @@ never appear in UI.
 | 16 | Quest-platform link-out assumption (Galxe/Layer3 accept on-chain/API verification) not re-verified against current docs; `frame-ancestors 'none'` makes embedding a renegotiation, not a code change | §3.2 |
 | 17 | Email deliverability is earned: sending-domain warm-up before launch or the one irreversible-value email (unbonding complete) lands in spam | §14.4, §21.3 |
 | 18 | Wide-layout scope creep (each list-detail screen = new QA surface ×3 breakpoints); launch scope pinned in §2.3 | §2.3 |
-| 19 | Telegram-policy rationale for dropping the TMA should be re-verified by counsel if the adapter is ever revived | §3.4 |
+| 19 | Telegram-policy rationale for dropping the TMA should be re-verified if the adapter is ever revived | §3.4 |
 | 20 | Outfox/$ALPHA availability checks pending; the §4.4 alias layer is the rename blast-radius containment — keep it until checks clear | §4.4, header |

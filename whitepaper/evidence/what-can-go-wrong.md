@@ -10,7 +10,7 @@ What is *not* green in that run, reported because we said we would: the token's 
 
 ## Identity is the load-bearing assumption
 
-Several defenses are per-identity: the sybil bounds, the whale-tail fix, the weekly caps. If cheap fake identities are available at scale, all of them weaken. Proof of personhood at cash-out and funding-graph analysis are the answers. The check's class is now chosen (document-and-liveness verification with biometric duplicate detection; the final provider is pinned at the legal review), but its real-world quality is still an open question, not a solved one. The simulation is explicit that this check is the binding sybil defense, and it will be measured live against the same bar.
+Several defenses are per-identity: the sybil bounds, the whale-tail fix, the weekly caps. If cheap fake identities are available at scale, all of them weaken. Proof of personhood at cash-out and funding-graph analysis are the answers. The check's class is now chosen (document-and-liveness verification with biometric duplicate detection; the final provider is pinned before mainnet), but its real-world quality is still an open question, not a solved one. The simulation is explicit that this check is the binding sybil defense, and it will be measured live against the same bar.
 
 ## The model has boundaries
 
@@ -20,9 +20,9 @@ External market dynamics are probed, not modeled. Player morale is not endogenou
 
 The economic design is validated in simulation; the majority of it is not yet code. [What exists today](../status/what-exists-today.md) is the honest inventory, and everything marked **\[designed]** in these pages belongs to the unbuilt column.
 
-## Legal review is a hard gate
+## Legal exposure
 
-A cashable token, combined with earning as a draw, combined with chance mechanics, can implicate gambling, securities, and money-transmission law simultaneously. The design carries deliberate mitigations, the chance/real-money firewall above all, but **mitigations are not clearance**, and this document does not assert any legal conclusion. Counsel before launch is a stated, non-negotiable gate, as is jurisdictional geofencing.
+A cashable token, combined with earning as a draw, combined with chance mechanics, can implicate gambling, securities, and money-transmission law simultaneously. The design carries deliberate mitigations, the chance/real-money firewall above all, but **mitigations are not clearance**, and this document does not assert any legal conclusion. The project does not run a formal legal review as a launch gate; that is an owner decision. Availability is restricted by jurisdictional geofencing, and the third-party audit remains the gate before any real money.
 
 ## If it fails
 

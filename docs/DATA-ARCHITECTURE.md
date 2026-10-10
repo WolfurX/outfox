@@ -76,8 +76,8 @@ server/indexer module builds against it.
 ## 5. Boundaries
 
 Chain data is public by nature; game-ledger events are internal. Nothing here creates a
-PII store: legal/retention review of the identity tables joins the counsel gate
-(`VALIDATION-BENCHMARKS.md` §4). A pre-publication redaction sweep applies to any published
+PII store: retention of the identity tables is an owner decision before mainnet (no
+legal-review gate, ARCHITECTURE A18). A pre-publication redaction sweep applies to any published
 dashboard or dataset.
 
 First published slice (2026-10-02): the public economy page (`GET /api/economy`,

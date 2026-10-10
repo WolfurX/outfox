@@ -99,7 +99,7 @@ the settlement program (`programs/`), the chain adapter and indexer
   signature, pause, rolling cap); every economic gate lives server-side and runs BEFORE
   a voucher is signed. Neither layer may weaken assuming the other will catch it.
 - **A professional third-party smart-contract + economic audit is a hard pre-mainnet
-  gate**, alongside the counsel gate. In-house hardening raises the floor; it is not a
+  gate.** In-house hardening raises the floor; it is not a
   substitute for an external audit of code that holds funds.
 
 ## Repo hygiene
@@ -109,7 +109,8 @@ the settlement program (`programs/`), the chain adapter and indexer
   internal documents live there; public files must not quote or cite their contents
   beyond the stubs already in `docs/`. Business, funding, and identity matters stay
   out of the public tree entirely.
-- **Legal counsel remains a hard pre-launch gate** (`VALIDATION-BENCHMARKS.md` §4);
-  nothing real-money goes live before it. Deployer/treasury key hygiene: fresh keys
+- **No legal-review gate (owner, 2026-10-10; ARCHITECTURE A18).** The third-party audit
+  is the gate before real money; jurisdiction is handled by geofencing. Mentions of a
+  counsel gate in frozen or historical docs are superseded. Deployer/treasury key hygiene: fresh keys
   per environment, hot/cold split (voucher signer is never the admin), and a multisig
   admin for anything real.

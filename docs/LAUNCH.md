@@ -9,8 +9,8 @@ on devnet (`programs/deployments/devnet-launch.md`). The join to settlement exis
 genesis mode (`GENESIS_MINT`, below) and is verified on a local validator with the full
 end-to-end run; **no deployment uses it yet**: the devnet settlement deployment still runs
 on the mint the earlier genesis created, and the beta gets its own program id, launch and
-genesis. Mainnet only behind the launch gates
-(third-party audit, counsel). This supersedes the earlier plan in which the operator
+genesis. Mainnet only behind the launch gate
+(the third-party audit; no legal-review gate, ARCHITECTURE A18). This supersedes the earlier plan in which the operator
 minted the supply to the treasury and seeded a pool with its own money.
 
 ## 1. What happens
@@ -138,8 +138,9 @@ pool shows 99.50% after one outside position.
   be final and permanently hosted before a mainnet launch.
 - **We depend on two programs we do not control.** Both are audited and widely used, and
   both can be upgraded by Meteora.
-- **A curve sale is a sale of tokens to the public.** That is exactly what the counsel
-  gate reviews. Nothing here goes to mainnet before the audit and counsel gates.
+- **A curve sale is a sale of tokens to the public.** Jurisdiction is handled by
+  geofencing; there is no legal-review gate (A18). Nothing here goes to mainnet before
+  the audit gate.
 - A buy that would overshoot the threshold fails; the last buy must be a partial fill.
   After completion the curve is closed both ways until the pool is created. Meteora runs
   keepers that graduate pools on mainnet; on devnet the script does it.

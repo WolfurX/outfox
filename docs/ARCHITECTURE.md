@@ -305,7 +305,7 @@ Documented in full in `wiki/chain-edge.md`, `programs/settlement/src/lib.rs`, an
 - Trust model: custodial by construction. A stolen hot key drains at most the window
   cap per rolling 24 h before the operator pauses. Admin can pause, rotate, and recap but
   cannot move funds. Mainnet prerequisites: multisig admin, fresh keys, third-party
-  audit, counsel.
+  audit.
 
 ## 11. Data and telemetry
 
@@ -425,7 +425,7 @@ cast went with it); both packages' tsc are gates.
 
 `INFRASTRUCTURE.md`. In one line each: local is chainless SQLite on `:8787` and `:5173`;
 dev+beta is one small VPS on devnet with SQLite behind Caddy; production is a separate
-larger box on mainnet with Postgres, and it exists only after the audit and counsel gates.
+larger box on mainnet with Postgres, and it exists only after the audit gate.
 
 ## 17. Scaling path
 
@@ -454,11 +454,12 @@ Each step has a trigger, so nothing is built ahead of need.
 | A8 | Jobs run in-process at beta; a separate worker unit at production | adopted 2026-09-12 (owner) |
 | A9 | Content catalog lives in `@outfox/shared` as code, not in the database, until live-ops needs to change content without a deploy | adopted for the slice; revisit with seasons |
 | A10 | PoP integrates as a server-side verification of the vendor's result, recorded as an `identity.*` event; the vendor's identifier is stored in the identity tables only, never in the ledger | adopted 2026-09-12 (owner); provider still the owner's call |
-| A11 | Convenience purchases (F3) are deposit-shaped: USDC arrives on-chain to a purchase address, the indexer credits the SKU; no card processor in the server | adopted 2026-09-12 (owner); rail choice couples to geofence and counsel |
+| A11 | Convenience purchases (F3) are deposit-shaped: USDC arrives on-chain to a purchase address, the indexer credits the SKU; no card processor in the server | adopted 2026-09-12 (owner); rail choice couples to the geofence |
 | A12 | npm workspaces monorepo: `packages/shared`, `apps/server`, `apps/web`, `programs/`, `sim/` | adopted (kickoff) |
 | A13 | No CI exists yet; the pipeline is defined in `INFRASTRUCTURE.md` §4 and is a pre-beta item | adopted 2026-09-12 (owner) |
 | A14 | Parameter changes go through a policy registry with change events before any live tuning; constants in code remain the published defaults | adopted 2026-09-12 (owner) |
 | A15 | $ALPHA gets a single mutation gate (`postAlpha` becomes the only writer of `alpha_lots` and `alpha_ledger`, together, inside `withTx`) and a per-player ledger-versus-lots drift audit beside `conservationAudit` | adopted 2026-09-12 (owner); built the same day with the module move, adversarially reviewed |
+| A18 | No legal-review gate. Legal review is not a launch gate; the third-party audit is the gate before real money, and jurisdiction is handled by geofencing. Player copy keeps casino vocabulary out (THEME-OUTFOX §3, narrowed the same day: odds, chance and luck are ordinary words). Mentions of a counsel gate in frozen or historical docs (`ECONOMY.md`, `VALIDATION-BENCHMARKS.md`, `PLAN.md`, `WHITEPAPER.md` v0.2, logs) are superseded by this entry | adopted 2026-10-10 (owner) |
 | A17 | Items carry effects and farmable items are consumables, used up inside the same transaction as the action they modify (an item row keeps its history: `consumed_at` marks it out of play). No NPC buyback: players set every item price. Every item effect is modelled in `sim/` behind a default-off switch, proven identical when off, and run through the standard and red-team gates with a matched control before it is adopted. First instance: the Signal Booster | adopted 2026-10-10 (owner); Signal Booster built and tested the same day, sim v7 |
 | A16 | $ALPHA and its first liquidity are created through Meteora: a Dynamic Bonding Curve pool creates the fixed-supply mint and graduates into a DAMM v2 pool whose launch liquidity is permanently locked (`LAUNCH.md`). The server shows the launch through a read-only public route that decodes the pools by byte offset; the Meteora SDK stays a scripts-only dev dependency and off the production box | adopted 2026-10-02 (owner); launch and view built and rehearsed on devnet, two adversarial review rounds; the join to settlement is a genesis mode (`GENESIS_MINT`), verified on a local validator, not yet used by a deployment |
 

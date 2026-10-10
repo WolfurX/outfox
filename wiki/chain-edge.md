@@ -28,7 +28,7 @@ withdrawal vouchers).
   Escrow ATA balance = on-chain PoR.
 - Voucher nonces are random u64 (matching the program's nonce space — 256-bit nonces
   were caught by the M4 rerun).
-- Mainnet gates: admin → multisig; third-party audit; legal counsel.
+- Mainnet gates: admin → multisig; third-party audit. (Legal counsel dropped as a gate 2026-10-10, A18.)
 
 ## Identity ladder (R0→R3) — SIWS era
 
@@ -68,7 +68,7 @@ BigInt base units at SPL 9dp (`ALPHA_BASE_UNITS`), seasoning clocks keyed by
 blockTime. M4 contract-in-the-loop is GREEN against the real program (LiteSVM), and
 the devnet e2e gate is PASSED (2026-08-28): deposit, forgery/replay rejection, pause,
 and PoR verified against the live devnet deployment. Mainnet remains behind the
-audit + counsel gates.
+audit gate (counsel dropped 2026-10-10, A18).
 
 **The $ALPHA carry — IMPLEMENTED** (`applyAlphaCarry`; ECONOMY §13.A + §13.D): idle
 decay 0.45%/day, 4.5%/day above the 250-$ALPHA shelter, lazy catch-up, capture →

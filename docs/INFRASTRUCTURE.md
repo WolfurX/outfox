@@ -12,7 +12,7 @@
 |---|---|---|---|---|---|---|
 | local | developer machine | off, or devnet by env | SQLite in `apps/server/` | `localhost:5173` (Vite) proxying `:8787` | throwaway devnet keys in `~/.config/outfox/devnet/` | the developer |
 | dev+beta | one small VPS (1 vCPU, 1 GB, swap) | devnet, chain id 1 | SQLite at `/var/lib/outfox/outfox.sqlite` | `outfoxgame.com`, live 2026-10-09 (Vultr sgp box `outfox-beta`) | fresh hot signer generated on the box; admin key stays cold | closed beta players, the operator |
-| production | a separate larger box (2 GB+) | mainnet, chain id 2, only after the audit and counsel gates | Postgres | `outfox.game` (apex versus subdomain for beta is an open owner call) | fresh keys; admin = multisig; signer never reused from beta | the public |
+| production | a separate larger box (2 GB+) | mainnet, chain id 2, only after the audit gate | Postgres | `outfox.game` (apex versus subdomain for beta is an open owner call) | fresh keys; admin = multisig; signer never reused from beta | the public |
 
 Rules: the two boxes never share anything and never co-host unrelated services; the web
 bundle is built locally and rsynced (the 1 GB box never builds); public beta surfaces

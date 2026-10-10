@@ -25,7 +25,8 @@
  *   LAUNCH_DIR=<dir>                 config + mint keypairs and launch.json (default: beside the payer key)
  *   OUTFOX_PROGRAM_ID=<pubkey>       optional off mainnet: `create` refuses when that settlement is
  *                                    already initialized (the game already has its token)
- *   LAUNCH_MAINNET_GATES=audit-and-counsel-passed   required for `create` on mainnet
+ *   LAUNCH_MAINNET_GATES=audit-passed   required for `create` on mainnet (the third-party audit;
+ *                                    no legal-review gate, ARCHITECTURE A18)
  *
  *   npx tsx scripts/launch.ts quote                      (not on mainnet) create the stand-in quote mint
  *   npx tsx scripts/launch.ts fund <pubkey> <amount>     (not on mainnet) mint stand-in quote to a wallet
@@ -389,8 +390,8 @@ const commands: Record<string, (args: string[]) => Promise<void>> = {
     const uri = env('LAUNCH_URI');
     const quote = quoteMint();
     if (MAINNET) {
-      if (process.env.LAUNCH_MAINNET_GATES !== 'audit-and-counsel-passed') {
-        throw new Error('mainnet launch is behind the audit and counsel gates (LAUNCH_MAINNET_GATES)');
+      if (process.env.LAUNCH_MAINNET_GATES !== 'audit-passed') {
+        throw new Error('mainnet launch is behind the audit gate (LAUNCH_MAINNET_GATES=audit-passed)');
       }
       if (quote.toBase58() !== MAINNET_USDC) throw new Error('on mainnet the quote mint must be USDC');
       if (!/^https:\/\//.test(uri) || /example\.(com|org)/.test(uri)) throw new Error('LAUNCH_URI must be the final, permanently hosted metadata file');

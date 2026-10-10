@@ -34,6 +34,6 @@ We bound it deliberately:
 * Value won by chance is **structurally walled off from real money**. There is no code path from a chance win to the cash-out door. See [The firewall](../the-economy/the-firewall.md).
 * Success probabilities are **stated to the player before they act**, not hidden. A Signal Booster changes the stated chance before the Call runs, never after it or out of sight.
 * Resolution is flat and immediate. No suspense build, no near-miss theatre, no escalating celebration; the reveal is capped at 320ms by design rule. The reveal must never *be* the reward.
-* Gambling vocabulary and imagery are banned from the product by its written copy rules, which every player-facing string is held to. An automated check in the build is planned, not yet in place.
+* Casino vocabulary and imagery stay out of the product: no bets, jackpots or loot boxes, by the written copy rules every player-facing string is held to.
 
-We are not going to tell you what legal category any of this falls into; that is for counsel and regulators, and the project treats legal review as a hard pre-launch gate. What we can tell you is what we built and why.
+We are not going to tell you what legal category any of this falls into; that is for regulators. What we can tell you is what we built and why.

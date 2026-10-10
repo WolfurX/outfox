@@ -80,8 +80,9 @@ product names (Gold, Legend, Cortex) and "Greenwood" (Tulsa connotation — henc
 
 **Banned framings:** theft/burglary verbs for the core loop ("steal," "rob," "loot" as UI
 verbs — use *raid, outtrade, take the other side, claim*); depictions of raiding real-world
-institutions; any gambling-vocabulary items from the TAPE blacklist (bet, odds, jackpot,
-house edge, parlay, loot box, spin/roll/pull); and never framing chance mechanics as
+institutions; casino vocabulary (bet, wager, jackpot, house edge, parlay, loot box,
+casino, slots; narrowed by the owner 2026-10-10: odds, chance and luck are ordinary words
+and allowed); and never framing chance mechanics as
 "prediction markets" or "event contracts" (active CFTC rulemaking category).
 
 **The tone test:** every line of copy should read as *sporting defiance* ("the Houses never
@@ -133,7 +134,7 @@ costume party.
 ## 7. Open items
 
 - Availability checks: **Outfox** (trademark/domain/handles; note Gamewright's *Outfoxed!*
-  kids' game — different class, counsel to confirm), $ALPHA ticker, The Hollow.
+  kids' game, a different class), $ALPHA ticker, The Hollow.
 - Art direction pass: terminal-noir + folk-hero iconography + the fox mascot (§6).
 - ~~Apply-the-rename decision: executed together with the pivot's governance unlock
   (`ROBINHOOD-FEASIBILITY.md` §6 condition 6), not before.~~ **DONE 2026-07-02** — the

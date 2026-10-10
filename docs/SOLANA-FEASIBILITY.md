@@ -25,8 +25,8 @@ Chain never answered that; Solana does:
    a tradable token, near-zero fees for the settlement edge, and an active builder/
    grants ecosystem. (Specific integration claims are in §4's verification queue, not
    asserted here.)
-3. **Counsel remains a hard pre-launch gate** regardless of chain (`CLAUDE.md`,
-   `VALIDATION-BENCHMARKS.md` §4).
+3. ~~Counsel remains a hard pre-launch gate~~ **Dropped 2026-10-10 (owner, ARCHITECTURE
+   A18):** no legal-review gate; the third-party audit is the gate before real money.
 
 ## 2. What carries over unchanged
 
@@ -79,14 +79,14 @@ asserted as fact yet)
   ramps cover day 0 at zero fixed cost; regional local-payment rails exist but
   concentrate in aggregator-only providers and must be re-verified against live
   quotes before launch-market commitments. The F3 rail choice remains coupled to
-  the geofence/counsel decision.
+  the geofence decision.
 - ~~PoP/R3 options in the Solana context.~~ **Verified 2026-08-28.** World ID is not
   viable as primary for our launch geography (suspended/halted in several SEA
   markets through 2025–26; its non-Orb credential path does not claim
   human-uniqueness), and Solana-native PoP no longer exists (Civic's uniqueness
   product sunset July 2025). The viable class is biometric-dedupe verification at
   cash-out, with zk-passport schemes as a possible privacy lane. Provider choice
-  remains the standing owner decision (couple with geofence + counsel); decision
+  remains the standing owner decision (couple with the geofence); decision
   brief is internal.
 - ~~DEX/liquidity venue for $ALPHA.~~ **Superseded in part 2026-10-02:** the pool is no
   longer seeded by the team. A Meteora bonding curve creates the mint and funds the
@@ -134,7 +134,7 @@ asserted as fact yet)
 | 1 | Sim decision-grade at ≥500 seeds | ✅ done (AUDIT-2, v5/v6 record) |
 | 2 | Written distribution plan | 🟡 exists (internal); revise for Solana (Phase C) |
 | 3 | Payments (F3) + auth answer | 🟡 auth answered (SIWS at the proven seam); F3 = §4 queue |
-| 4 | Legal Phase-0 review (counsel) | ⬜ unchanged, hard launch gate |
+| 4 | Legal Phase-0 review (counsel) | dropped as a gate 2026-10-10 (owner, A18) |
 | 5 | Retention re-baseline | ⬜ unchanged |
 | 6 | Governance unlock recorded | ✅ this document |
 

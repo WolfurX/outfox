@@ -8,7 +8,7 @@ $ALPHA mint and the settlement program, written to the semantics already verifie
 
 ## 2. Wallet and identity
 
-Wallet sign-in on Solana is built and wired into the existing guest → registered ladder. The cash-out verification class is chosen after a provider coverage study: document-and-liveness verification with biometric duplicate detection, the check the simulation identifies as the binding sybil defense (Orb-based verification was ruled out for our launch geography). Final provider selection is coupled to the legal review.
+Wallet sign-in on Solana is built and wired into the existing guest → registered ladder. The cash-out verification class is chosen after a provider coverage study: document-and-liveness verification with biometric duplicate detection, the check the simulation identifies as the binding sybil defense (Orb-based verification was ruled out for our launch geography). Final provider selection is made before mainnet.
 
 ## 3. Economy systems, one at a time
 
@@ -18,9 +18,9 @@ Staking/locking, the progressive carry, the Index, Skulks, Desks, the Commons. E
 
 The real-money on-ramp for convenience purchases, plus the notification and retention stack. On-ramp provider coverage for Solana has been verified: native USDC is carried broadly, so purchases price in USDC and day-one funding can lean on the ramps built into major Solana wallets, with a dedicated on-ramp widget following once the game's own revenue justifies it. Integration work still comes after the beta gates.
 
-## 5. Legal review and controlled beta
+## 5. Geofencing and controlled beta
 
-Counsel review of the chance/cashable-value separation, money-transmission exposure, and jurisdictional geofencing. **This is a hard gate: nothing real-money opens before it.** Then a closed beta on devnet economics, with the live dashboards from the specification running against real players for the first time.
+Jurisdictional geofencing is decided with the payment rail; there is no formal legal review as a gate (an owner decision, 2026-10-10). Then a closed beta on devnet economics, with the live dashboards from the specification running against real players for the first time.
 
 ## 6. Launch
 

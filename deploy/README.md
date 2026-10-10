@@ -12,7 +12,7 @@ services:
 | Env | Box | Chain | DB | Domain |
 |---|---|---|---|---|
 | **dev+beta** | Vultr `outfox-beta`, sgp, 1 vCPU / 1 GB (2.4 GB swap from the image), Debian 13, Node 24 (NodeSource) | devnet | SQLite | `outfoxgame.com`, live 2026-10-09 |
-| **production** | separate, larger box (2 GB+) | mainnet — exists only after the audit + counsel gates | PostgreSQL (migration queued) | `outfox.game` (whether beta takes the apex first is an open owner call) |
+| **production** | separate, larger box (2 GB+) | mainnet — exists only after the audit gate | PostgreSQL (migration queued) | `outfox.game` (whether beta takes the apex first is an open owner call) |
 
 Rules:
 

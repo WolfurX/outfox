@@ -363,10 +363,12 @@ in convenience only, never in cashable value or standing.
 
 Two rails. Convenience checkout priced in USD and settled in USDC from the player's
 wallet (F3; day-0 funding through wallet built-in ramps; rail choice couples to the
-geofence and counsel decisions). Primary $ALPHA sales (F4) with wealth-indexed
+geofence decision). Primary $ALPHA sales (F4) with wealth-indexed
 allocation. Money buys Focus and Risk Appetite refills, extra Desk and Market slots,
-cosmetics, faster regen, name reservations. Money never buys stats, guaranteed
-outcomes, or power items. Convenience spend is the real-money faucet that other Foxes
+cosmetics, faster regen, name reservations. The game never sells stats, guaranteed
+outcomes, or power items for money. Items earned in play, such as Signal Boosters, may
+trade between players at player prices, so money can reach them only through another
+player (owner, 2026-10-10). Convenience spend is the real-money faucet that other Foxes
 end up earning: the transfer-funded model. Operator revenue comes from the fiat side and
 from boundary fees only (`ECONOMY.md` §3); in-loop captured value is never profit.
 
@@ -396,8 +398,8 @@ those fail the game fails regardless of DAU.
 3. Regulatory exposure (chance plus cashable value plus loss aversion can touch gambling,
    securities, and money-transmission law): chance value cannot reach cash-out by
    construction; bounded behavioral mechanics; the Index separated from $ALPHA; no
-   appreciation marketing; PoP and fees at the boundary; counsel as a hard gate before
-   any real money.
+   appreciation marketing; PoP and fees at the boundary; geofencing by jurisdiction. No
+   legal-review gate (owner, 2026-10-10; ARCHITECTURE A18).
 4. Distribution: no host-app funnel on the open web. Founder receipts, the dApp
    Store TWA, Colosseum, the kill criteria in `PRD.md` §4.
 5. Platform: chain deplatforming risk is near zero; Discord is a dependency of the

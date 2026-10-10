@@ -180,7 +180,7 @@ before steps 2–5 (owner password required for the pacman half).
 | 7 | Payments/on-ramp (F3, USDG-first) | ⬜ blocked on rail verification (`ONRAMP-COVERAGE.md`) |
 | 8 | PoP: World ID at cash-out (R3) | ⬜ |
 | 9 | Retention stack | ⬜ |
-| 10 | Legal Phase-0 (geofence, MSB, counsel) | ⬜ hard launch gate |
+| 10 | Legal Phase-0 (geofence, MSB, counsel) | geofence open; counsel **dropped as a gate 2026-10-10** (owner, ARCHITECTURE A18) |
 | 11 | Distribution execution | plan adopted (`DISTRIBUTION-PLAN.md`), not started |
 
 ## Owner decisions — status (internal briefs, 2026-08-28)
@@ -196,7 +196,8 @@ per owner data 2026-08-28 — the owner's own Superteam payout experience; Didit
 fallback),
 POL depth at launch, op_take rates, grant-money boundary confirmation, counsel
 engagement (the hard gate; sharpest question: does cash-out make us a VASP → KYC
-mandatory anyway?).
+mandatory anyway?). *2026-10-10: the counsel gate is dropped (owner, A18); the VASP/KYC
+question stays open as an owner decision.*
 
 ## Open queues
 

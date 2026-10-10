@@ -35,7 +35,7 @@ fifth is the adversary the design assumes is present.
 | Bot / sybil | 8% (assumed) | multi-account extraction, funnel to one cash-out | nothing; the valve, seasoning, and PoP make the ROI negative, and the dashboards measure the leak |
 
 Secondary users: the operator (dashboards, pause, parameter changes by rule), auditors
-and counsel (the published parameters and the event record), and grant or hackathon
+(the published parameters and the event record), and grant or hackathon
 reviewers (the whitepaper and the evidence pages).
 
 ## 3. Goals and non-goals
@@ -44,8 +44,8 @@ Goals, in priority order (the order is the tie-breaker):
 
 1. An economy that holds the G1–G12 gate live, and not just in the sim.
 2. A first session that is fast, legible, and honest on a low-end Android browser.
-3. A cash-out path that is safe to open: audited program, counsel-cleared posture, PoP
-   at the gate, custody bounded by the window cap.
+3. A cash-out path that is safe to open: audited program, PoP at the gate, custody
+   bounded by the window cap.
 4. Retention from the game itself, measured with rewards removed.
 
 Non-goals (stated so nobody builds them by accident):
@@ -58,7 +58,7 @@ Non-goals (stated so nobody builds them by accident):
   structured (`DESIGN-SYSTEM-WEB.md` §16).
 - Pay-to-win of any kind. Money buys time, slots, and cosmetics.
 - A native app. The PWA is the product; the dApp Store listing is a TWA wrapper.
-- Any real-money surface before the audit and counsel gates.
+- Any real-money surface before the audit gate.
 
 ## 4. Success metrics and kill criteria
 
@@ -96,7 +96,7 @@ Releases are gated, not dated; each names its exit condition.
 | **R1 closed beta** | R0 on a real domain and box, devnet economics, real players, the dashboards live for the first time, CI gates, `/min-version`, idempotency keys, step-up auth, metric jobs, backups verified | hardening checklist clear; G1–G12 computed live for two weeks; D1/D7 measured | **blocked on purchases** (domain, VPS wait on the grant decision) |
 | **R2 economy systems** | one at a time behind the sim gate: Raids, staking and unbonding, progressive carry (built) and wealth-indexed issuance, Skulks, Desks, Seats, the Index, the Commons and Share-Out | each system: sim scenarios pass at full seeds, adversarial review if it touches money, a `verify-live` world | designed |
 | **R3 payments and retention** | F3 convenience checkout (USDC-first), PoP at cash-out, notifications (push, email, Discord mirror), referral loop, device handoff, settings IA | conversion and funnel events live; PoP false-reject budget met | owner decisions pending (rail, PoP provider) |
-| **R4 launch** | mainnet deploy under the custody model (multisig admin, fresh keys), published parameters, launch liquidity graduated from the curve and permanently locked (`LAUNCH.md`), the valve opening last | third-party audit passed; counsel cleared; beta gates held | gated |
+| **R4 launch** | mainnet deploy under the custody model (multisig admin, fresh keys), published parameters, launch liquidity graduated from the curve and permanently locked (`LAUNCH.md`), the valve opening last | third-party audit passed; beta gates held | gated |
 
 ## 6. Functional requirements
 
@@ -184,7 +184,7 @@ point at the rule; this table does not restate rules.
 | Id | Requirement | Acceptance | Status |
 |---|---|---|---|
 | FR-PAY-1 | Convenience checkout priced in USD, settled in USDC; day-0 funding through wallet built-in ramps | `SOLANA-FEASIBILITY.md` §4; A11 | Owner (rail), then build |
-| FR-PAY-2 | Money never buys stats or outcomes | catalog review; `GDD.md` §8 | Rule, enforced by review |
+| FR-PAY-2 | The game never sells stats, outcomes or power items for money; earned items (Signal Boosters) may trade between players | catalog review; `GDD.md` §8 | Rule, enforced by review |
 | FR-NOTIFY-1 | Push, email, Discord mirror with quiet hours and a daily rate limit; the permission ask is a designed moment | DSW §14 | Specified |
 | FR-REF-1 | Guest-play-first referral links with server-side first-touch attribution; rewards in convenience only | DSW §15 | Specified |
 | FR-SET-1 | Settings IA per DSW §2.5, including per-device toggles already shipped in the header | partial | Partial |
@@ -209,7 +209,7 @@ point at the rule; this table does not restate rules.
 | availability | beta: one box, restart on failure, healthz monitored; production: the §17 scaling path in `ARCHITECTURE.md`, target set at launch |
 | data | pseudonymous by construction; no PII in the event stream; identity tables separable; self-hosted analytics only |
 | security | the standing posture in `CLAUDE.md`; threat model in `ARCHITECTURE.md` §14; fresh keys per environment; hot/cold split; multisig admin before mainnet |
-| legal | counsel review is a hard launch gate; PoP at cash-out only; gambling vocabulary banned in product copy; chance value walled from cash-out structurally; geofence decision coupled to the on-ramp rail |
+| legal | no legal-review gate (owner, 2026-10-10, ARCHITECTURE A18); PoP at cash-out only; casino vocabulary kept out of product copy; chance value walled from cash-out structurally; geofence decision coupled to the on-ramp rail |
 | accessibility | live regions for tickers, focus management, keyboard map at Wide, text scaling (DSW §20) |
 | i18n | number and date formatting locale-proof; copy in English at launch; `id-ID` is the regression locale |
 | cost | beta runs on one small VPS and a domain; production sizing at launch (`INFRASTRUCTURE.md` §10) |
@@ -220,11 +220,11 @@ point at the rule; this table does not restate rules.
 | Item | Blocks | State |
 |---|---|---|
 | domain (`outfoxgame.com`) and a VPS | R1 beta deploy | bought 2026-10-09; beta live at https://outfoxgame.com |
-| R3 PoP provider | FR-ID-6, launch | owner decision pending; the provider brief is internal; couple with counsel and geofence |
+| R3 PoP provider | FR-ID-6, launch | owner decision pending; the provider brief is internal; couple with geofence |
 | on-ramp rail | FR-PAY-1 | couple with geofence |
 | `op_take_f3`, `op_take_wdfee` rates | FR-CH-7 | inside proven intervals [0, 0.9] and [0, 1.0] |
 | launch price band and depth | R4 | mechanism decided 2026-10-02 (`LAUNCH.md`): Meteora bonding curve into a locked DAMM v2 pool; the mainnet band and depth stay open, rehearsal values are in `LAUNCH` |
-| counsel engagement | R4, and architecture of FR-PAY-1 and FR-ID-6 | the hard gate |
+| counsel engagement | none: dropped as a gate 2026-10-10 (A18) | optional, the owner's call |
 | third-party audit of the program and economy | R4 | not engaged |
 | beta on the apex domain or a subdomain | R1 | recommendation: apex |
 
@@ -233,7 +233,7 @@ point at the rule; this table does not restate rules.
 | Risk | Mitigation in scope |
 |---|---|
 | economy fails live in a way the sim did not predict | live G1–G12 with alerting; parameter moves only inside swept intervals; new sim round before anything outside |
-| regulatory exposure of chance plus cashable value | the firewall, PoP at cash-out, banned vocabulary, counsel gate; no launch before it |
+| regulatory exposure of chance plus cashable value | the firewall, PoP at cash-out, casino vocabulary out of copy, geofencing; no legal-review gate by owner decision (A18) |
 | custody: hot key theft, insolvency | window cap, pause, PoR after every change, multisig admin |
 | distribution: no host-app funnel | the distribution plan's channel stack (internal), the dApp Store TWA, Colosseum; kill criteria if the band is missed |
 | sybil funnel past a weak PoP | provider chosen for dedupe quality; seasoning, vesting, weekly cap as the backstop; measured leak as the KPI |
@@ -245,5 +245,5 @@ point at the rule; this table does not restate rules.
 - Which systems enter R2 first: the recommendation is Raids (extends the built loop),
   then Skulks (the Skulk tab and the social layer), then the Commons (the Gini lever);
   Desks, Seats, and the Index after, since each needs a modeled scenario.
-- The Index's separation from $ALPHA is a design rule; counsel may ask for more.
+- The Index's separation from $ALPHA is a design rule.
 - Beta cohort size and invite mechanism (private link, or the Superteam community first).
