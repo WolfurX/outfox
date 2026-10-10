@@ -29,6 +29,7 @@ criteria** (sourced thresholds: [`docs/VALIDATION-BENCHMARKS.md`](../docs/VALIDA
 - `gate.py` — the G1–G12 criteria, all failable (see "What v2 fixed").
 - `run.py` — Monte-Carlo driver (`--procs` multiprocessing) + scorecard.
 - `sweep.py` — OAT sensitivity + 2-D safe-region sweep (5-scenario stress subset incl. funnel).
+- `probe_booster.py`: the Signal Booster consumable probe (v7, 2026-10-10), record `v7_booster_probe.txt`/`.json`.
 
 ## Run it
 ```bash
@@ -235,6 +236,46 @@ concentration that corner exposed. *(Reporting note:
 `bound_spend_frac` shows "OUTSIDE" only because the calibrated 0.56 is interior to but
 not one of the five swept points; all five pass and the validation ran at 0.56 —
 unchanged from v4.)*
+
+## v7 probe: Signal Booster consumable (2026-10-10)
+
+**Question (owner, after player feedback that items without an effect are junk):** can the
+one tool the slice drops, the Signal Booster (every 5th Gig, GDD §5.2), become a consumable
+that adds **+5 points to the success chance of one Call** (Exploit) and is then gone,
+without breaking the gate? GDD §5.1 already says "stats and tools shift the probability;
+chance stays bounded"; the sim had never modelled it (items were descoped, spec §16).
+
+**Wiring (`simulation.py`, DEFAULT_PARAMS "Signal Booster probe" block, default OFF):**
+drops pinned to Gig output (one per 5 × 90 Clean of F2), each Booster spent on one
+Squeeze-sized Exploit (success 0.40, 17.5 of the 50 Nerve; the Call where +5 points is
+worth most), raising that Exploit's Bound yield by pp/p (+12.5%); half of each day's drops
+sell on the Market to market-minded agents who can pay, at a player-set price in Clean
+(an input, swept), with the S3 fee captured. The extra Bound is ledgered as F1 mint;
+Clean moves zero-sum between players except the captured fee. Conservation stays exact.
+
+**Identity:** `booster_pp=0` reproduces the pre-booster engine (git 586f7c6) on every value
+of every daily row, 13 scenarios × 2 seeds × 720 days: 692,640 values, 0 mismatches. The
+off engine is therefore the v5 engine, and `v5_500.txt` / `v5_redteam_100.txt` are its
+Booster-off baselines at the same seeds.
+
+| Run | Seeds | Result |
+|---|---|---|
+| Standard gate, +5 points | 500 × 6 | **6/6 pass**, every criterion (v5 off: 6/6) |
+| Red-team, +5 points | 100 × 7 | **6/7 survive**; smart_sybil fails G11 at 6.08% (v5 off: 6.07%, the known PoP item) |
+| Extra Bound minted, as share of F1 | 500 | 1.42% at +5 points; 2.85% at +10; 5.70% at +20 (linear) |
+| Stress: +20 points, a Booster from every Gig | 50 | baseline passes all 12; extra Bound 28.27% of F1 |
+| Control, same 50 seeds | 50 | smart_sybil G11: off 6.20%, +5 points 6.20%, stress 6.21%; baseline G1 median 0.9815 / 0.9816 / 0.9833 |
+| Booster price 0 / 3 / 15¢ | 50 | no criterion moves (price is a transfer between players) |
+
+**Why the gate does not move:** the boost mints **Bound only**, which is spend-only and
+firewalled (G10 holds); supply is pinned to Gig output; sales are Clean transfers with the
+fee captured. Even the stress cell is absorbed by the sinks (G1 stays below 1.0).
+
+**What this does not show (do not over-read):** the Booster's market price is an input,
+not discovered; Exploit volume is Nerve-capped and unchanged by Boosters (no behavioural
+uplift is modelled); nothing here judges how paying Settled Scrip for better odds reads to
+players or to counsel; the sim's daily pacing is not the slice's demo pacing. Adopting the
+mechanic is an owner decision; `ECONOMY.md` and the GDD are unchanged by this probe.
 
 ## Historical — v2 FINAL results (superseded by v3 above)
 

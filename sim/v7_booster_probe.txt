@@ -1,0 +1,268 @@
+# Signal Booster probe: owner default +5 points on one Call, consumed
+# engine: simulation.py booster block; base for identity: git 586f7c6
+# params: trade_frac=0.5 price=3.0¢ call_p=0.4 call_cost=17.5 gig_clean=90.0 gig_every=5  horizon=720
+
+## Phase 0: identity (booster_pp=0 vs 586f7c6): scenarios=13 seeds=2 values compared=692,640 mismatches=0
+
+## Phase 1: standard gate, Booster ON, 500 seeds
+
+=== Scenario: baseline ===
+  final medians: N=888  M=960,787¢  e=94.7¢/$ALPHA  Gini=0.542  cashout=7,264,092¢  sybil=0.01%
+  crit   pass%        median   detail
+  OK G1     100%       0.9818   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -1244.2830   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0176   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)
+  OK G4     100%       0.0006   median mature CPI inflation in [−5%, +10%] (annualised)
+  OK G5     100%       0.9900   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.1972   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.5252   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=7.43)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0774   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0001   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6138   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  booster: dropped 226,579  used 221,613  held at end 205  traded 113,290 for 339,869¢ (fee captured 11,895¢)  extra Bound 1,157,043¢ = 1.42% of F1
+
+=== Scenario: whale_shock ===
+  final medians: N=888  M=959,360¢  e=94.5¢/$ALPHA  Gini=0.542  cashout=7,238,987¢  sybil=0.01%
+  crit   pass%        median   detail
+  OK G1     100%       0.9815   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -1114.2529   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0302   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)
+  OK G4     100%       0.0553   median mature CPI inflation in [−5%, +10%] (annualised)
+  OK G5     100%       0.9897   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.1965   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.5250   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=7.46)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0771   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0001   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6136   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  booster: dropped 226,579  used 221,613  held at end 205  traded 113,290 for 339,869¢ (fee captured 11,895¢)  extra Bound 1,157,043¢ = 1.42% of F1
+
+=== Scenario: plateau ===
+  final medians: N=395  M=427,096¢  e=94.1¢/$ALPHA  Gini=0.542  cashout=4,459,404¢  sybil=0.01%
+  crit   pass%        median   detail
+  OK G1     100%       0.9787   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -5804.4047   mean net Credit emission, t≥180 ≤ 0
+  OK G3      99%       0.0280   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)
+  OK G4     100%      -0.0043   median mature CPI inflation in [−5%, +10%] (annualised)
+  OK G5     100%       0.9857   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.1759   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.5272   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=7.96)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0855   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0001   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6116   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  booster: dropped 137,887  used 134,914  held at end 91  traded 68,944 for 206,831¢ (fee captured 7,239¢)  extra Bound 705,912¢ = 1.42% of F1
+
+=== Scenario: bot_attack ===
+  final medians: N=888  M=979,681¢  e=99.9¢/$ALPHA  Gini=0.598  cashout=5,614,273¢  sybil=0.06%
+  crit   pass%        median   detail
+  OK G1     100%       0.9815   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -1246.7200   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0168   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)
+  OK G4     100%       0.0033   median mature CPI inflation in [−5%, +10%] (annualised)
+  OK G5     100%       0.9900   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.1998   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.5854   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=6.97)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0759   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0006   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6076   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  booster: dropped 230,885  used 225,831  held at end 209  traded 115,442 for 346,327¢ (fee captured 12,121¢)  extra Bound 1,184,344¢ = 1.31% of F1
+
+=== Scenario: gresham ===
+  final medians: N=888  M=1,012,734¢  e=99.5¢/$ALPHA  Gini=0.544  cashout=7,525,351¢  sybil=0.01%
+  crit   pass%        median   detail
+  OK G1     100%       0.9746   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -2533.5017   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0168   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)
+  OK G4     100%       0.0043   median mature CPI inflation in [−5%, +10%] (annualised)
+  OK G5     100%       0.9904   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.1996   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.5269   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=7.48)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0768   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0001   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6127   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  booster: dropped 226,579  used 221,613  held at end 205  traded 113,290 for 339,869¢ (fee captured 11,895¢)  extra Bound 1,157,043¢ = 1.42% of F1
+
+=== Scenario: funnel ===
+  final medians: N=888  M=974,204¢  e=99.8¢/$ALPHA  Gini=0.607  cashout=6,123,365¢  sybil=1.24%
+  crit   pass%        median   detail
+  OK G1     100%       0.9814   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -1238.8571   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0167   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)
+  OK G4     100%       0.0033   median mature CPI inflation in [−5%, +10%] (annualised)
+  OK G5     100%       0.9904   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.2029   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.5950   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=6.14)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0764   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0124   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6086   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  booster: dropped 229,840  used 224,815  held at end 208  traded 114,920 for 344,759¢ (fee captured 12,067¢)  extra Bound 1,177,649¢ = 1.33% of F1
+
+>>> standard: ALL PASS
+
+## Phase 2: red-team gate, Booster ON, 100 seeds (G3/G4 diagnostic)
+
+=== Scenario: demurrage_flight === [red-team: G3/G4 diagnostic]
+  final medians: N=884  M=949,779¢  e=151.8¢/$ALPHA  Gini=0.567  cashout=11,636,354¢  sybil=0.00%
+  crit   pass%        median   detail
+  OK G1     100%       0.9847   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%    -774.1355   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0199   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)  [diagnostic under attack]
+  OK G4     100%       0.0103   median mature CPI inflation in [−5%, +10%] (annualised)  [diagnostic under attack]
+  OK G5     100%       0.9815   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.2048   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.5473   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=6.97)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.1202   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0000   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6319   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  booster: dropped 226,121  used 221,148  held at end 204  traded 113,060 for 339,181¢ (fee captured 11,871¢)  extra Bound 1,153,971¢ = 1.42% of F1
+
+=== Scenario: bank_run === [red-team: G3/G4 diagnostic]
+  final medians: N=884  M=952,133¢  e=85.0¢/$ALPHA  Gini=0.533  cashout=6,661,207¢  sybil=0.01%
+  crit   pass%        median   detail
+  OK G1     100%       0.9725   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -2533.0190   mean net Credit emission, t≥180 ≤ 0
+  DG G3       0%       0.1492   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)  [diagnostic under attack]
+  DG G4      24%      -0.0571   median mature CPI inflation in [−5%, +10%] (annualised)  [diagnostic under attack]
+  OK G5     100%       0.9631   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.2116   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.5143   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=7.05)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.1393   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0001   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6156   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  booster: dropped 226,121  used 221,148  held at end 204  traded 113,060 for 339,181¢ (fee captured 11,871¢)  extra Bound 1,153,971¢ = 1.42% of F1
+
+=== Scenario: smart_sybil === [red-team: G3/G4 diagnostic]
+  final medians: N=881  M=973,698¢  e=100.0¢/$ALPHA  Gini=0.615  cashout=5,933,846¢  sybil=6.08%
+  crit   pass%        median   detail
+  OK G1     100%       0.9816   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -1235.4922   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0176   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)  [diagnostic under attack]
+  OK G4     100%       0.0021   median mature CPI inflation in [−5%, +10%] (annualised)  [diagnostic under attack]
+  OK G5     100%       0.9902   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.2023   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.6028   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=7.22)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0764   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  XX G11      0%       0.0608   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6034   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE FAIL (see XX/~ rows)
+  booster: dropped 231,256  used 226,196  held at end 207  traded 115,628 for 346,885¢ (fee captured 12,141¢)  extra Bound 1,187,552¢ = 1.31% of F1
+
+=== Scenario: floor_split === [red-team: G3/G4 diagnostic]
+  final medians: N=884  M=977,644¢  e=96.4¢/$ALPHA  Gini=0.544  cashout=7,354,032¢  sybil=0.01%
+  crit   pass%        median   detail
+  OK G1     100%       0.9845   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%    -995.4430   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0167   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)  [diagnostic under attack]
+  OK G4     100%      -0.0055   median mature CPI inflation in [−5%, +10%] (annualised)  [diagnostic under attack]
+  OK G5     100%       0.9922   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.1942   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.5251   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=7.12)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0837   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0001   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6142   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  booster: dropped 226,121  used 221,148  held at end 204  traded 113,060 for 339,181¢ (fee captured 11,871¢)  extra Bound 1,153,971¢ = 1.42% of F1
+
+=== Scenario: pump_dump === [red-team: G3/G4 diagnostic]
+  final medians: N=884  M=1,238,133¢  e=39.7¢/$ALPHA  Gini=0.468  cashout=6,115,848¢  sybil=0.01%
+  crit   pass%        median   detail
+  OK G1     100%       0.9655   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -4731.2963   mean net Credit emission, t≥180 ≤ 0
+  DG G3       0%       0.9464   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)  [diagnostic under attack]
+  DG G4      76%      -0.0406   median mature CPI inflation in [−5%, +10%] (annualised)  [diagnostic under attack]
+  OK G5     100%       1.0086   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.2442   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.4927   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=7.74)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0861   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0001   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6398   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  booster: dropped 226,121  used 221,148  held at end 204  traded 113,060 for 339,181¢ (fee captured 11,871¢)  extra Bound 1,153,971¢ = 1.42% of F1
+
+=== Scenario: confidence_crisis === [red-team: G3/G4 diagnostic]
+  final medians: N=881  M=955,955¢  e=93.1¢/$ALPHA  Gini=0.541  cashout=6,532,054¢  sybil=0.01%
+  crit   pass%        median   detail
+  OK G1     100%       0.9871   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -1226.9927   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0248   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)  [diagnostic under attack]
+  OK G4     100%       0.0629   median mature CPI inflation in [−5%, +10%] (annualised)  [diagnostic under attack]
+  OK G5     100%       0.9923   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.2073   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.5285   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=7.41)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0760   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0001   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.6223   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  booster: dropped 227,064  used 222,135  held at end 203  traded 113,532 for 340,596¢ (fee captured 11,921¢)  extra Bound 1,159,375¢ = 1.42% of F1
+
+=== Scenario: whale_market === [red-team: G3/G4 diagnostic]
+  final medians: N=881  M=956,466¢  e=65.0¢/$ALPHA  Gini=0.659  cashout=5,022,951¢  sybil=0.02%
+  crit   pass%        median   detail
+  OK G1     100%       0.9798   cumulative faucet:sink (2nd half) ≤ 1.0
+  OK G2     100%   -1418.4043   mean net Credit emission, t≥180 ≤ 0
+  OK G3     100%       0.0180   p95 |30-day smoothed M/Q growth| ≤ 5%/mo (mature window)  [diagnostic under attack]
+  OK G4     100%      -0.0039   median mature CPI inflation in [−5%, +10%] (annualised)  [diagnostic under attack]
+  OK G5     100%       0.9959   credit velocity end ≥ 0.5× mid (no collapse)
+  OK G6     100%       0.3575   median mature $ALPHA velocity in [0.02, 30]×/month
+  OK G7     100%       0.6529   median wealth Gini ≤ 0.70 AND Pareto α ≥ 2 (α=2.80)
+  OK G8     100%       1.0000   CAPTURE share of cumulative sink volume ≥ 50% (sinks accrue value)
+  OK G9     100%       1.0605   no hoard/dump split: e∈[0.2,5]×e0 and price <3×
+  OK G10    100%       0.0000   unexplained Bound (chance-origin) outflow = 0 (ledger-verified)
+  OK G11    100%       0.0002   sybil share of realized cash-out value < 5%
+  OK G12    100%       0.7238   ledgers conserve ($ALPHA resid=0.00, ¢ resid=0.00) AND exit-Gini < 0.85
+  >>> GATE PASS
+  booster: dropped 227,064  used 222,135  held at end 203  traded 113,532 for 340,596¢ (fee captured 11,921¢)  extra Bound 1,159,375¢ = 1.42% of F1
+
+>>> red-team: NOT ALL SURVIVE
+
+## Phase 3: margin grid, 50 seeds per cell (pass% of the 12 or survival criteria)
+     pp  price every |  baseline: min pass%  extra Bound/F1 | smart_sybil: survival min%  G11 med
+   0.05    0.0     5 |                  100           1.42% |                          0   0.0620
+   0.05    3.0     5 |                  100           1.42% |                          0   0.0620
+   0.05   15.0     5 |                  100           1.42% |                          0   0.0621
+   0.10    0.0     5 |                  100           2.84% |                          0   0.0620
+   0.10    3.0     5 |                  100           2.85% |                          0   0.0620
+   0.10   15.0     5 |                  100           2.85% |                          0   0.0621
+   0.20    0.0     5 |                  100           5.68% |                          0   0.0620
+   0.20    3.0     5 |                  100           5.70% |                          0   0.0620
+   0.20   15.0     5 |                  100           5.70% |                          0   0.0621
+   0.20    3.0     1 |                  100          28.27% |                          0   0.0621
+
+## Phase 3b: control at 50 seeds: Booster OFF vs ON, same seeds
+  baseline     off              G11 median 0.0001  G1 median 0.9815  Gini 0.543  extra Bound 0.00% of F1  below 95%: none
+  baseline     +5pp owner       G11 median 0.0001  G1 median 0.9816  Gini 0.543  extra Bound 1.42% of F1  below 95%: none
+  baseline     +20pp every Gig  G11 median 0.0001  G1 median 0.9833  Gini 0.542  extra Bound 28.27% of F1  below 95%: none
+  smart_sybil  off              G11 median 0.0620  G1 median 0.9815  Gini 0.615  extra Bound 0.00% of F1  below 95%: G11 0%
+  smart_sybil  +5pp owner       G11 median 0.0620  G1 median 0.9815  Gini 0.615  extra Bound 1.31% of F1  below 95%: G11 0%
+  smart_sybil  +20pp every Gig  G11 median 0.0621  G1 median 0.9831  Gini 0.614  extra Bound 25.81% of F1  below 95%: G11 0%

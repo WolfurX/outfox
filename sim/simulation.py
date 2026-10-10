@@ -184,6 +184,25 @@ DEFAULT_PARAMS = dict(
     # multiplicative CPI integrator — see README); re-enable only with a basket CPI.
     recycle_kp=0.0,
     recycle_max=0.030,
+    # Signal Booster probe (2026-10-10, owner "start the simulation"): the one tool the
+    # slice drops (every 5th Gig) becomes a CONSUMABLE that adds booster_pp to the
+    # success chance of one Exploit, then is gone. Default booster_pp=0 is the v6
+    # engine exactly: no extra RNG draws, no state touched (identity check in
+    # v7_booster_probe.txt). Units follow the slice's published numbers (GDD §5.1-5.2):
+    # a Gig pays 90 Clean and drops a tool every 5th; the rational target for a
+    # Booster is the Exploit where +pp is worth most, Squeeze the Basket (success 0.40,
+    # 35 of a 100 bar = 17.5 of the sim's 50 Nerve). A boosted Exploit's Bound yield
+    # rises by booster_pp / booster_call_p (+12.5% at +5pp on Squeeze).
+    booster_pp=0.0,
+    booster_call_p=0.40,
+    booster_call_cost=17.5,
+    booster_gig_clean=90.0,
+    booster_gig_every=5,
+    # a share of each day's drops goes to the Market at a player-set price in Clean
+    # (the sim takes it as an input and sweeps it); buyers are market-minded agents
+    # who can pay; the S3 fee (phi_market) is captured like any Market sale
+    booster_trade_frac=0.5,
+    booster_price=3.0,
     seed=0,
 )
 
@@ -294,6 +313,7 @@ class Sim:
         self.is_adv = np.zeros(N, bool)
         self.ALPHA_unseasoned = np.zeros(N)  # newly acquired $ALPHA (pays surcharge at exit)
         self.ALPHA_unbonding = np.zeros(N)   # unstake requests aging toward liquid
+        self.boost_inv = np.zeros(N)         # Signal Boosters held (expected count; probe)
 
         # ---- $ALPHA ledger (all in $ALPHA units; must sum to alpha_max every tick) ----
         self.R_credit = p["amm_credit0"] * p["amm_depth_mult"]
@@ -324,6 +344,13 @@ class Sim:
         self.cashout_by_bot = 0.0
         self.sink_captured = 0.0         # cumulative CAPTURE-tagged sink volume (¢)
         self.sink_dead = 0.0             # cumulative dead/destroyed sink volume (¢)
+        # Signal Booster probe accumulators (all stay 0 with booster_pp=0)
+        self.boost_dropped = 0.0
+        self.boost_used = 0.0
+        self.boost_bonus_bound = 0.0     # extra Bound minted by boosted Exploits
+        self.boost_traded = 0.0          # Boosters that changed hands on the Market
+        self.boost_trade_value = 0.0     # Clean paid for them (fee included)
+        self.f1_base_bound = 0.0         # Bound F1 would have minted unboosted
 
         # ---- CPI / policy state ----
         self.P = 1.0
@@ -439,7 +466,8 @@ class Sim:
         self.exited_hist.extend(wdl[wdl > 0].tolist())
         self.active[leaving] = False
         for arr in (self.C_clean, self.C_bound, self.ALPHA_liquid, self.ALPHA_staked,
-                    self.ALPHA_unseasoned, self.ALPHA_unbonding, self.compute, self.nerve):
+                    self.ALPHA_unseasoned, self.ALPHA_unbonding, self.compute, self.nerve,
+                    self.boost_inv):
             arr[leaving] = 0.0
         self.verified[leaving] = False
         self.is_mule[leaving] = False    # audit fix: stale mule flags blocked replacement
@@ -465,6 +493,18 @@ class Sim:
         vr = self.rng.lognormal(0.0, p["f1_var"], p["n_max"])
         bound_gain = np.where(a, nerve_spent * p["f1_yield"]
                               * (0.5 + 0.5 * np.tanh(self.stats / 5)) * vr, 0.0)
+        if p["booster_pp"] > 0:
+            # each held Booster boosts one Squeeze-sized Exploit today, then is consumed
+            self.f1_base_bound += float(bound_gain.sum())
+            calls = nerve_spent / p["booster_call_cost"]
+            used = np.where(a, np.minimum(self.boost_inv, calls), 0.0)
+            bonus = np.where(a, used * p["booster_call_cost"] * p["f1_yield"]
+                             * (0.5 + 0.5 * np.tanh(self.stats / 5)) * vr
+                             * (p["booster_pp"] / p["booster_call_p"]), 0.0)
+            bound_gain = bound_gain + bonus          # a chance-origin mint, ledgered as F1
+            self.boost_inv -= used
+            self.boost_used += float(used.sum())
+            self.boost_bonus_bound += float(bonus.sum())
         self.C_bound += bound_gain
         self.nerve -= nerve_spent
         mint_bound += float(bound_gain.sum())
@@ -482,6 +522,13 @@ class Sim:
         self.treasury_credits += float(upkeep.sum())
         sink_removed += float(upkeep.sum())
         self.sink_captured += float(upkeep.sum())
+        boost_offered = None
+        if p["booster_pp"] > 0:
+            # deterministic pity: one Booster per booster_gig_every Gigs of Clean output
+            drops = np.where(a, clean_gain / (p["booster_gig_clean"] * p["booster_gig_every"]), 0.0)
+            self.boost_inv += drops
+            self.boost_dropped += float(drops.sum())
+            boost_offered = drops * p["booster_trade_frac"]
 
         # --- demand elasticity (audit-2): external demand is PROCYCLICAL in e ---
         dmult = float(np.clip((self.e_fast / max(self.e_slow, 1e-9)) ** p["demand_gamma"],
@@ -532,6 +579,29 @@ class Sim:
         # --- Market / PvP transfers (zero-sum) + fee S3 ---
         trade_vol = (self.C_clean * beh[:, 1] * 0.5) * a
         self._trade_volume = float(trade_vol.sum())   # Market volume (G5 velocity input)
+        if boost_offered is not None and p["booster_price"] > 0:
+            # Booster sales: market-minded buyers who can pay take today's offered
+            # Boosters pro rata; sellers deliver pro rata to what sold. Zero-sum in
+            # Clean except the captured S3 fee (conservation-exact).
+            price = p["booster_price"]
+            q_off = float(boost_offered.sum())
+            w = np.where(a & (self.C_clean >= price), beh[:, 1], 0.0)
+            wsum = float(w.sum())
+            if q_off > 0 and wsum > 0:
+                got = np.minimum(q_off * w / wsum, self.C_clean / price)
+                sold = float(got.sum())
+                delivered = boost_offered * (sold / q_off)
+                self.boost_inv += got - delivered
+                value = sold * price
+                bfee = value * p["phi_market"]
+                self.C_clean -= got * price
+                self.C_clean += delivered * price * (1.0 - p["phi_market"])
+                self.treasury_credits += bfee
+                sink_removed += bfee
+                self.sink_captured += bfee
+                self._trade_volume += value
+                self.boost_traded += sold
+                self.boost_trade_value += value
         fee = trade_vol * p["phi_market"]
         self.C_clean -= fee
         self.treasury_credits += float(fee.sum())
@@ -1034,6 +1104,10 @@ class Sim:
             wd_released=self.wd_released_tick, wd_escrow=self.ALPHA_escrow,
             sybil_share=sybil_share, chance_leak=self.chance_leak_total,
             alpha_resid=self.alpha_resid_max, credit_resid=self.credit_resid_max,
+            boost_dropped=self.boost_dropped, boost_used=self.boost_used,
+            boost_held=float(self.boost_inv[a].sum()), boost_traded=self.boost_traded,
+            boost_trade_value=self.boost_trade_value, boost_bonus_bound=self.boost_bonus_bound,
+            f1_base_bound=self.f1_base_bound,
             reserve_ok=bool(self.alpha_resid_max < 1e-3 * self.p["alpha_max"]
                             and self.credit_resid_max < max(1e-3 * self.cum_credit_mint, 1.0)),
         )
