@@ -17,8 +17,9 @@ export function listItem(db: DB, playerId: number, itemId: number, price: number
     throw new EngineError('bad_amount', 'price must be between 1 and 1,000,000 Scrip');
   }
   const item = db.prepare(`SELECT * FROM items WHERE id = ?`).get(itemId) as
-    { id: number; owner_id: number; listed: number } | undefined;
+    { id: number; owner_id: number; listed: number; consumed_at: number | null } | undefined;
   if (!item || item.owner_id !== playerId) throw new EngineError('not_yours', 'not your item');
+  if (item.consumed_at !== null) throw new EngineError('used_up', 'that item is used up');
   if (item.listed) throw new EngineError('already_listed', 'already on the book');
   withTx(db, () => {
     db.prepare(`UPDATE items SET listed = 1 WHERE id = ?`).run(itemId);

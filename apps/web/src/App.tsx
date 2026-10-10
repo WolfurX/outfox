@@ -3,7 +3,7 @@ import type {
   BootstrapResponse, CallDef, CallResult, ItemKind, LedgerRow, ListingView, PlayerView,
 } from '@outfox/shared';
 import {
-  GIG, ITEM_KINDS, MARKET_FEE_BPS, REFILL, REGEN, UNSETTLED_EXPLAINER,
+  BOOSTER, BOOSTER_EFFECT, GIG, ITEM_KINDS, MARKET_FEE_BPS, REFILL, REGEN, UNSETTLED_EXPLAINER,
 } from '@outfox/shared';
 import {
   Activity, ChevronRight, Crosshair, Gauge, Landmark, Moon, Signpost, Store, Sun, TriangleAlert, WifiOff,
@@ -161,9 +161,9 @@ export default function App() {
   }, [absorb]);
 
   /** Shared by the Tape rows and the FTUE beat — the first resolved Call ends FTUE. */
-  const doCall = useCallback(async (id: string) => {
+  const doCall = useCallback(async (id: string, boost = false) => {
     fx.emit('press');
-    const r = await run(() => api.call(id));
+    const r = await run(() => api.call(id, boost));
     const result = (r as { result?: CallResult } | null)?.result;
     if (!result) return;
     if (result.ok) {
@@ -178,11 +178,11 @@ export default function App() {
       ? {
           actionId: id, kind: 'clean', seq: ++seq.current,
           text: `Filled +${result.payout.toLocaleString()} Scrip`,
-          note: 'Unsettled — spend-only',
+          note: result.boosted ? 'Booster used. Unsettled, spend-only' : 'Unsettled — spend-only',
         }
       : {
           actionId: id, kind: 'nicked', seq: ++seq.current,
-          text: 'Nicked', note: 'The Sheriff saw it coming',
+          text: 'Nicked', note: result.boosted ? 'Booster used. The Sheriff saw it coming' : 'The Sheriff saw it coming',
         });
     setFtueDone((done) => {
       if (!done) { try { localStorage.setItem('outfox.ftue', 'done'); } catch { /* private mode */ } }
@@ -322,7 +322,8 @@ export default function App() {
                   setFeedback(tool
                     ? {
                         actionId: GIG.id, kind: 'clean', seq: ++seq.current,
-                        text: `${ITEM_KINDS[tool].name} earned`, note: 'In your kit',
+                        text: `${ITEM_KINDS[tool].name} earned`,
+                        note: tool === BOOSTER.item ? 'In your kit. Use it on a Call' : 'In your kit',
                       }
                     : {
                         actionId: GIG.id, kind: 'clean', seq: ++seq.current,
@@ -435,9 +436,15 @@ function Ftue({ call, onCall }: { call: CallDef; onCall: (id: string) => Promise
 function Tape(props: {
   player: PlayerView; boot: BootstrapResponse; srvNow: number; feedback: Feedback;
   landing: 'gigs' | 'calls' | null; onLanded: () => void;
-  onCall: (id: string) => void; onGig: () => void; onRefill: (bar: 'focus' | 'risk') => void;
+  onCall: (id: string, boost: boolean) => void; onGig: () => void; onRefill: (bar: 'focus' | 'risk') => void;
 }) {
   const { player: p, boot, srvNow, feedback } = props;
+
+  // Signal Boosters in play (owned, not on the book). Arming one applies it to the next
+  // run of that Call only; the server uses it up whatever the outcome.
+  const boosters = p.items.filter((i) => i.kind === BOOSTER.item && !i.listed).length;
+  const [armed, setArmed] = useState<string | null>(null);
+  const armedId = boosters > 0 ? armed : null;
 
   // Your Book scrolls away under the Calls and Gigs; once it does, a one-line copy of it
   // pins to the top so a payout is seen landing while the thumb is still on the button.
@@ -521,6 +528,8 @@ function Tape(props: {
         {boot.catalog.calls.map((c) => {
           const wait = cd(c.id);
           const blocked = wait > 0 || risk < c.riskCost;
+          const on = armedId === c.id;
+          const pct = (on ? Math.min(c.successP + BOOSTER.pp, BOOSTER.maxP) : c.successP) * 100;
           return (
             <ActionRow
               key={c.id}
@@ -535,10 +544,22 @@ function Tape(props: {
               }
               action={
                 <div style={{ display: 'grid', gap: 'var(--space-2)', justifyItems: 'stretch', minWidth: 132 }}>
-                  <SplitBar successPct={c.successP * 100} />
-                  <Button variant="primary" size="sm" disabled={blocked} onClick={() => props.onCall(c.id)}>
-                    {wait > 0 ? `${wait}s` : risk < c.riskCost ? 'Low Risk' : 'Run it'}
+                  <SplitBar successPct={pct} />
+                  <Button
+                    variant="primary" size="sm" disabled={blocked}
+                    onClick={() => { props.onCall(c.id, on); if (on) setArmed(null); }}
+                  >
+                    {wait > 0 ? `${wait}s` : risk < c.riskCost ? 'Low Risk' : on ? `Run it +${Math.round(BOOSTER.pp * 100)}` : 'Run it'}
                   </Button>
+                  {boosters > 0 && (
+                    <Button
+                      variant="ghost" size="sm" aria-pressed={on}
+                      aria-label={on ? 'Booster armed for this Call. Tap to disarm' : `Use a Signal Booster on this Call, ${boosters} left`}
+                      onClick={() => setArmed(on ? null : c.id)}
+                    >
+                      {on ? `Boost on · ${boosters}` : `Boost · ${boosters}`}
+                    </Button>
+                  )}
                 </div>
               }
               result={resultFor(c.id)}
@@ -556,7 +577,7 @@ function Tape(props: {
               <span>Focus {boot.catalog.gig.focusCost}</span>
               <span>Pays {boot.catalog.gig.payout}</span>
               <Chip tone="up">Settled</Chip>
-              <span>Tool {p.gigCount % boot.catalog.gig.toolEvery}/{boot.catalog.gig.toolEvery}</span>
+              <span>Booster {p.gigCount % boot.catalog.gig.toolEvery}/{boot.catalog.gig.toolEvery}</span>
             </>
           }
           action={
@@ -643,7 +664,12 @@ function Market(props: {
               key={l.id}
               lead={<ItemThumb kind={l.itemKind} />}
               title={kindName(l.itemKind)}
-              sub={l.mine ? 'Your listing' : l.seller}
+              sub={
+                <>
+                  {l.mine ? 'Your listing' : l.seller}
+                  {l.itemKind === BOOSTER.item && <span className="ofx-row__effect">{BOOSTER_EFFECT}</span>}
+                </>
+              }
               trail={
                 <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
                   <Amount value={l.price} unit="Scrip" />
@@ -682,6 +708,7 @@ function Market(props: {
               sub={
                 <>
                   {ITEM_KINDS[i.kind].desc} {ITEM_KINDS[i.kind].source}
+                  {i.kind === BOOSTER.item && <span className="ofx-row__effect">{BOOSTER_EFFECT}</span>}
                   {net !== null && (
                     <span className="ofx-row__net">You get {net.toLocaleString()} Settled after the {feePct}% fee.</span>
                   )}

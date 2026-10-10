@@ -228,5 +228,11 @@ export function openDb(path: string): DB {
     db.exec(`ALTER TABLE players ADD COLUMN alpha_carry_at INTEGER NOT NULL DEFAULT 0`);
     db.prepare(`UPDATE players SET alpha_carry_at = ?`).run(Date.now());
   }
+  // Migration: consumables (Signal Booster, 2026-10-10). A used item keeps its row and
+  // history; consumed_at marks it gone from play. NULL = still in play.
+  const itemCols = db.prepare(`PRAGMA table_info(items)`).all() as { name: string }[];
+  if (!itemCols.some((c) => c.name === 'consumed_at')) {
+    db.exec(`ALTER TABLE items ADD COLUMN consumed_at INTEGER`);
+  }
   return db;
 }

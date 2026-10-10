@@ -144,6 +144,12 @@ thumb is still on the action. It is a visual duplicate (`aria-hidden`; the live 
 already speaks every result). A changed figure replays one flat tint of its provenance
 color, the same short print for every amount (§8.2: no escalation by payout size).
 
+**Boost (Call cards, 2026-10-10):** while the player holds a Signal Booster in play, each
+Call card shows a Boost toggle under its run button. Arming it shows the boosted clean
+chance on that card's bar and labels the run button with the boost before anything runs; the
+result note says a Booster was used. A Booster never changes a chance after the fact or out
+of sight (§8.2 applies unchanged).
+
 **The Street (screen spec):** a district panel list — one `Card`/`ListRow` per district
 (The Floor, Options Alley, The Pit, The Dark Pool, The Vault, After Hours, The Hollow)
 showing the district's state and entry points. Districts whose system lives on The Tape
@@ -1420,6 +1426,9 @@ Commons · Foxes.
 | **foxtag** | Player handle in referral URLs | §15 |
 | **Your Recruits** | Referral/invite surface (never “Your Band” — *the Band* canonically means the Skulk — and never the unregistered “Skulk-mates”) | §15 |
 | **Quiet hours** | Notification window setting (never “After Hours”) | §14.4 |
+| **Signal Booster** | The consumable tool from Gigs (GDD §5.1) | §2.4 |
+| **Boost / Boost on** | The Call-card toggle that arms a Signal Booster | §2.4 |
+| **clean chance** | The Call's success probability in prose (the bar's “Clean” side) | §2.4 |
 
 **Banned in player copy:** the `THEME-OUTFOX.md` §3 lists (gambling vocabulary, theft
 verbs, trademark-adjacent names, including *all-in*) — CI-enforced; plus wallet jargon at

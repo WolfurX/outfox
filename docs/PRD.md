@@ -123,7 +123,8 @@ point at the rule; this table does not restate rules.
 |---|---|---|---|
 | FR-LOOP-1 | Calls show their probability before the player commits; the server resolves the outcome; a failure is Nicked with a longer cooldown | catalog in `@outfox/shared`; `engine.test.ts` | Built |
 | FR-LOOP-2 | Call payouts land as Unsettled Scrip and can never be transferred, listed, or exchanged | engine tests; G10 | Built |
-| FR-LOOP-3 | Gigs pay deterministic Settled Scrip and a tool every Nth completion (pity, not chance) | engine tests | Built |
+| FR-LOOP-3 | Gigs pay deterministic Settled Scrip and a Signal Booster every Nth completion (pity, not chance) | engine tests | Built |
+| FR-LOOP-9 | A Signal Booster is a consumable: a Call run with one gets +5 points of clean chance (capped at 95%), shown before the Call runs; it is used up either way; a win still pays Unsettled only; a Booster on the book or already used cannot be used or listed | engine tests (`Signal Booster` block); `sim/v7_booster_probe.txt` | Built |
 | FR-LOOP-4 | Focus and Risk Appetite regenerate over real time and gate work and Calls respectively | `computeBar` tests | Built |
 | FR-LOOP-5 | Refills are purchasable from Unsettled Scrip (a sink) | engine tests | Built |
 | FR-LOOP-6 | Resolution is flat and immediate: reveal capped at 320 ms, no near-miss theatre | feedback layer; motion rules | Built |

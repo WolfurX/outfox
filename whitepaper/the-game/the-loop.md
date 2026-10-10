@@ -10,6 +10,8 @@ The minute-to-minute game is small and repeats.
 
 **Gigs** are deterministic work. Slower, safer, reliable pay. Honest work on the Floor, and the backbone of the working economy.
 
+Every fifth Gig earns a **Signal Booster**, a consumable. Run a Call with one and its clean chance rises by 5 points, capped at 95%; the Booster is used up whether the Call lands or not. Boosters trade on the Open Market at prices players set. We simulated it before building it: the economy's gates hold with it in play (see [The simulation](../evidence/the-simulation.md)).
+
 ## The two bars
 
 Everything above is gated by two bars that refill over real time:
@@ -30,7 +32,7 @@ Calls are chance actions with variable payouts. That structure is the oldest eng
 We bound it deliberately:
 
 * Value won by chance is **structurally walled off from real money**. There is no code path from a chance win to the cash-out door. See [The firewall](../the-economy/the-firewall.md).
-* Success probabilities are **stated to the player before they act**, not hidden.
+* Success probabilities are **stated to the player before they act**, not hidden. A Signal Booster changes the stated chance before the Call runs, never after it or out of sight.
 * Resolution is flat and immediate. No suspense build, no near-miss theatre, no escalating celebration; the reveal is capped at 320ms by design rule. The reveal must never *be* the reward.
 * Gambling vocabulary and imagery are banned from the product, and the ban is enforced by an automated check in the build.
 

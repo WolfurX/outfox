@@ -131,6 +131,8 @@
 .ofx-rowgroup-anchor { scroll-margin-top: 64px; }
 /* what a listing would pay the seller, under the item while a price is typed */
 .ofx-row__net { display: block; margin-top: var(--space-1); color: var(--c-text); }
+/* what an item does, in plain words, under its name */
+.ofx-row__effect { display: block; margin-top: var(--space-1); color: var(--c-text); }
 .ofx-rowgroup { border-bottom: var(--bw-1) solid var(--c-border); }
 .ofx-rowgroup--capless { border-top: var(--bw-1) solid var(--c-border); }
 .ofx-rowgroup > * + * { border-top: var(--bw-1) solid var(--c-border); }

@@ -4,7 +4,7 @@ The long game on the Street is economic, and most of it runs through markets whe
 
 ## The Open Market
 
-The item market: terminals, feeds, models, and the jacket-color cosmetic line. Listings are player-to-player with floating prices; the game does not fix them. Trading here is live in the current build.
+The item market: Signal Boosters and terminals today; feeds, models, and the jacket-color cosmetic line are designed. Listings are player-to-player with floating prices; the game does not fix them and never buys items back. Trading here is live in the current build. Every item that does something is used up when used, so demand comes back.
 
 ## Desks **\[designed]**
 

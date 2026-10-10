@@ -153,7 +153,7 @@ non-transferable. Rich is one leaderboard; beloved is another.
 result; bank, spend, or list it; the bars refill; again. Calls state their probability
 before commit, resolve flat and immediate (reveal capped at 320 ms, no near-miss
 theatre), and pay **Unsettled** Scrip on success or Nicked on failure. Gigs pay
-**Settled** Scrip and a tool every fifth completion.
+**Settled** Scrip and a Signal Booster every fifth completion.
 
 **Session (5 to 15 minutes)**: burn the banked bars, check Open Market listings and
 fills, read the Overnight Tape, react to what happened to you.
@@ -211,10 +211,17 @@ Versus-Fox Calls (Designed) take the other side against a named Fox: the loser p
 winner from Settled Scrip minus a fee, a transfer (F5), never a mint; the loser is Margin
 Called. Stats and tools shift the probability; chance stays bounded.
 
+**Signal Booster (Built; owner adoption 2026-10-10).** The first tool with an effect. Run a
+Call with one and its clean chance rises by 5 points, capped at 95%; the boosted chance is
+shown on the Call before it runs, the Booster is used up whether the Call lands or is
+Nicked, and a win still pays Unsettled Scrip only. Simulated before it was built: the
+standard gate still passes all 6 scenarios at 500 seeds and the red-team result is unchanged
+(`sim/v7_booster_probe.txt`). Constants: `BOOSTER` in `@outfox/shared`.
+
 ### 5.2 Gigs (Built)
 
 Honest work on the Floor. "Run the Tape" costs 15 Focus, pays 90 ¢ Settled, 20 s
-cooldown, and awards a tool every fifth completion (deterministic pity). Gigs are the
+cooldown, and awards a Signal Booster every fifth completion (deterministic pity). Gigs are the
 bootstrap liquidity faucet and stay small by design: most Settled Scrip should be
 transfer-driven.
 
@@ -235,7 +242,11 @@ value is created in The Sim.
 ### 5.5 The Open Market (Built)
 
 Player-to-player listings at player prices, never fixed. Items today: terminals and
-signal boosters (tools from Gigs); designed: feeds, models, the jacket cosmetic line. A
+Signal Boosters (consumables from Gigs, §5.1); designed: feeds, models, the jacket
+cosmetic line. **Item rule (owner, 2026-10-10):** an item sold between players has an
+effect; a farmable item is a consumable; no NPC buys items back, so players set every
+price; every item effect passes the sim gate (default-off switch, identity proof, the
+standard and red-team runs, a matched control) before it is adopted. A
 3.5% fee (`MARKET_FEE_BPS`, safe interval 2% to 10%) is captured to the treasury.
 Settled Scrip only; writing needs rung 1. This is the thick trade layer that raises real
 in-game output (Q).

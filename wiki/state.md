@@ -36,8 +36,10 @@ Booster (every 5th Gig) becomes a consumable, +5 points on one Call, then gone. 
 mismatches) and run through the gate: standard 6/6 at 500 seeds, red-team 6/7 at 100 (the
 known smart_sybil G11, unchanged: 6.20% off vs 6.20% on at matched seeds), extra Bound
 1.42% of F1, linear in the boost, stress (+20 points, a Booster every Gig) still passes.
-Record: `sim/v7_booster_probe.txt`; README §"v7 probe". Not adopted: ECONOMY.md, GDD and the
-game are unchanged until the owner decides.
+Record: `sim/v7_booster_probe.txt`; README §"v7 probe". **Adopted the same day** (owner):
+built server and client (FR-LOOP-9, ARCHITECTURE A17, GDD §5.1), sim default now carries it,
+whitepaper pages updated (publish waits for the deploy, since the status page says "built
+and running"). Standing rule for every future item: `CLAUDE.md` §Items.
 
 ## Launch through Meteora (2026-10-02)
 

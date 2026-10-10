@@ -193,7 +193,9 @@ DEFAULT_PARAMS = dict(
     # Booster is the Exploit where +pp is worth most, Squeeze the Basket (success 0.40,
     # 35 of a 100 bar = 17.5 of the sim's 50 Nerve). A boosted Exploit's Bound yield
     # rises by booster_pp / booster_call_p (+12.5% at +5pp on Squeeze).
-    booster_pp=0.0,
+    # ADOPTED 2026-10-10 (owner): the canonical economy now carries the Booster at +5
+    # points; booster_pp=0.0 reproduces the v5/v6 engine exactly (identity in the v7 record).
+    booster_pp=0.05,
     booster_call_p=0.40,
     booster_call_cost=17.5,
     booster_gig_clean=90.0,

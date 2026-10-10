@@ -66,6 +66,16 @@ over unchanged, with the model, calibration, and committed scorecards intact.
   wallet sign-in (SIWS) via Jupiter's wallet kit, keeping the rung-ladder collision
   semantics from the provider-agnostic auth seam.
 
+## Items (standing owner rule, 2026-10-10)
+
+Every item sold between players has an effect; a farmable item is a consumable; no NPC buys
+items back, so players set every price. **Every new item or item effect goes through the
+sim gate before it is adopted**, the way the Signal Booster did (`sim/v7_booster_probe.txt`,
+`sim/probe_booster.py` as the template): model it in `sim/simulation.py` behind a
+default-off switch, prove the switched-off engine identical to the previous one, run the
+standard gate at 500 seeds and the red-team suite at 100, add a matched-seed control for any
+failure, then record the decision (ARCHITECTURE decision log, GDD, PRD) before building.
+
 ## Security posture (standing — this project handles user funds)
 
 This is custody code: real people's money crosses the chain edge. Treat every change to

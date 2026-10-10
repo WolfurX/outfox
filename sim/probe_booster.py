@@ -98,7 +98,7 @@ def _identity_job(job):
     scs = dict(base.make_scenarios()); scs.update(base.make_adversarial_scenarios())
     ro = base.Sim(dict(base.DEFAULT_PARAMS), scs[name], seed=seed).run()
     nscs = dict(make_scenarios()); nscs.update(make_adversarial_scenarios())
-    rn = Sim(dict(DEFAULT_PARAMS), nscs[name], seed=seed).run()
+    rn = Sim(dict(DEFAULT_PARAMS, booster_pp=0.0), nscs[name], seed=seed).run()   # switched off
     vals = bad = 0
     for a, b in zip(ro, rn):
         for k, v in a.items():
@@ -121,7 +121,7 @@ def main():
     args = ap.parse_args()
     if args.control:
         return control(args)
-    params = dict(DEFAULT_PARAMS)
+    params = dict(DEFAULT_PARAMS, booster_pp=0.0)   # phases switch the Booster on explicitly
     if args.smoke:
         params.update(horizon=120, n_max=2500)
         args.runs = args.rt_runs = args.grid_runs = 4
@@ -199,7 +199,7 @@ def control(args):
     """Phase 3b: the grid's missing control. Booster OFF vs the owner default and the
     stress cell at the same seeds, per criterion, so the pre-existing smart_sybil G11
     failure (v5 record) is separated from any Booster effect."""
-    params = dict(DEFAULT_PARAMS)
+    params = dict(DEFAULT_PARAMS, booster_pp=0.0)
     std = make_scenarios()["baseline"]
     sy = make_adversarial_scenarios()["smart_sybil"]
     cells = [("off", dict(booster_pp=0.0)), ("+5pp owner", dict(booster_pp=0.05)),

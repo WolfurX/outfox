@@ -10,11 +10,11 @@ import { createPlayer, playerView, requireRung } from '../src/identity/players.j
 import { startRegister, verifyRegister, adoptExistingAccount } from '../src/identity/rungs.js';
 import { postTx, conservationAudit } from '../src/ledger/scrip.js';
 import { applyCarry } from '../src/economy/carry.js';
-import { runCall } from '../src/systems/calls/rules.js';
+import { boostedP, runCall } from '../src/systems/calls/rules.js';
 import { runGig } from '../src/systems/gigs/rules.js';
 import { refill } from '../src/systems/refills/rules.js';
 import { listItem, buyListing, cancelListing, listingsView } from '../src/systems/market/rules.js';
-import { CALLS, GIG, REFILL, MARKET_FEE_BPS, DEMURRAGE } from '@outfox/shared';
+import { BOOSTER, CALLS, GIG, REFILL, MARKET_FEE_BPS, DEMURRAGE } from '@outfox/shared';
 
 let db: DB;
 const T0 = 1_800_000_000_000; // fixed epoch
@@ -317,5 +317,74 @@ describe('errors are typed', () => {
     const item = (db.prepare('SELECT id FROM items WHERE owner_id = ?').get(p) as { id: number }).id;
     expect(() => listItem(db, p, item, 0, T0)).toThrowError(/price/);
     expect(() => listItem(db, p, item, 2.5, T0)).toThrowError(/price/);
+  });
+});
+
+describe('Signal Booster: a consumable, +5 points on one Call (owner adoption 2026-10-10)', () => {
+  // Expected thresholds come from the published odds (GDD §5.1): Squeeze the Basket is
+  // 40% clean, so a boosted Squeeze is 45%. A roll of 0.42 sits between the two.
+  const squeeze = CALLS.find((c) => c.id === 'squeeze_basket')!;
+  const between = () => 0.42;
+  const boosters = (p: number) => (db.prepare(
+    `SELECT COUNT(*) AS n FROM items WHERE owner_id = ? AND kind = 'signal_booster' AND consumed_at IS NULL`,
+  ).get(p) as { n: number }).n;
+  const giveBooster = (p: number) =>
+    db.prepare(`INSERT INTO items (owner_id, kind, origin) VALUES (?, 'signal_booster', 'gig')`).run(p);
+
+  it('the boost turns a roll between 40% and 45% into a clean Squeeze, and uses up exactly one Booster', () => {
+    const plain = createPlayer(db, T0);
+    expect(runCall(db, plain, squeeze.id, T0, between).nicked).toBe(true);
+    const p = createPlayer(db, T0);
+    giveBooster(p); giveBooster(p);
+    const r = runCall(db, p, squeeze.id, T0, between, true);
+    expect(r.ok).toBe(true);
+    expect(r.boosted).toBe(true);
+    expect(boosters(p)).toBe(1);
+  });
+
+  it('a boosted win still pays Unsettled only (I4)', () => {
+    const p = createPlayer(db, T0);
+    giveBooster(p);
+    const r = runCall(db, p, squeeze.id, T0, between, true);
+    const v = playerView(db, p, T0);
+    expect(v.scripSettled).toBe(0);
+    expect(v.scripUnsettled).toBe(r.payout);
+  });
+
+  it('boosting with no Booster is refused and changes nothing: no Risk spent, no cooldown', () => {
+    const p = createPlayer(db, T0);
+    const before = playerView(db, p, T0);
+    expect(() => runCall(db, p, squeeze.id, T0, between, true)).toThrow(EngineError);
+    const after = playerView(db, p, T0);
+    expect(after.risk).toBe(before.risk);
+    expect(after.cooldowns[squeeze.id]).toBeUndefined();
+  });
+
+  it('a Booster on the book cannot be used, and a used Booster cannot be listed or seen', () => {
+    const p = toR1(createPlayer(db, T0));
+    giveBooster(p);
+    const id = (db.prepare(`SELECT id FROM items WHERE owner_id = ? AND kind = 'signal_booster'`).get(p) as { id: number }).id;
+    listItem(db, p, id, 50, T0);
+    expect(() => runCall(db, p, squeeze.id, T0, between, true)).toThrow(EngineError);
+    const q = toR1(createPlayer(db, T0));
+    giveBooster(q);
+    const qid = (db.prepare(`SELECT id FROM items WHERE owner_id = ? AND kind = 'signal_booster'`).get(q) as { id: number }).id;
+    runCall(db, q, squeeze.id, T0, between, true);
+    expect(playerView(db, q, T0).items.some((i) => i.id === qid)).toBe(false);
+    expect(() => listItem(db, q, qid, 50, T0 + 1)).toThrow(EngineError);
+  });
+
+  it('a Nicked boosted Call still uses the Booster up', () => {
+    const p = createPlayer(db, T0);
+    giveBooster(p);
+    const r = runCall(db, p, squeeze.id, T0, lose, true);
+    expect(r.nicked).toBe(true);
+    expect(boosters(p)).toBe(0);
+  });
+
+  it('the boost is bounded: the clean chance never exceeds the published cap', () => {
+    expect(boostedP(0.40)).toBeCloseTo(0.45, 10);
+    expect(boostedP(0.75)).toBeCloseTo(0.80, 10);
+    expect(boostedP(0.94)).toBe(BOOSTER.maxP);
   });
 });

@@ -45,7 +45,7 @@ export function requireRung(db: DB, playerId: number, min: number): void {
 export function playerView(db: DB, playerId: number, now = Date.now()): PlayerView {
   applyCarry(db, playerId, now);
   const p = getPlayer(db, playerId);
-  const items = db.prepare(`SELECT id, kind, listed FROM items WHERE owner_id = ?`).all(playerId) as
+  const items = db.prepare(`SELECT id, kind, listed FROM items WHERE owner_id = ? AND consumed_at IS NULL`).all(playerId) as
     { id: number; kind: ItemKind; listed: number }[];
   const cds = db.prepare(
     `SELECT action_id, ready_at FROM cooldowns WHERE player_id = ? AND ready_at > ?`

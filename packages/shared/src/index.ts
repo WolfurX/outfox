@@ -207,6 +207,13 @@ export const ITEM_KINDS = {
     source: `Earned every ${GIG.toolEvery} Gigs.`,
   },
 } as const;
+
+/** The Signal Booster is a consumable (owner adoption 2026-10-10; sim v7 gate,
+ * sim/v7_booster_probe.txt): run a Call with one and its clean chance rises by `pp`,
+ * bounded by `maxP`; the Booster is used up whatever the outcome. Chance stays
+ * bounded (GDD §5.1) and the win still pays Unsettled only. */
+export const BOOSTER = { item: 'signal_booster', pp: 0.05, maxP: 0.95 } as const;
+export const BOOSTER_EFFECT = `Run a Call with it: +${Math.round(BOOSTER.pp * 100)} points on the clean chance. Used up either way.`;
 export type ItemKind = keyof typeof ITEM_KINDS;
 
 // ----- wire types -----
@@ -260,6 +267,7 @@ export interface CallResult {
   ok: boolean; // success or Nicked
   payout: number; // ¢ unsettled (0 on failure)
   nicked: boolean;
+  boosted?: boolean; // a Signal Booster was used up on this Call
 }
 
 export interface BootstrapResponse {

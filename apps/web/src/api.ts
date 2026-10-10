@@ -47,7 +47,8 @@ async function get<T>(path: string): Promise<T> {
 // SVG brand glyph, never a text symbol. No string-based currency formatting here.
 export const api = {
   bootstrap: () => post<BootstrapResponse>('/api/session/bootstrap'),
-  call: (callId: string) => post<ActionResponse>('/api/actions/call', { callId }),
+  call: (callId: string, boost = false) =>
+    post<ActionResponse>('/api/actions/call', boost ? { callId, boost: true } : { callId }),
   gig: () => post<ActionResponse>('/api/actions/gig'),
   refill: (bar: 'focus' | 'risk') => post<ActionResponse>('/api/sinks/refill', { bar }),
   market: () => get<MarketResponse>('/api/market'),

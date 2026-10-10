@@ -274,8 +274,13 @@ fee captured. Even the stress cell is absorbed by the sinks (G1 stays below 1.0)
 **What this does not show (do not over-read):** the Booster's market price is an input,
 not discovered; Exploit volume is Nerve-capped and unchanged by Boosters (no behavioural
 uplift is modelled); nothing here judges how paying Settled Scrip for better odds reads to
-players or to counsel; the sim's daily pacing is not the slice's demo pacing. Adopting the
-mechanic is an owner decision; `ECONOMY.md` and the GDD are unchanged by this probe.
+players or to counsel; the sim's daily pacing is not the slice's demo pacing.
+
+**Adopted 2026-10-10 (owner):** `booster_pp` now defaults to 0.05, so `run.py` runs the
+economy with the Booster in play and reproduces the Phase-1 numbers above at the same seeds;
+`booster_pp=0.0` is the v5/v6 engine (the probe pins it for its identity and control
+phases). Decision: ARCHITECTURE A17; GDD §5.1; PRD FR-LOOP-9. Standing rule for every
+future item: repo `CLAUDE.md` §Items.
 
 ## Historical — v2 FINAL results (superseded by v3 above)
 

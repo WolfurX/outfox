@@ -6,7 +6,7 @@ This matters, and most whitepapers are cagey about it.
 | --- | --- |
 | Calls, Gigs, cooldowns, the Focus and Risk Appetite bars | Raids as a distinct tier, Skulks (crews), Desks (player businesses) |
 | Scrip, the Settled/Unsettled firewall, the carry (idle and progressive) | The Index (internal market), the Commons, the Share-Out |
-| Refill sinks; the Open Market (item trading) | Staking/locking, wealth-indexed issuance |
+| Refill sinks; the Open Market (item trading); the Signal Booster consumable | Staking/locking, wealth-indexed issuance |
 | Guest → registered identity ladder with Solana wallet sign-in; the PWA client | Real proof of personhood; the payment on-ramp |
 | The Scrip⇄$ALPHA exchange and the Clearinghouse UI | Retention and notification stack |
 | The full cash-out valve: fees, seasoning, vesting, caps | **Mainnet. Real money. Any of this being live.** |
